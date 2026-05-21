@@ -88,7 +88,8 @@ fun LoginScreen(
             onValueChange = {email = it},
             label = "Email",
             keyboardType = KeyboardType.Email,
-            modifier = inputModifier
+            modifier = inputModifier,
+            bgColor = MaterialTheme.colorScheme.surface
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -98,7 +99,8 @@ fun LoginScreen(
             onValueChange = {password = it},
             label = "Password",
             isPassword = true,
-            modifier = inputModifier
+            modifier = inputModifier,
+            bgColor = MaterialTheme.colorScheme.surface
         )
         Spacer(modifier = Modifier.height((32.dp)))
 
