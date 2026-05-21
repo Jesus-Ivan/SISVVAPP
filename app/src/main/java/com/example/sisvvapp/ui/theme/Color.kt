@@ -2,45 +2,40 @@ package com.example.sisvvapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ─── Verde Eco-Minimal Palette (Spotify Style) ──────────────────────────────
-val EcoGreenPrimary    = Color(0xFF00A86B)   // Verde Jade (Acción / CTA)
-val EcoGreenSecondary  = Color(0xFF008F5A)   // Verde Secundario / Hover
-val EcoBackground      = Color(0xFFFAFAFA)   // Blanco Off-White (Fondo Principal)
-val EcoSurface         = Color(0xFFFFFFFF)   // Blanco Puro (Tarjetas / Contenedores)
-val EcoDivider         = Color(0xFFE9ECEF)   // Gris Ultra Claro (Líneas de división)
-val EcoTextHigh        = Color(0xFF1A1C1E)   // Gris Pizarra Oscuro (Texto Principal)
-val EcoTextMedium      = Color(0xFF6C757D)   // Gris Medio (Texto Secundario)
+// ==========================================
+// PALETA DE COLORES VISTA VERDE POS
+// ==========================================
 
-// ─── Status Colors ───────────────────────────────────────────────────────────
-val StatusActive       = Color(0xFF00A86B)   // Jade Green
-val StatusInactive     = Color(0xFF6C757D)   // Medium Gray
-val StatusCancelled    = Color(0xFFDC3545)   // Red error
-val StatusOpen         = Color(0xFFFD7E14)   // Orange/Amber open
-val StatusOffline      = Color(0xFFDC3545)   // Red offline banner
+// --- TEMA CLARO (Tus colores de Figma) ---
+val VerdePrincipal = Color(0xFF006D40)
+val FondoAppClaro = Color(0xFFF9FAFB)
+val FondoCardsClaro = Color(0xFFFFFFFF)
+val FondoInputClaro = Color(0xFFEDEFF2)
 
-// ─── Semantic Mapping to Retain Compatibility and Refine Layouts ─────────────
-val VVGreenDeep       = Color(0xFF0F1E19)   // Ultra-deep dark pine gray for headers
-val VVGreenForest     = EcoGreenPrimary     // Eco Green Primary
-val VVGreenLight      = EcoGreenSecondary   // Eco Green Hover
-val VVGreenAccent     = EcoGreenPrimary     // Active Green
+val TextoPrincipalClaro = Color(0xFF1F2937)
+val TextoSecundarioClaro = Color(0xFF878D98)
 
-val VVGoldChampagne   = EcoGreenPrimary     // Spotify Green replaces gold accent!
-val VVGoldLight       = Color(0xFFE6F7F0)   // Very soft pastel jade background
-val VVGoldDark        = EcoGreenSecondary   // Darker jade green for active elements
+// --- TEMA OSCURO (Equivalentes Premium) ---
+val VerdePrincipalOscuro = Color(0xFF22C55E) // Un verde más vivo para que resalte en la oscuridad
+val FondoAppOscuro = Color(0xFF121212)       // Gris oscuro/carbón para el fondo de la app
+val FondoCardsOscuro = Color(0xFF1E1E1E)     // Gris ligeramente más claro para que las tarjetas "floten"
+val FondoInputOscuro = Color(0xFF2A2B2E)     // Fondo para la barra de búsqueda de noche
 
-// Backgrounds (Mapped to Off-white and White to shift whole app to Light Eco-Minimal)
-val VVBackgroundDark  = EcoBackground       // Off-White background
-val VVSurfaceDark     = EcoSurface           // White card surface
-val VVSurface2Dark    = EcoSurface           // White card surface
-val VVSurface3Dark    = EcoDivider           // Divider thin line
+val TextoPrincipalOscuro = Color(0xFFF9FAFB) // Blanco hueso para títulos de noche (no cansa la vista)
+val TextoSecundarioOscuro = Color(0xFF9CA3AF)// Gris claro para subtítulos e IDs
 
-// Light equivalents
-val VVBackgroundLight = EcoBackground
-val VVSurfaceLight    = EcoSurface
-val VVSurface2Light   = EcoDivider
+// --- ESTADOS (Banners y Badges comunes) ---
+val EstadoExitoClaro = Color(0xFFC1FFD6)    // Caja cerrada / Banner Conectado
+val EstadoExitoOscuro = Color(0xFF064E3B)   // Verde muy oscuro para fondo de badge de noche
+val TextoExitoOscuro = Color(0xFF4ADE80)    // Texto verde brillante para el badge de noche
 
-// Texts (All high/medium contrast slate/gray)
-val OnDark            = EcoTextHigh
-val OnDarkSecondary   = EcoTextMedium
-val OnLight           = EcoTextHigh
-val OnLightSecondary  = EcoTextMedium
+val EstadoAlertaClaro = Color(0xFFFFEDBA)   // Banner de No Conexión
+val EstadoAlertaOscuro = Color(0xFF78350F)   // Fondo café/naranja oscuro para alerta de noche
+val TextoAlertaOscuro = Color(0xFFFDE68A)   // Texto amarillo claro para alerta de noche
+
+// --- ECO DESIGN SYSTEM ---
+val EcoGreenPrimary = Color(0xFF006D40)
+val EcoBackground = Color(0xFFF9FAFB)
+val EcoTextHigh = Color(0xFF1F2937)
+val EcoTextMedium = Color(0xFF878D98)
+val EcoDivider = Color(0xFFE5E7EB)
