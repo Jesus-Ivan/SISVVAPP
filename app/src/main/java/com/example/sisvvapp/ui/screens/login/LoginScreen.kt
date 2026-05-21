@@ -45,6 +45,7 @@ fun LoginScreen(
 ){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var localError by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val viewModel: SisvvViewModel = viewModel(
@@ -118,14 +119,36 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.height((32.dp)))
 
+        if (localError.isNotEmpty() || viewModel.estadoDeError.isNotEmpty()) {
+            Text(
+                text = if (localError.isNotEmpty()) localError else viewModel.estadoDeError,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
+
         //BOTÓN
         VistaVerdeButton(
             text = "INGRESAR",
-            onClick = { viewModel.login(email, password) },
-            enabled = !viewModel.isLoading
+            onClick = {
+                if (email.isBlank() || password.isBlank()) {
+                    localError = "Por favor, llena todos los campos."
+                } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    localError = "Por favor, ingresa un correo válido."
+                } else if (password.length < 6) {
+                    localError = "La contraseña debe tener al menos 6 caracteres."
+                }
+                else {
+                    localError = ""
+                    viewModel.hacerLogin(email, password)
+                }
+            }
         )
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable
