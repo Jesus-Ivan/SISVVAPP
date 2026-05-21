@@ -16,6 +16,7 @@ import com.example.sisvvapp.ui.screens.main.MainContainer
 import com.example.sisvvapp.ui.screens.splash.SplashScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 
 class MainActivity : ComponentActivity() {
 
@@ -27,8 +28,9 @@ class MainActivity : ComponentActivity() {
             SISVVAPPTheme(darkTheme = false) {
                 val navController = rememberNavController()
                 val windowSizeClass = calculateWindowSizeClass(this)
-                // Shared ViewModel across the whole main graph
-                val sisvvViewModel: SisvvViewModel = viewModel()
+                val sisvvViewModel: SisvvViewModel = viewModel(
+                    factory = SisvvViewModelFactory(this)
+                )
 
                 NavHost(
                     navController    = navController,

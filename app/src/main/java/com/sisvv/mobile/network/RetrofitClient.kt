@@ -1,0 +1,71 @@
+package com.sisvv.mobile.network
+
+import android.content.Context
+import android.content.pm.ApplicationInfo
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
+
+object RetrofitClient {
+
+    private const val BASE_URL = "http://192.168.137.172/api/"
+
+    private var apiService: ApiService? = null
+
+    fun create(context: Context): ApiService {
+        if (apiService != null) return apiService!!
+
+        val prefs = context.getSharedPreferences("sisvv_prefs", Context.MODE_PRIVATE)
+
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val bypassTunnelInterceptor = Interceptor { chain ->
+            val request = chain.request().newBuilder()
+                .addHeader("Bypass-Tunnel-Reminder", "true")
+                .build()
+            chain.proceed(request)
+        }
+
+        val authInterceptor = Interceptor { chain ->
+            val token = prefs.getString("token", null)
+            val request = chain.request()
+                .newBuilder()
+                .apply {
+                    if (!token.isNullOrEmpty()) {
+                        addHeader("Authorization", "Bearer $token")
+                    }
+                }
+                .build()
+            chain.proceed(request)
+        }
+
+        val isDebug = context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(bypassTunnelInterceptor)
+            .apply {
+                if (isDebug) {
+                    addInterceptor(logging)
+                }
+            }
+            .addInterceptor(authInterceptor)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        apiService = retrofit.create(ApiService::class.java)
+        return apiService!!
+    }
+}
