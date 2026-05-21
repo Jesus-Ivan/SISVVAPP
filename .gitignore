@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Capturas de memoria de Java
+*.hprof

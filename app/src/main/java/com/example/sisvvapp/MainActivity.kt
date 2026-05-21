@@ -4,44 +4,46 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.sisvvapp.ui.navigation.Screen
+import com.example.sisvvapp.ui.screens.login.LoginScreen
+import com.example.sisvvapp.ui.screens.splash.SplashScreen
+import com.example.sisvvapp.ui.theme.SisvvappTheme
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SISVVAPPTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            SisvvappTheme(darkTheme = false) {
+                val navController = rememberNavController()
+
+                NavHost(
+                    navController    = navController,
+                    startDestination = Screen.Splash.route
+                ) {
+                    // ── Splash ──────────────────────────────────────────────
+                    composable(Screen.Splash.route) {
+                        SplashScreen(
+                            onNavigateToLogin = {
+                                navController.navigate(Screen.Login.route) {
+                                    popUpTo(Screen.Splash.route) { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+
+                    // ── Login ───────────────────────────────────────────────
+                    // onLoginSuccess is a no-op for now; remaining screens
+                    // will be wired up in a future iteration.
+                    composable(Screen.Login.route) {
+                        LoginScreen(onLoginSuccess = {})
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SISVVAPPTheme {
-        Greeting("Android")
     }
 }
