@@ -13,11 +13,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.sisvvapp.ui.state.SisvvViewModel
+import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
@@ -40,6 +45,15 @@ fun LoginScreen(
 ){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val viewModel: SisvvViewModel = viewModel(
+        factory = SisvvViewModelFactory(context)
+    )
+
+    LaunchedEffect(viewModel.loginSuccess) {
+        if (viewModel.loginSuccess) onLoginSuccess()
+    }
 
     val inputModifier = Modifier
         .shadow(
@@ -107,10 +121,8 @@ fun LoginScreen(
         //BOTÓN
         VistaVerdeButton(
             text = "INGRESAR",
-            onClick = {
-                // Lógica para Laravel / Auth irá aquí
-                onLoginSuccess()
-            }
+            onClick = { viewModel.login(email, password) },
+            enabled = !viewModel.isLoading
         )
     }
 }
