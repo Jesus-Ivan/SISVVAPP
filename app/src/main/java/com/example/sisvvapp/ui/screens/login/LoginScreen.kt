@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import android.util.Patterns
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -100,7 +101,7 @@ fun LoginScreen(
         //INPUT EMAIL
         VistaVerdeTextField(
             value = email,
-            onValueChange = {email = it},
+            onValueChange = {email = it; localError = ""},
             label = "Email",
             keyboardType = KeyboardType.Email,
             modifier = inputModifier,
@@ -111,7 +112,7 @@ fun LoginScreen(
         //INPUT PASSWORD
         VistaVerdeTextField(
             value = password,
-            onValueChange = {password = it},
+            onValueChange = {password = it; localError = ""},
             label = "Password",
             isPassword = true,
             modifier = inputModifier,
@@ -119,9 +120,12 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.height((32.dp)))
 
-        if (localError.isNotEmpty() || viewModel.estadoDeError.isNotEmpty()) {
+        val errorMsg = localError.ifEmpty {
+            viewModel.loginError ?: viewModel.networkError ?: ""
+        }
+        if (errorMsg.isNotEmpty()) {
             Text(
-                text = if (localError.isNotEmpty()) localError else viewModel.estadoDeError,
+                text = errorMsg,
                 color = MaterialTheme.colorScheme.error,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -132,16 +136,17 @@ fun LoginScreen(
         VistaVerdeButton(
             text = "INGRESAR",
             onClick = {
-                if (email.isBlank() || password.isBlank()) {
-                    localError = "Por favor, llena todos los campos."
-                } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    localError = "Por favor, ingresa un correo válido."
-                } else if (password.length < 6) {
-                    localError = "La contraseña debe tener al menos 6 caracteres."
-                }
-                else {
-                    localError = ""
-                    viewModel.hacerLogin(email, password)
+                localError = when {
+                    email.isBlank() || password.isBlank() ->
+                        "Por favor, llena todos los campos."
+                    !Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+                        "Por favor, ingresa un correo válido."
+                    password.length < 6 ->
+                        "La contraseña debe tener al menos 6 caracteres."
+                    else -> {
+                        viewModel.login(email, password)
+                        ""
+                    }
                 }
             }
         )
