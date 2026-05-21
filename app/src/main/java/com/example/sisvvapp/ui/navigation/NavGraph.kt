@@ -4,5 +4,5 @@ package com.example.sisvvapp.ui.navigation
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Login  : Screen("login")
-    // Future screens will be added here as they are implemented
+    object Main   : Screen("main")
 }
