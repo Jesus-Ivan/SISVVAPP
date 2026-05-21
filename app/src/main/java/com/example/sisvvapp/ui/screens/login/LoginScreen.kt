@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import android.util.Patterns
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -71,14 +72,14 @@ fun LoginScreen(
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    ){
+    ) {
         //LOGO
         Image(
-            painter = painterResource(id= R.drawable.logo),
+            painter = painterResource(id = R.drawable.logo),
             contentDescription = "Logo Vista Verde",
             modifier = Modifier
                 .fillMaxWidth(1f)
-                .padding(bottom=50.dp)
+                .padding(bottom = 50.dp)
         )
         //TITULO PRINCIPAL
         Text(
@@ -100,7 +101,10 @@ fun LoginScreen(
         //INPUT EMAIL
         VistaVerdeTextField(
             value = email,
-            onValueChange = {email = it},
+            onValueChange = {
+                email = it
+                localError = ""
+            },
             label = "Email",
             keyboardType = KeyboardType.Email,
             modifier = inputModifier,
@@ -111,7 +115,10 @@ fun LoginScreen(
         //INPUT PASSWORD
         VistaVerdeTextField(
             value = password,
-            onValueChange = {password = it},
+            onValueChange = {
+                password = it
+                localError = ""
+            },
             label = "Password",
             isPassword = true,
             modifier = inputModifier,
@@ -119,18 +126,20 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.height((32.dp)))
 
-        if (localError.isNotEmpty() || viewModel.estadoDeError.isNotEmpty()) {
+        val errorMessage = localError.ifEmpty { viewModel.loginError ?: "" }
+
+        if (errorMessage.isNotEmpty()) {
             Text(
-                text = if (localError.isNotEmpty()) localError else viewModel.estadoDeError,
+                text = errorMessage,
                 color = MaterialTheme.colorScheme.error,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
 
-        //BOTÓN
         VistaVerdeButton(
-            text = "INGRESAR",
+            text = if (viewModel.isLoading) "Cargando..." else "INGRESAR", // ✨ Feedback visual
+            enabled = !viewModel.isLoading,
             onClick = {
                 if (email.isBlank() || password.isBlank()) {
                     localError = "Por favor, llena todos los campos."
@@ -138,24 +147,13 @@ fun LoginScreen(
                     localError = "Por favor, ingresa un correo válido."
                 } else if (password.length < 6) {
                     localError = "La contraseña debe tener al menos 6 caracteres."
-                }
-                else {
+                } else {
                     localError = ""
-                    viewModel.hacerLogin(email, password)
+                    viewModel.login(email, password)
                 }
             }
         )
     }
-}
 
 
-
-@Preview(showBackground = true)
-@Composable
-fun LoginPreview() {
-    SISVVAPPTheme {
-        LoginScreen(
-            onLoginSuccess = {}
-        )
     }
-}
