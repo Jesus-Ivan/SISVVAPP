@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 @Composable
-fun SearchBar(
+fun VistaVerdeSearchBar(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -65,7 +65,7 @@ fun SearchBar(
 fun SearchBarPreview() {
     // Usamos el nombre correcto de tu tema
     SISVVAPPTheme {
-        SearchBar(
+        VistaVerdeSearchBar(
             value = "", // Un valor vacío de prueba
             onValueChange = {}, // Una acción vacía de prueba
             placeholder = "Buscar socio..."

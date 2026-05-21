@@ -10,12 +10,14 @@ import com.example.sisvvapp.R
 
 // 1. AGRUPAMOS LAS FUENTES EN FAMILIAS
 val Poppins = FontFamily(
-    Font(R.font.poppinsbold, FontWeight.Bold)
+    Font(R.font.poppinsbold, FontWeight.Bold),
+            Font(R.font.poppinssemibold, FontWeight.SemiBold)
 )
 
 val Inter = FontFamily(
     Font(R.font.interregular, FontWeight.Normal),
-    Font(R.font.intermedium, FontWeight.Medium)
+    Font(R.font.intermedium, FontWeight.Medium),
+    Font(R.font.intersemibold, FontWeight.SemiBold)
 )
 
 val Typography = Typography(
