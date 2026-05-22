@@ -10,5 +10,9 @@ data class SocioDto(
     @SerializedName("num_accion") val numAccion: Int,
     val firma: Boolean,
     val estatus: String,
-    @SerializedName("foto_url") val fotoUrl: String
+    @SerializedName("foto_url") val fotoUrl: String,
+    val telefono: String?,
+    val email: String?,
+    @SerializedName("membresia") val membresia: MembresiaDto?,
+    @SerializedName("integrantes") val integrantes: List<IntegranteDto> = emptyList()
 )

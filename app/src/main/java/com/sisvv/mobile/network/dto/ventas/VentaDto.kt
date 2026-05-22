@@ -9,5 +9,11 @@ data class VentaDto(
     val hora: String,
     val total: Double,
     val estatus: String,
-    val items: List<ItemCarritoDto> = emptyList()
+    val items: List<ItemCarritoDto> = emptyList(),
+    @SerializedName("caja_id")     val cajaId: Int?,
+    @SerializedName("socio_id")    val socioId: Int?,
+    @SerializedName("tipo_cliente") val tipoCliente: String?,
+    val fecha: String?,
+    @SerializedName("productos") val productos: List<ProductoVentaDto> = emptyList(),
+    val pagos: List<PagoDto> = emptyList()
 )
