@@ -3,7 +3,7 @@ package com.example.sisvvapp.data.repository
 import android.util.Log
 import com.example.sisvvapp.data.local.dao.SocioDao
 import com.example.sisvvapp.data.local.entity.SocioEntity
-import com.sisvv.mobile.network.ApiService
+import com.example.sisvvapp.network.ApiService
 import kotlinx.coroutines.flow.Flow
 
 class SocioRepository(

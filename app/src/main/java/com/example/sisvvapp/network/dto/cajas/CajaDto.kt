@@ -1,4 +1,4 @@
-package com.sisvv.mobile.network.dto.cajas
+package com.example.sisvvapp.network.dto.cajas
 
 import com.google.gson.annotations.SerializedName
 

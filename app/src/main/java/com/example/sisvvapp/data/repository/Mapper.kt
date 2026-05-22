@@ -5,22 +5,22 @@ import com.example.sisvvapp.data.local.entity.IntegranteEntity
 import com.example.sisvvapp.data.local.entity.ModificadorEntity
 import com.example.sisvvapp.data.local.entity.ProductoEntity
 import com.example.sisvvapp.data.local.entity.SocioEntity
-import com.sisvv.mobile.network.dto.cajas.CajaDto
-import com.sisvv.mobile.network.dto.productos.ModificadorSyncDto
-import com.sisvv.mobile.network.dto.productos.ProductoDto
-import com.sisvv.mobile.network.dto.socios.IntegranteDto
-import com.sisvv.mobile.network.dto.socios.SocioDto
+import com.example.sisvvapp.network.dto.cajas.CajaDto
+import com.example.sisvvapp.network.dto.productos.ModificadorSyncDto
+import com.example.sisvvapp.network.dto.productos.ProductoDto
+import com.example.sisvvapp.network.dto.socios.IntegranteDto
+import com.example.sisvvapp.network.dto.socios.SocioDto
 
 fun SocioDto.toSocioEntity() = SocioEntity(
     id = id,
     nombre = nombre,
     apellidoP = apellidoP,
     apellidoM = apellidoM,
-    telefono = telefono,
-    email = email,
+    telefono = null,
+    email = null,
     firmaAutorizada = firma,
-    estatus = estatus,
-    fotoUrl = fotoUrl
+    estatus = membresia?.estado ?: "",
+    fotoUrl = imgPath
 )
 
 fun SocioDto.toIntegranteEntities(): List<IntegranteEntity> = integrantes.map { int ->
@@ -34,26 +34,26 @@ fun SocioDto.toIntegranteEntities(): List<IntegranteEntity> = integrantes.map { 
 }
 
 fun ProductoDto.toProductoEntity() = ProductoEntity(
-    id = id,
+    id = 0,
     clave = clave.toString(),
     descripcion = descripcion,
-    precio = precio,
-    categoria = categoria,
-    imagenUrl = imagenUrl.ifEmpty { null },
-    forzarCaptura = forzarCaptura,
-    modifIncluidos = modifIncluidos,
-    modifMaximos = modifMaximos
+    precio = costoUnitario,
+    categoria = grupo ?: "Sin categoría",
+    imagenUrl = null,
+    forzarCaptura = gruposModificadores.any { it.forzarCaptura },
+    modifIncluidos = gruposModificadores.firstOrNull()?.modifIncluidos ?: 0,
+    modifMaximos = gruposModificadores.firstOrNull()?.modifMaximos ?: 0
 )
 
-fun ProductoDto.toModificadorEntities(): List<ModificadorEntity> = modificadores.map { mod ->
+fun ProductoDto.toModificadorEntities(): List<ModificadorEntity> = modificadoresOpciones.map { mod ->
     ModificadorEntity(
         id = mod.id,
-        productoId = mod.productoId,
-        nombre = mod.nombre,
-        tipo = mod.tipo,
-        precio = mod.precio,
-        grupo = mod.grupo,
-        incluido = mod.incluido
+        productoId = clave,
+        nombre = mod.descripcion,
+        tipo = "",
+        precio = mod.precioOverride,
+        grupo = mod.idGrupo.toString(),
+        incluido = false
     )
 }
 

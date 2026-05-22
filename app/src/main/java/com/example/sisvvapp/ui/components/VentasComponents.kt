@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.ui.theme.*
-import com.sisvv.mobile.network.dto.ventas.VentaDto
+import com.example.sisvvapp.network.dto.ventas.VentaDto
 import java.util.Locale
 
 @Composable
@@ -87,11 +87,10 @@ fun SaleCardPreview() {
             hora = "15:34",
             total = 983.0,
             estatus = "Abierta",
+            cajaId = 1,
             socioId = 1832,
-            tipoCliente = "Socio", // Parámetro faltante agregado
+            tipoCliente = "Socio",
             fecha = "15/06/2026",
-            cajaId = 1,            // Parámetro faltante agregado
-            items = emptyList(),
             productos = emptyList(),
             pagos = emptyList()
         )
@@ -106,11 +105,11 @@ fun SaleCardPreview() {
 fun VentasListPreview() {
     SISVVAPPTheme {
         val mockVentas = listOf(
-            VentaDto(1, "Cristian Meza", "15:34", 983.0, "Abierta", emptyList(), 1, 1832, "Socio", "15/06/2026", emptyList(), emptyList()),
-            VentaDto(2, "Juan Pérez", "16:00", 500.0, "Cerrada", emptyList(), 1, 1833, "Socio", "15/06/2026", emptyList(), emptyList())
+            VentaDto(1, "Cristian Meza", "15:34", 983.0, "Abierta", 1, 1832, "Socio", "15/06/2026"),
+            VentaDto(2, "Juan Pérez", "16:00", 500.0, "Cerrada", 1, 1833, "Socio", "15/06/2026")
         )
         Surface(modifier = Modifier.fillMaxSize()) {
             VentasList(ventas = mockVentas, onVentaClick = {})
         }
     }
-}
+}

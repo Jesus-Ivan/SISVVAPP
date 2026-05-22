@@ -1,13 +1,13 @@
-package com.sisvv.mobile.network
+package com.example.sisvvapp.network
 
-import com.sisvv.mobile.network.dto.auth.LoginRequest
-import com.sisvv.mobile.network.dto.auth.LoginResponse
-import com.sisvv.mobile.network.dto.cajas.CajaDto
-import com.sisvv.mobile.network.dto.productos.GrupoModificadorDto
-import com.sisvv.mobile.network.dto.productos.ProductoDto
-import com.sisvv.mobile.network.dto.socios.SocioDto
-import com.sisvv.mobile.network.dto.ventas.VentaDto
-import com.sisvv.mobile.network.dto.ventas.VentaRequest
+import com.example.sisvvapp.network.dto.auth.LoginRequest
+import com.example.sisvvapp.network.dto.auth.LoginResponse
+import com.example.sisvvapp.network.dto.cajas.CajaDto
+import com.example.sisvvapp.network.dto.productos.GrupoModificadorDto
+import com.example.sisvvapp.network.dto.productos.ProductoDto
+import com.example.sisvvapp.network.dto.socios.SocioDto
+import com.example.sisvvapp.network.dto.ventas.VentaDto
+import com.example.sisvvapp.network.dto.ventas.VentaRequest
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -37,6 +37,12 @@ interface ApiService {
 
     @POST("ventas")
     suspend fun crearVenta(
+        @Body request: VentaRequest
+    ): Response<VentaDto>
+
+    @POST("ventas/{folio}/productos")
+    suspend fun appendProductos(
+        @Path("folio") folio: Int,
         @Body request: VentaRequest
     ): Response<VentaDto>
 }

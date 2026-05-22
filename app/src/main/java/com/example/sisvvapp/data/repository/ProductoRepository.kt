@@ -3,7 +3,7 @@ package com.example.sisvvapp.data.repository
 import android.util.Log
 import com.example.sisvvapp.data.local.dao.ProductoDao
 import com.example.sisvvapp.data.local.entity.ProductoEntity
-import com.sisvv.mobile.network.ApiService
+import com.example.sisvvapp.network.ApiService
 import kotlinx.coroutines.flow.Flow
 
 class ProductoRepository(

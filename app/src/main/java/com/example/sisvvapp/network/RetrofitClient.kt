@@ -1,4 +1,4 @@
-package com.sisvv.mobile.network
+package com.example.sisvvapp.network
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private const val BASE_URL = "https://grumpy-ghosts-trade.loca.lt/api/"
+    private const val BASE_URL = "https://spotty-bars-cover.loca.lt/api/"
 
     private var apiService: ApiService? = null
 

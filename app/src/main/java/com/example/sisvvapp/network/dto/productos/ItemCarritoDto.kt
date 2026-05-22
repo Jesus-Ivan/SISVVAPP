@@ -1,0 +1,18 @@
+package com.example.sisvvapp.network.dto.productos
+
+import com.google.gson.annotations.SerializedName
+
+/** Representa un modificador seleccionado dentro de un ítem de venta (carrito). */
+data class ModificadorSeleccionadoDto(
+    @SerializedName("clave_producto") val claveProducto: Int,
+    val cantidad: Int,
+    val precio: Double?
+)
+
+/** Representa un ítem en el carrito de una nueva venta o al agregar productos. */
+data class ItemCarritoDto(
+    @SerializedName("clave_producto") val claveProducto: Int,
+    val cantidad: Int,
+    val observaciones: String = "",
+    val modificadores: List<ModificadorSeleccionadoDto> = emptyList()
+)

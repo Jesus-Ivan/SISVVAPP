@@ -8,7 +8,7 @@ import com.example.sisvvapp.data.repository.CajaRepository
 import com.example.sisvvapp.data.repository.ProductoRepository
 import com.example.sisvvapp.data.repository.SocioRepository
 import com.example.sisvvapp.ui.state.SisvvViewModel
-import com.sisvv.mobile.network.RetrofitClient
+import com.example.sisvvapp.network.RetrofitClient
 
 class SisvvViewModelFactory(
     private val context: Context

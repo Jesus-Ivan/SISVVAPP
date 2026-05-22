@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
 import com.example.sisvvapp.data.local.SessionManager
-import com.sisvv.mobile.network.ApiService
-import com.sisvv.mobile.network.RetrofitClient
-import com.sisvv.mobile.network.dto.auth.LoginRequest
+import com.example.sisvvapp.network.ApiService
+import com.example.sisvvapp.network.RetrofitClient
+import com.example.sisvvapp.network.dto.auth.LoginRequest
 import kotlinx.coroutines.launch
 import java.net.ConnectException
 import java.net.SocketTimeoutException

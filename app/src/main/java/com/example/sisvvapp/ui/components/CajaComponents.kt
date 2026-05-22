@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.ui.theme.*
-import com.sisvv.mobile.network.dto.cajas.CajaDto
+import com.example.sisvvapp.network.dto.cajas.CajaDto
 
 @Composable
 fun VistaVerdeCajaCard( // Renombrado para consistencia

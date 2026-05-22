@@ -1,4 +1,4 @@
-package com.sisvv.mobile.network.dto.auth
+package com.example.sisvvapp.network.dto.auth
 
 data class LoginResponse(
     val token: String,

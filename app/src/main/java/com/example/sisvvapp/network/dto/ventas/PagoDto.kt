@@ -1,4 +1,4 @@
-package com.sisvv.mobile.network.dto.ventas
+package com.example.sisvvapp.network.dto.ventas
 
 import com.google.gson.annotations.SerializedName
 
