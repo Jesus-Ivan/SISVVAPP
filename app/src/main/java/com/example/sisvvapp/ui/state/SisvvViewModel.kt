@@ -1,13 +1,17 @@
 package com.example.sisvvapp.ui.state
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkManager
 import com.example.sisvvapp.data.local.AppDatabase
+import com.example.sisvvapp.data.local.SessionManager
 import com.sisvv.mobile.network.RetrofitClient
 import com.sisvv.mobile.network.ApiService
 import com.sisvv.mobile.network.dto.auth.LoginRequest
@@ -15,6 +19,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import javax.net.ssl.SSLException
 
 class SisvvViewModel(
     private val context: Context
@@ -22,6 +30,7 @@ class SisvvViewModel(
 
     private val api: ApiService = RetrofitClient.create(context)
     private val db: AppDatabase = AppDatabase.getInstance(context)
+    private val sessionManager = SessionManager.getInstance(context)
 
     // ── Sync count ─────────────────────────────────────────────────────────
 
@@ -32,6 +41,15 @@ class SisvvViewModel(
         viewModelScope.launch {
             _syncCount.value = db.ventaColaDao().countPendientesFlow().first()
         }
+    }
+
+    // ── Network check ──────────────────────────────────────────────────────
+
+    fun isNetworkAvailable(): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = cm.activeNetwork ?: return false
+        val caps = cm.getNetworkCapabilities(network) ?: return false
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     // ── Auth state ──────────────────────────────────────────────────────────
@@ -48,41 +66,63 @@ class SisvvViewModel(
     var loginSuccess by mutableStateOf(false)
         private set
 
+    // ── Logout ──────────────────────────────────────────────────────────────
+
+    fun logout() {
+        sessionManager.clearSession()
+        loginSuccess = false
+        loginError = null
+        try {
+            WorkManager.getInstance(context).cancelAllWork()
+        } catch (e: Exception) {
+            Log.e("LOGOUT", "Error al cancelar WorkManager", e)
+        }
+    }
+
     // ── Login ───────────────────────────────────────────────────────────────
 
-    fun login(email: String, password: String) {
-        viewModelScope.launch {
+    fun login(email: String, password: String){
+        viewModelScope.launch{
             isLoading = true
             loginError = null
             networkError = null
 
-            try {
+            if(!isNetworkAvailable()){
+                networkError = "No hay conexión a internet. Verifica tu red e intenta de nuevo"
+                isLoading = false
+                return@launch
+            }
+            try{
                 val response = api.login(LoginRequest(email, password))
 
-                if (response.isSuccessful) {
+                if(response.isSuccessful){
                     val body = response.body()
-                    if (body != null) {
-                        val prefs = context.getSharedPreferences(
-                            "sisvv_prefs",
-                            Context.MODE_PRIVATE
-                        )
-                        prefs.edit()
-                            .putString("token", body.token)
-                            .apply()
+                    if (body != null){
+                        sessionManager.saveToken(body.token)
+                        sessionManager.saveUserId(body.user.id)
 
                         Log.d("LOGIN", "Token: ${body.token}")
                         loginSuccess = true
                     }
                 } else {
-                    loginError = "Credenciales incorrectas"
+                    loginError = "Credenciales Incorrectas"
                     Log.e("LOGIN", "Error: ${response.code()}")
                 }
-            } catch (e: Exception) {
-                networkError = e.message
-                Log.e("LOGIN", "Exception", e)
+            }catch (e: Exception) {
+                networkError = when (e) {
+                    is UnknownHostException,
+                    is ConnectException,
+                    is SocketTimeoutException,
+                    is SSLException ->
+                        "No hay conexión a internet. Verifica tu red e intenta de nuevo."
+
+                    else -> "Ocurrió un error inesperado. Intenta de nuevo"
+                }
+                Log.e("LOGIN", "Exeption", e)
             } finally {
                 isLoading = false
             }
+            }
         }
     }
-}
+

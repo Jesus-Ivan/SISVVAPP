@@ -56,7 +56,10 @@ fun MainContainer(
             Spacer(modifier = Modifier.height(48.dp))
 
             Button(
-                onClick = onLogout,
+                onClick = {
+                    viewModel.logout()
+                    onLogout()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),

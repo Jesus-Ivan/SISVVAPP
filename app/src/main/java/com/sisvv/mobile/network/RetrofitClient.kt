@@ -2,6 +2,7 @@ package com.sisvv.mobile.network
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import com.example.sisvvapp.data.local.SessionManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -11,14 +12,14 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private const val BASE_URL = "https://odd-sheep-switch.loca.lt/api/"
+    private const val BASE_URL = "https://grumpy-ghosts-trade.loca.lt/api/"
 
     private var apiService: ApiService? = null
 
     fun create(context: Context): ApiService {
         if (apiService != null) return apiService!!
 
-        val prefs = context.getSharedPreferences("sisvv_prefs", Context.MODE_PRIVATE)
+        val sessionManager = SessionManager.getInstance(context)
 
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -32,7 +33,7 @@ object RetrofitClient {
         }
 
         val authInterceptor = Interceptor { chain ->
-            val token = prefs.getString("token", null)
+            val token = sessionManager.getToken()
             val request = chain.request()
                 .newBuilder()
                 .apply {

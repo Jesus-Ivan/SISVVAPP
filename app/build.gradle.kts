@@ -73,6 +73,9 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     // Gson
     implementation(libs.gson)
+
+    // Security (EncryptedSharedPreferences)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
     // ViewModel for Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     testImplementation(libs.junit)

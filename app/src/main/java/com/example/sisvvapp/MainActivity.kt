@@ -6,10 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.ui.navigation.Screen
 import com.example.sisvvapp.ui.screens.login.LoginScreen
 import com.example.sisvvapp.ui.screens.main.MainContainer
@@ -31,15 +33,22 @@ class MainActivity : ComponentActivity() {
                 val sisvvViewModel: SisvvViewModel = viewModel(
                     factory = SisvvViewModelFactory(this)
                 )
+                val startDestination = Screen.Splash.route
 
                 NavHost(
                     navController    = navController,
-                    startDestination = Screen.Splash.route
+                    startDestination = startDestination
                 ) {
                     composable(Screen.Splash.route) {
+                        val sessionManager = SessionManager.getInstance(LocalContext.current)
                         SplashScreen(
                             onNavigateToLogin = {
-                                navController.navigate(Screen.Login.route) {
+                                val destination = if (sessionManager.isLoggedIn()) {
+                                    Screen.Main.route
+                                } else {
+                                    Screen.Login.route
+                                }
+                                navController.navigate(destination) {
                                     popUpTo(Screen.Splash.route) { inclusive = true }
                                 }
                             }
@@ -60,7 +69,7 @@ class MainActivity : ComponentActivity() {
                             windowWidthSizeClass = windowSizeClass.widthSizeClass,
                             onLogout             = {
                                 navController.navigate(Screen.Login.route) {
-                                    popUpTo(Screen.Main.route) { inclusive = true }
+                                    popUpTo(0) { inclusive = true }
                                 }
                             }
                         )

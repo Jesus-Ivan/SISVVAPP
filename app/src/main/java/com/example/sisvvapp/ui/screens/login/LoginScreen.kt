@@ -137,6 +137,8 @@ fun LoginScreen(
             text = "INGRESAR",
             onClick = {
                 localError = when {
+                    !viewModel.isNetworkAvailable() ->
+                        "No hay conexión a internet. Verifica tu red e intenta de nuevo."
                     email.isBlank() || password.isBlank() ->
                         "Por favor, llena todos los campos."
                     !Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
