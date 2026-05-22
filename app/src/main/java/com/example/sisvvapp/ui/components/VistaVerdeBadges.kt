@@ -2,6 +2,7 @@ package com.example.sisvvapp.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
@@ -74,26 +75,25 @@ fun VistaVerdeCounterBadge(
 @Composable
 fun BadgesPreview() {
     SISVVAPPTheme {
-        Row(
+        Column(
             modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Ejemplo Verde (Toma los valores por defecto)
-            VistaVerdeStatusBadge(text = "Activa")
+            // Ejemplo 1: Activo (Usa los colores por defecto que definimos arriba)
+            VistaVerdeStatusBadge(text = "Activo")
 
-            // Ejemplo Amarillo (Le inyectas los colores)
-            VistaVerdeStatusBadge(
-                text = "Abierta",
-                containerColor = Color(0xFFFEF08A), // Fondo amarillito
-                textColor = Color(0xFF854D0E)       // Texto café
-            )
-
-            // Ejemplo Rojo (Le inyectas los colores de error de tu tema)
+            // Ejemplo 2: Inactivo (Inyectamos colores de error)
             VistaVerdeStatusBadge(
                 text = "Inactivo",
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 textColor = MaterialTheme.colorScheme.onErrorContainer
+            )
+
+            // Ejemplo 3: Abierta
+            VistaVerdeStatusBadge(
+                text = "Abierta",
+                containerColor = Color(0xFFFEF08A),
+                textColor = Color(0xFF854D0E)
             )
         }
     }

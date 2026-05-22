@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import android.util.Patterns
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +45,7 @@ import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit
-){
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var localError by remember { mutableStateOf("") }
@@ -69,89 +71,98 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 24.dp)
+            .wrapContentWidth(Alignment.CenterHorizontally),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    ){
-        //LOGO
-        Image(
-            painter = painterResource(id= R.drawable.logo),
-            contentDescription = "Logo Vista Verde",
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth(1f)
-                .padding(bottom=50.dp)
-        )
-        //TITULO PRINCIPAL
-        Text(
-            text = "Iniciar Sesión",
-            fontFamily = Poppins,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 32.sp,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Text(
-            text = "Ingresa tu correo y contraseña para acceder",
-            fontFamily = Inter,
-            fontWeight = FontWeight.Normal,
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
-        //INPUT EMAIL
-        VistaVerdeTextField(
-            value = email,
-            onValueChange = {email = it; localError = ""},
-            label = "Email",
-            keyboardType = KeyboardType.Email,
-            modifier = inputModifier,
-            bgColor = MaterialTheme.colorScheme.surface
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //INPUT PASSWORD
-        VistaVerdeTextField(
-            value = password,
-            onValueChange = {password = it; localError = ""},
-            label = "Password",
-            isPassword = true,
-            modifier = inputModifier,
-            bgColor = MaterialTheme.colorScheme.surface
-        )
-        Spacer(modifier = Modifier.height((32.dp)))
-
-        val errorMsg = localError.ifEmpty {
-            viewModel.loginError ?: viewModel.networkError ?: ""
-        }
-        if (errorMsg.isNotEmpty()) {
-            Text(
-                text = errorMsg,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
+                .widthIn(max = 450.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            //LOGO
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Logo Vista Verde",
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .padding(bottom = 50.dp)
             )
-        }
+            //TITULO PRINCIPAL
+            Text(
+                text = "Iniciar Sesión",
+                fontFamily = Poppins,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 32.sp,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Ingresa tu correo y contraseña para acceder",
+                fontFamily = Inter,
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
+            //INPUT EMAIL
+            VistaVerdeTextField(
+                value = email,
+                onValueChange = { email = it; localError = "" },
+                label = "Email",
+                keyboardType = KeyboardType.Email,
+                modifier = inputModifier,
+                bgColor = MaterialTheme.colorScheme.surface
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-        //BOTÓN
-        VistaVerdeButton(
-            text = "INGRESAR",
-            onClick = {
-                localError = when {
-                    !viewModel.isNetworkAvailable() ->
-                        "No hay conexión a internet. Verifica tu red e intenta de nuevo."
-                    email.isBlank() || password.isBlank() ->
-                        "Por favor, llena todos los campos."
-                    !Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
-                        "Por favor, ingresa un correo válido."
-                    password.length < 6 ->
-                        "La contraseña debe tener al menos 6 caracteres."
-                    else -> {
-                        viewModel.login(email, password)
-                        ""
+            //INPUT PASSWORD
+            VistaVerdeTextField(
+                value = password,
+                onValueChange = { password = it; localError = "" },
+                label = "Password",
+                isPassword = true,
+                modifier = inputModifier,
+                bgColor = MaterialTheme.colorScheme.surface
+            )
+            Spacer(modifier = Modifier.height((32.dp)))
+
+            val errorMsg = localError.ifEmpty {
+                viewModel.loginError ?: viewModel.networkError ?: ""
+            }
+            if (errorMsg.isNotEmpty()) {
+                Text(
+                    text = errorMsg,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+
+            //BOTÓN
+            VistaVerdeButton(
+                text = "INGRESAR",
+                onClick = {
+                    localError = when {
+                        email.isBlank() || password.isBlank() ->
+                            "Por favor, llena todos los campos."
+
+                        !Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+                            "Por favor, ingresa un correo válido."
+
+                        password.length < 6 ->
+                            "La contraseña debe tener al menos 6 caracteres."
+
+                        else -> {
+                            viewModel.login(email, password)
+                            ""
+                        }
                     }
                 }
-            }
-        )
+            )
+        }
     }
 }
 
