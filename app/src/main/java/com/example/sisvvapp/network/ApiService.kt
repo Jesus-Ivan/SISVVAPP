@@ -30,7 +30,7 @@ interface ApiService {
     ): Response<List<GrupoModificadorDto>>
 
     @GET("cajas/activas")
-    suspend fun getCajaActiva(): Response<CajaDto>
+    suspend fun getCajasActivas(): Response<List<CajaDto>>
 
     @GET("ventas")
     suspend fun getVentasAbiertas(): Response<List<VentaDto>>

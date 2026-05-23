@@ -32,7 +32,7 @@ fun VistaVerdeSearchBar(
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(48.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         placeholder = {
             Text(
@@ -48,13 +48,14 @@ fun VistaVerdeSearchBar(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(28.dp),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
         ),
         singleLine = true,
         textStyle = MaterialTheme.typography.bodyLarge.copy(
@@ -67,11 +68,10 @@ fun VistaVerdeSearchBar(
 @Preview(showBackground = true)
 @Composable
 fun SearchBarPreview() {
-    // Usamos el nombre correcto de tu tema
     SISVVAPPTheme {
         VistaVerdeSearchBar(
-            value = "", // Un valor vacío de prueba
-            onValueChange = {}, // Una acción vacía de prueba
+            value = "",
+            onValueChange = {},
             placeholder = "Buscar socio..."
         )
     }

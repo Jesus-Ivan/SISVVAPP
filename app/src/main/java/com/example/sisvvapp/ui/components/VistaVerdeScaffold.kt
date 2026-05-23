@@ -14,6 +14,7 @@ fun VistaVerdeScaffold(
     onMenuClick: () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     showConnectionBanner: Boolean = true,
+    isBackButton: Boolean = false,
     content: @Composable () -> Unit
 ) {
     Scaffold(
@@ -21,7 +22,8 @@ fun VistaVerdeScaffold(
             VistaVerdeTopBar(
                 title = title,
                 onMenuClick = onMenuClick,
-                actions = actions
+                actions = actions,
+                isBackButton = isBackButton
             )
         }
     ) { innerPadding ->

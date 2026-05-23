@@ -11,18 +11,28 @@ class CajaRepository(
     private val cajaActivaDao: CajaActivaDao
 ) {
 
+    // Función para consultar UNA caja
     fun getCajaActiva(): Flow<CajaActivaEntity?> = cajaActivaDao.getCajaActiva()
 
+    // Función que devuelve el flujo de TODAS las cajas para la lista
+    fun getCajasAbiertas(): Flow<List<CajaActivaEntity>> = cajaActivaDao.getCajasAbiertas()
+
     suspend fun sync(): Result<Unit> = runCatching {
-        val response = api.getCajaActiva()
+        // Llamamos al endpoint que ahora devuelve una lista de cajas
+        val response = api.getCajasActivas()
+
         if (response.isSuccessful) {
-            val cajaDto = response.body()
-            if (cajaDto != null) {
+            // Extraemos la lista, y si viene nula, usamos una lista vacía
+            val listaCajas = response.body() ?: emptyList()
+
+            // Iteramos sobre cada caja de la respuesta para insertarla en Room
+            listaCajas.forEach { cajaDto ->
                 cajaActivaDao.insertCajaActiva(cajaDto.toCajaActivaEntity())
-                Log.d("CajaRepo", "Caja activa sincronizada: ${cajaDto.nombre}")
             }
+
+            Log.d("CajaRepo", "Cajas sincronizadas correctamente: ${listaCajas.size}")
         } else {
-            Log.w("CajaRepo", "Error sync caja: ${response.code()}")
+            Log.w("CajaRepo", "Error sync cajas: ${response.code()}")
         }
     }
 }

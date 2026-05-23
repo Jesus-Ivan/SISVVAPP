@@ -1,4 +1,4 @@
-package com.example.sisvvapp.ui.components
+package com.example.sisvvapp.ui.screens.caja
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.ui.theme.*
 import com.example.sisvvapp.network.dto.cajas.CajaDto
+import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 
 @Composable
 fun VistaVerdeCajaCard( // Renombrado para consistencia
@@ -63,7 +64,7 @@ fun CajasList(cajas: List<CajaDto>, selectedCajaId: Int?, onCajaClick: (CajaDto)
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(cajas) { caja ->
+        items(items= cajas, key ={caja -> caja.id}) { caja ->
             VistaVerdeCajaCard(
                 caja = caja,
                 isSelected = caja.id == selectedCajaId,

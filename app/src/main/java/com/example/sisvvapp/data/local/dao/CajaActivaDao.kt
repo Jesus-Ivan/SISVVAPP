@@ -13,6 +13,9 @@ interface CajaActivaDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCajaActiva(caja: CajaActivaEntity)
 
-    @Query("SELECT * FROM cajas_activas WHERE activo = 1 LIMIT 1")
+    @Query("SELECT * FROM cajas_activas WHERE activo = 1")
     fun getCajaActiva(): Flow<CajaActivaEntity?>
+
+    @Query("SELECT * FROM cajas_activas WHERE activo = 1")
+    fun getCajasAbiertas(): Flow<List<CajaActivaEntity>>
 }

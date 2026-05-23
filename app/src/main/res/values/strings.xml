@@ -1,3 +1,25 @@
 <resources>
-    <string name="app_name">SISVVAPP</string>
+    <!-- Menú Drawer -->
+    <string name="app_name">SISVV APP</string>
+    <string name="menu_ventas">Ventas</string>
+    <string name="menu_socios">Socios</string>
+    <string name="menu_caja">Caja</string>
+    <string name="menu_ajustes">Ajustes</string>
+    <string name="title_socios">Socios</string>
+    <string name="title_buscar_socio">Buscar socio…</string>
+
+
+        <!-- Login Screen -->
+        <string name="login_logo_desc">Logo Vista Verde</string>
+        <string name="login_title">Iniciar Sesión</string>
+        <string name="login_subtitle">Ingresa tu correo y contraseña para acceder</string>
+        <string name="login_email_label">Email</string>
+        <string name="login_password_label">Contraseña</string>
+        <string name="login_button">INGRESAR</string>
+
+        <!-- Errores de Validación -->
+        <string name="error_empty_fields">Por favor, llena todos los campos.</string>
+        <string name="error_invalid_email">Por favor, ingresa un correo válido.</string>
+        <string name="error_short_password">La contraseña debe tener al menos 6 caracteres.</string>
+
 </resources>

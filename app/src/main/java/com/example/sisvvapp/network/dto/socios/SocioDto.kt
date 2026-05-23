@@ -13,3 +13,5 @@ data class SocioDto(
     val membresia: MembresiaDto?,
     val integrantes: List<IntegranteDto> = emptyList()
 )
+
+

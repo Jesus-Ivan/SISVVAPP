@@ -19,8 +19,9 @@ fun SocioDto.toSocioEntity() = SocioEntity(
     telefono = null,
     email = null,
     firmaAutorizada = firma,
-    estatus = membresia?.estado ?: "",
-    fotoUrl = imgPath
+    estatus = membresia?.estado ?: "Inactivo",
+    fotoUrl = imgPath,
+    membresiaTipo = membresia?.clave ?: "Sin membresía"
 )
 
 fun SocioDto.toIntegranteEntities(): List<IntegranteEntity> = integrantes.map { int ->

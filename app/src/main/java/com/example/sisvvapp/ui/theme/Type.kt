@@ -8,7 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
 
-// 1. AGRUPAMOS LAS FUENTES EN FAMILIAS
+
 val Poppins = FontFamily(
     Font(R.font.poppinsbold, FontWeight.Bold),
             Font(R.font.poppinssemibold, FontWeight.SemiBold)

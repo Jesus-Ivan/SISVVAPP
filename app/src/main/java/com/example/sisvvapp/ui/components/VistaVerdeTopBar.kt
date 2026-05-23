@@ -2,6 +2,7 @@ package com.example.sisvvapp.ui.components
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
@@ -24,6 +25,7 @@ fun VistaVerdeTopBar(
     title: String,
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isBackButton: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
@@ -36,15 +38,15 @@ fun VistaVerdeTopBar(
         },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
+                // Evaluamos qué ícono y descripción mostrar
                 Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "Menú principal",
+                    imageVector = if (isBackButton) Icons.Default.ArrowBack else Icons.Default.Menu,
+                    contentDescription = if (isBackButton) "Regresar" else "Menú principal",
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         },
         actions = actions,
-        // Usamos la nueva versión "topAppBarColors" para quitar la advertencia
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.background,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -68,16 +70,12 @@ fun TopBarPreviewSinIconos() {
 
 @Preview(showBackground = true)
 @Composable
-fun TopBarPreviewUnIcono() {
+fun TopBarPreviewConBotonRegreso() {
     SISVVAPPTheme {
         VistaVerdeTopBar(
-            title = "Socios",
-            onMenuClick = {},
-            actions = {
-                IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar")
-                }
-            }
+            title = "Perfil del socio",
+            isBackButton = true,
+            onMenuClick = {}
         )
     }
 }

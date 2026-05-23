@@ -13,23 +13,36 @@ class CajaViewModel(
     private val cajaRepository: CajaRepository
 ) : ViewModel() {
 
-    private val _cajaActiva = MutableStateFlow<CajaActivaEntity?>(null)
-    val cajaActiva: StateFlow<CajaActivaEntity?> = _cajaActiva
+    // Lista de todas las cajas abiertas
+    private val _cajas = MutableStateFlow<List<CajaActivaEntity>>(emptyList())
+    val cajas: StateFlow<List<CajaActivaEntity>> = _cajas
+
+    // Estado para saber qué caja seleccionó el usuario
+    private val _selectedCajaId = MutableStateFlow<Int?>(null)
+    val selectedCajaId: StateFlow<Int?> = _selectedCajaId
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     init {
-        observeCaja()
+        observeCajas()
         sync()
     }
 
-    private fun observeCaja() {
+    private fun observeCajas() {
         viewModelScope.launch {
-            cajaRepository.getCajaActiva().collect { caja ->
-                _cajaActiva.value = caja
+            cajaRepository.getCajasAbiertas().collect { lista ->
+                _cajas.value = lista
+                // Si la lista tiene elementos y no hay nada seleccionado, podríamos seleccionar el primero por defecto (opcional)
+                if (lista.isNotEmpty() && _selectedCajaId.value == null) {
+                    _selectedCajaId.value = lista.first().id
+                }
             }
         }
+    }
+
+    fun selectCaja(id: Int) {
+        _selectedCajaId.value = id
     }
 
     fun sync() {
