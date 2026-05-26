@@ -45,4 +45,7 @@ interface ApiService {
         @Path("folio") folio: Int,
         @Body request: VentaRequest
     ): Response<VentaDto>
+
+    @POST("logout")
+    suspend fun logout(): Response<Unit>
 }
