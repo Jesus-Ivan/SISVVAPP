@@ -90,6 +90,8 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
+        val ringColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+        
         // Anillos decorativos
         Canvas(modifier = Modifier.fillMaxSize()) {
             val cx = size.width / 2f
@@ -99,7 +101,7 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
                 210.dp.toPx() to ring2Alpha,
             ).forEach { (r, a) ->
                 drawCircle(
-                    color = SplashGreenDeep.copy(alpha = a),
+                    color = ringColor.copy(alpha = a),
                     radius = r,
                     center = Offset(cx, cy),
                     style = Stroke(width = 0.8.dp.toPx())
@@ -147,7 +149,7 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Normal,
                 letterSpacing = 2.5.sp,
-                color = SplashGreenDeep.copy(alpha = statusAlpha.value * 0.45f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = statusAlpha.value),
             )
         }
     }

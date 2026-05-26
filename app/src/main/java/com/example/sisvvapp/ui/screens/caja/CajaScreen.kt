@@ -19,7 +19,6 @@ import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
-import com.example.sisvvapp.ui.screens.socios.SociosList
 import com.example.sisvvapp.ui.theme.Inter
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal

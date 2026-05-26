@@ -68,7 +68,7 @@
     <string name="ajustes_btn_cerrar_sesion">Cerrar Sesión</string>
 
     <!-- Banners de Conexión -->
-    <string name="banner_connected">Conexión con el servidor</string>
+    <string name="banner_connected">Conexión con el Servidor</string>
     <string name="banner_offline">Modo sin conexión - Se sincronizará al volver</string>
 
 </resources>
