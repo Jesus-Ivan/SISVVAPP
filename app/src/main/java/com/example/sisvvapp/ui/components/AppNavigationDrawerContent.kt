@@ -36,10 +36,9 @@ fun AppNavigationDrawerContent(
     )
 
     ModalDrawerSheet(
-        drawerContainerColor = FondoAppClaro,
-        modifier = Modifier
-            .width(300.dp)
-            .statusBarsPadding()
+        modifier = Modifier.width(300.dp),
+        drawerContainerColor = MaterialTheme.colorScheme.surface,
+        drawerContentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(
             modifier = Modifier

@@ -32,6 +32,7 @@
     <string name="ventas_search_desc">Buscar</string>
     <string name="ventas_filter_date_desc">Filtrar por fecha</string>
     <string name="ventas_new_sale_desc">Nueva Venta</string>
+    <string name="ventas_empty_state">No se encontraron ventas recientes.</string>
 
     <!-- Pantalla de Socios -->
     <string name="title_socios">Socios</string>
