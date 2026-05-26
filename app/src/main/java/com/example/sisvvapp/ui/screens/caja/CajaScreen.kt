@@ -11,6 +11,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
@@ -29,7 +31,7 @@ fun CajaScreen(
     onContinueClick: (Int) -> Unit
 ) {
     VistaVerdeScaffold(
-        title = "Selecciona el corte de caja",
+        title = stringResource(R.string.caja_title_select),
         onMenuClick = onMenuClick,
         showConnectionBanner = true
     ) {
@@ -39,10 +41,12 @@ fun CajaScreen(
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            VistaVerdeSectionHeader(text = "Cajas abiertas")
+            VistaVerdeSectionHeader(text = stringResource(R.string.caja_section_open))
             Spacer(modifier = Modifier.height(8.dp))
 
-            Box(modifier = Modifier.weight(1f)) {
+            Box(modifier = Modifier.weight(1f)
+                .fillMaxWidth(),
+                contentAlignment = Alignment.Center) {
                 if (isLoading && cajas.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else {
@@ -66,7 +70,7 @@ fun CajaScreen(
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(
-                    text = "Continuar →",
+                    text = stringResource(R.string.caja_button_continue),
                     style = TextStyle(
                         fontFamily = Inter,
                         fontWeight = FontWeight.SemiBold,

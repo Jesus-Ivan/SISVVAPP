@@ -13,6 +13,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.sisvvapp.R
 import com.example.sisvvapp.data.local.entity.IntegranteEntity
 import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.ui.components.*
@@ -25,7 +27,7 @@ fun PerfilSocioScreen(
     onBackClick: () -> Unit
 ) {
     VistaVerdeScaffold(
-        title = "Perfil del socio",
+        title = stringResource(R.string.perfil_socio_title),
         onMenuClick = onBackClick,
         isBackButton = true,
         showConnectionBanner = true
@@ -45,7 +47,7 @@ fun PerfilSocioScreen(
 
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    VistaVerdeSectionHeader(text = "Detalles")
+                    VistaVerdeSectionHeader(text = stringResource(R.string.perfil_socio_section_details))
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
@@ -61,11 +63,11 @@ fun PerfilSocioScreen(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            val esActivo = socio.estatus.equals("Activo", ignoreCase = true)
+                            val esActivo = socio.estatus.equals(stringResource(R.string.perfil_socio_status_active), ignoreCase = true)
                             VistaVerdeStatusBadge(
                                 text = socio.estatus,
-                                containerColor = if (esActivo) FondoAbierta else Color(0xFFFFEBEE), // 2. CORRECCIÓN: Color Hex directo
-                                textColor = if (esActivo) TextoAbierta else Color(0xFFD32F2F)
+                                containerColor = if (esActivo) FondoAbierta else FondoErrorClaro,
+                                textColor = if (esActivo) TextoAbierta else TextoErrorFuerte
                             )
 
                             Spacer(modifier = Modifier.height(12.dp))
@@ -81,7 +83,7 @@ fun PerfilSocioScreen(
 
                             if (socio.firmaAutorizada) {
                                 Text(
-                                    text = "Firma Autorizada",
+                                    text = stringResource(R.string.perfil_socio_firma_autorizada),
                                     fontSize = 13.sp,
                                     color = VerdePrincipal,
                                     fontWeight = FontWeight.Medium
@@ -91,7 +93,7 @@ fun PerfilSocioScreen(
                             Spacer(modifier = Modifier.height(2.dp))
 
                             Text(
-                                text = "Membresía ${socio.membresiaTipo}",
+                                text = stringResource(R.string.perfil_socio_membership_label, socio.membresiaTipo ?: ""),
                                 fontSize = 13.sp,
                                 color = TextoSecundarioClaro
                             )
@@ -101,7 +103,7 @@ fun PerfilSocioScreen(
 
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
-                    VistaVerdeSectionHeader(text = "Integrantes")
+                    VistaVerdeSectionHeader(text = stringResource(R.string.perfil_socio_section_members))
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 

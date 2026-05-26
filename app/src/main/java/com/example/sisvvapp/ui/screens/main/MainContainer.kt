@@ -42,11 +42,11 @@ fun MainContainer(
     val scope = rememberCoroutineScope()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: ScreenRoutes.SPLASH
+    val currentRoute = navBackStackEntry?.destination?.route ?: ScreenRoutes.CAJA
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = currentRoute != ScreenRoutes.LOGIN && currentRoute != ScreenRoutes.SPLASH,
+        gesturesEnabled = true,
         drawerContent = {
             AppNavigationDrawerContent(
                 currentRoute = currentRoute,
@@ -104,25 +104,24 @@ fun MainContainer(
                 )
             }
 
-            // --- 4. PANTALLA DE SOCIOS ---
+            // --- 5. PANTALLA DE SOCIOS (LISTA PRINCIPAL) ---
             composable(ScreenRoutes.SOCIOS) {
                 val context = LocalContext.current
                 val sociosViewModel: SociosViewModel = viewModel(factory = SisvvViewModelFactory(context))
 
                 val socios by sociosViewModel.socios.collectAsState()
                 val isLoading by sociosViewModel.isLoading.collectAsState()
-                var searchQuery by remember { mutableStateOf("") }
 
-                LaunchedEffect(searchQuery) {
-                    if (searchQuery.isBlank()) sociosViewModel.sync()
-                    else sociosViewModel.search(searchQuery)
-                }
+                var searchQuery by remember { mutableStateOf("") }
 
                 SociosScreen(
                     socios = socios,
                     isLoading = isLoading,
                     searchQuery = searchQuery,
-                    onSearchQueryChange = { searchQuery = it },
+                    onSearchQueryChange = { query ->
+                        searchQuery = query
+                        sociosViewModel.search(query)
+                    },
                     onMenuClick = { scope.launch { drawerState.open() } },
                     onSocioClick = { socioId ->
                         navController.navigate(ScreenRoutes.crearRutaPerfilSocio(socioId))
@@ -130,7 +129,7 @@ fun MainContainer(
                 )
             }
 
-            // --- 5. PERFIL DEL SOCIO ---
+            // --- 5.1 NUEVA PANTALLA: PERFIL DEL SOCIO (DETALLE) ---
             composable(
                 route = ScreenRoutes.PERFIL_SOCIO,
                 arguments = listOf(navArgument("socioId") { type = NavType.IntType })
@@ -140,10 +139,8 @@ fun MainContainer(
                 val context = LocalContext.current
                 val sociosViewModel: SociosViewModel = viewModel(factory = SisvvViewModelFactory(context))
 
-
                 val socios by sociosViewModel.socios.collectAsState()
                 val socioSeleccionado = socios.find { it.id == socioId }
-
 
                 val integrantes by sociosViewModel.integrantes.collectAsState(initial = emptyList())
 
@@ -169,7 +166,7 @@ fun MainContainer(
             // --- 6. PANTALLA DE AJUSTES ---
             composable(ScreenRoutes.AJUSTES) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Pantalla de Ajustes en construcción")
+                    Text(stringResource(R.string.settings_construction))
                 }
             }
         }

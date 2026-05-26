@@ -1,25 +1,59 @@
 <resources>
-    <!-- Menú Drawer -->
     <string name="app_name">SISVV APP</string>
+
+    <!-- Menú Drawer -->
     <string name="menu_ventas">Ventas</string>
     <string name="menu_socios">Socios</string>
     <string name="menu_caja">Caja</string>
     <string name="menu_ajustes">Ajustes</string>
+
+    <!-- Pantalla de Login -->
+    <string name="login_logo_desc">Logo Vista Verde</string>
+    <string name="login_title">Iniciar Sesión</string>
+    <string name="login_subtitle">Ingresa tu correo y contraseña para acceder</string>
+    <string name="login_email_label">Email</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_button">INGRESAR</string>
+
+    <!-- Errores de Validación -->
+    <string name="error_empty_fields">Por favor, llena todos los campos.</string>
+    <string name="error_invalid_email">Por favor, ingresa un correo válido.</string>
+    <string name="error_short_password">La contraseña debe tener al menos 6 caracteres.</string>
+
+    <!-- Pantalla de Caja -->
+    <string name="caja_title_select">Selecciona el corte de caja</string>
+    <string name="caja_section_open">Cajas abiertas</string>
+    <string name="caja_button_continue">Continuar \u2192</string>
+
+    <!-- Pantalla de Ventas -->
+    <string name="ventas_title">Ventas</string>
+    <string name="ventas_section_recent">Ventas Recientes</string>
+    <string name="ventas_search_desc">Buscar</string>
+    <string name="ventas_filter_date_desc">Filtrar por fecha</string>
+    <string name="ventas_new_sale_desc">Nueva Venta</string>
+
+    <!-- Pantalla de Socios -->
     <string name="title_socios">Socios</string>
     <string name="title_buscar_socio">Buscar socio…</string>
+    <string name="socios_section_search">Buscar Socios</string>
+    <string name="socios_search_placeholder">Buscar\u2026</string>
 
+    <!-- Perfil del Socio -->
+    <string name="perfil_socio_title">Perfil del socio</string>
+    <string name="perfil_socio_section_details">Detalles</string>
+    <string name="perfil_socio_status_active">Activo</string>
+    <string name="perfil_socio_firma_autorizada">Firma Autorizada</string>
+    <string name="perfil_socio_membership_label">Membresía %1$s</string>
+    <string name="perfil_socio_section_members">Integrantes</string>
 
-        <!-- Login Screen -->
-        <string name="login_logo_desc">Logo Vista Verde</string>
-        <string name="login_title">Iniciar Sesión</string>
-        <string name="login_subtitle">Ingresa tu correo y contraseña para acceder</string>
-        <string name="login_email_label">Email</string>
-        <string name="login_password_label">Contraseña</string>
-        <string name="login_button">INGRESAR</string>
+    <!-- Pantalla de Splash -->
+    <string name="splash_status_init">Iniciando\u2026</string>
+    <string name="splash_status_loading">Cargando datos\u2026</string>
+    <string name="splash_status_config">Configurando\u2026</string>
+    <string name="splash_status_welcome">¡Bienvenido!</string>
+    <string name="common_logo_desc">Vista Verde Country Club</string>
 
-        <!-- Errores de Validación -->
-        <string name="error_empty_fields">Por favor, llena todos los campos.</string>
-        <string name="error_invalid_email">Por favor, ingresa un correo válido.</string>
-        <string name="error_short_password">La contraseña debe tener al menos 6 caracteres.</string>
+    <!-- Otros -->
+    <string name="settings_construction">Pantalla de Ajustes en construcción</string>
 
 </resources>
