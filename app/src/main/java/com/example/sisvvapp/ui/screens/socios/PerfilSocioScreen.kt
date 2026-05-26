@@ -24,13 +24,14 @@ import com.example.sisvvapp.ui.theme.*
 fun PerfilSocioScreen(
     socio: SocioEntity,
     integrantes: List<IntegranteEntity>,
+    isOnline: Boolean = true,
     onBackClick: () -> Unit
 ) {
     VistaVerdeScaffold(
         title = stringResource(R.string.perfil_socio_title),
         onMenuClick = onBackClick,
         isBackButton = true,
-        showConnectionBanner = true
+        isOnline = isOnline
     ) {
 
         Column(

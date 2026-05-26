@@ -13,7 +13,7 @@ fun VistaVerdeScaffold(
     title: String,
     onMenuClick: () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
-    showConnectionBanner: Boolean = true,
+    isOnline: Boolean = true,
     isBackButton: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -32,12 +32,7 @@ fun VistaVerdeScaffold(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            if (showConnectionBanner) {
-                VistaVerdeBanner(
-                    text = "Conectado con el servidor",
-                    isError = false
-                )
-            }
+            VistaVerdeConnectivityBanner(isOnline = isOnline)
             content()
         }
     }

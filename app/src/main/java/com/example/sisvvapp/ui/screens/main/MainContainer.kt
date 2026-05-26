@@ -84,6 +84,7 @@ fun MainContainer(
                     cajas = cajasDto,
                     selectedCajaId = selectedCajaId,
                     isLoading = isLoading,
+                    isOnline = viewModel?.isOnline ?: true,
                     onCajaClick = { id -> cajaViewModel.selectCaja(id) },
                     onMenuClick = { scope.launch { drawerState.open() } },
                     onContinueClick = { _ ->
@@ -99,6 +100,7 @@ fun MainContainer(
                 VentasScreen(
                     onMenuClick = { scope.launch { drawerState.open() } },
                     ventas = emptyList(),
+                    isOnline = viewModel?.isOnline ?: true,
                     onVentaClick = { _ ->
                         /* Abrir detalle de la venta */
                     },
@@ -120,6 +122,7 @@ fun MainContainer(
                 SociosScreen(
                     socios = socios,
                     isLoading = isLoading,
+                    isOnline = viewModel?.isOnline ?: true,
                     searchQuery = searchQuery,
                     onSearchQueryChange = { query ->
                         searchQuery = query
@@ -155,6 +158,7 @@ fun MainContainer(
                     PerfilSocioScreen(
                         socio = socioSeleccionado,
                         integrantes = integrantes,
+                        isOnline = viewModel?.isOnline ?: true,
                         onBackClick = {
                             navController.popBackStack()
                         }
@@ -183,6 +187,7 @@ fun MainContainer(
                     cajas = cajasDto,
                     selectedCajaId = selectedCajaId,
                     lastSyncDate = "Pendiente de sincronizar",
+                    isOnline = viewModel?.isOnline ?: true,
                     onCajaClick = { caja -> cajaViewModel.selectCaja(caja.id) },
                     onSyncClick = { /* Lógica de Retrofit pendiente */ },
                     onLogoutClick = { onLogout() },

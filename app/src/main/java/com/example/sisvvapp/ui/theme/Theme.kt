@@ -19,7 +19,7 @@ private val DarkColorScheme = darkColorScheme(
 
     // Usamos estos roles para los banners de conexión dinámicos
     primaryContainer = EstadoExitoOscuro,
-    onPrimaryContainer = TextoExitoOscuro,
+    onPrimaryContainer = Color.White,
     errorContainer = EstadoAlertaOscuro,
     onErrorContainer = TextoAlertaOscuro
 )

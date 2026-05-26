@@ -29,6 +29,7 @@ fun CajaScreen(
     cajas: List<CajaDto>,
     selectedCajaId: Int?,
     isLoading: Boolean,
+    isOnline: Boolean = true,
 
     onCajaClick: (Int) -> Unit,
     onMenuClick: () -> Unit,
@@ -37,7 +38,7 @@ fun CajaScreen(
     VistaVerdeScaffold(
         title = stringResource(R.string.caja_title_select),
         onMenuClick = onMenuClick,
-        showConnectionBanner = true
+        isOnline = isOnline
     ) {
         Column(
             modifier = Modifier

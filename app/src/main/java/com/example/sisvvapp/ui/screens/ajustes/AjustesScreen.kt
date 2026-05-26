@@ -35,6 +35,7 @@ fun AjustesScreen(
     cajas: List<CajaDto>,
     selectedCajaId: Int?,
     lastSyncDate: String,
+    isOnline: Boolean = true,
     onCajaClick: (CajaDto) -> Unit,
     onSyncClick: () -> Unit,
     onLogoutClick: () -> Unit,
@@ -43,7 +44,7 @@ fun AjustesScreen(
     VistaVerdeScaffold(
         title = stringResource(id = R.string.ajustes_title),
         onMenuClick = onMenuClick,
-        showConnectionBanner = true
+        isOnline = isOnline
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
