@@ -14,6 +14,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.ui.res.stringResource
+import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.AppNavigationDrawerContent
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
@@ -64,7 +66,7 @@ fun MainContainer(
     ) {
         NavHost(navController = navController, startDestination = ScreenRoutes.SPLASH) {
 
-            // --- 1. PANTALLA DE SPLASH ---
+            /* --- 1. PANTALLA DE SPLASH
             composable(ScreenRoutes.SPLASH) {
                 SplashScreen(
                     onNavigateToLogin = {
@@ -73,7 +75,7 @@ fun MainContainer(
                         }
                     }
                 )
-            }
+            } */
 
             // --- 2. PANTALLA DE LOGIN ---
             composable(ScreenRoutes.LOGIN) {
@@ -166,7 +168,7 @@ fun MainContainer(
             // --- 6. PANTALLA DE AJUSTES ---
             composable(ScreenRoutes.AJUSTES) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Pantalla de Ajustes en construcción")
+                    Text(stringResource(R.string.settings_construction))
                 }
             }
         }

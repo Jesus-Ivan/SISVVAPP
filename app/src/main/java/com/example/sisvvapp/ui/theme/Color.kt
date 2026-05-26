@@ -33,17 +33,27 @@ val EstadoAlertaClaro = Color(0xFFFFEDBA)   // Banner de No Conexión
 val EstadoAlertaOscuro = Color(0xFF78350F)   // Fondo café/naranja oscuro para alerta de noche
 val TextoAlertaOscuro = Color(0xFFFDE68A)   // Texto amarillo claro para alerta de noche
 
+// --- ESTADOS SOCIO / BADGES ---
 val FondoInactivo = Color(0xFFFCD2D6)
-
 val TextoInactivo = Color(0xFFFB4A59)
+val FondoErrorClaro = Color(0xFFFFEBEE)
+val TextoErrorFuerte = Color(0xFFD32F2F)
 
 // --- ESTADOS VENTAS ---
 val FondoAbierta = Color(0xFFFEF3C7)
-
 val TextoAbierta = Color(0xFF92400E)
+
+// --- BRANDING ---
 val EcoGreenPrimary = Color(0xFF006D40)
 val EcoBackground = Color(0xFFF9FAFB)
 val EcoTextHigh = Color(0xFF1F2937)
 val EcoTextMedium = Color(0xFF878D98)
-
 val EcoDivider = Color(0xFFE5E7EB)
+
+// --- SPLASH COLORS ---
+val SplashGreenDeep = Color(0xFF1A5C1E)
+val SplashGreenLime = Color(0xFF7EC840)
+val SplashGreenBright = Color(0xFFB8E870)
+val SplashGreenMid = Color(0xFF66BB6A)
+val SplashBallGrayLight = Color(0xFFECECEC)
+val SplashBallGrayDark = Color(0xFFC8C8C8)

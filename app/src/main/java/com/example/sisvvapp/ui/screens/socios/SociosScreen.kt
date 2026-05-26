@@ -54,13 +54,13 @@ fun SociosScreen(
             .widthIn(max = if (isTablet) 700.dp else 400.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            VistaVerdeSectionHeader(text = "Buscar Socios")
+            VistaVerdeSectionHeader(text = stringResource(R.string.socios_section_search))
             Spacer(modifier = Modifier.height(16.dp))
 
             VistaVerdeSearchBar(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
-                placeholder = stringResource(R.string.title_buscar_socio)
+                placeholder = stringResource(R.string.socios_search_placeholder)
             )
             Spacer(modifier = Modifier.height(4.dp))
 
