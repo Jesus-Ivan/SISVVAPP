@@ -44,20 +44,14 @@ import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit
+    isLoading: Boolean = false,
+    serverError: String? = null,
+    onLoginClick: (String, String) -> Unit = { _, _ -> }
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var localError by remember { mutableStateOf("") }
 
-    val context = LocalContext.current
-    val viewModel: SisvvViewModel = viewModel(
-        factory = SisvvViewModelFactory(context)
-    )
-
-    LaunchedEffect(viewModel.loginSuccess) {
-        if (viewModel.loginSuccess) onLoginSuccess()
-    }
 
     val inputModifier = Modifier
         .shadow(
@@ -134,9 +128,8 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height((32.dp)))
 
-            val errorMsg = localError.ifEmpty {
-                viewModel.loginError ?: viewModel.networkError ?: ""
-            }
+            val errorMsg = localError.ifEmpty { serverError ?: "" }
+
             if (errorMsg.isNotEmpty()) {
                 Text(
                     text = errorMsg,
@@ -149,13 +142,14 @@ fun LoginScreen(
             // BOTÓN
             VistaVerdeButton(
                 text = stringResource(id = R.string.login_button),
+                enabled = !isLoading,
                 onClick = {
                     localError = when {
                         email.isBlank() || password.isBlank() -> errorEmptyFields
                         !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> errorInvalidEmail
-                        password.length < 6 -> errorShortPassword
+                        password.length < 8 -> errorShortPassword
                         else -> {
-                            viewModel.login(email, password)
+                            onLoginClick(email, password)
                             ""
                         }
                     }
@@ -170,7 +164,7 @@ fun LoginScreen(
 fun LoginPreview() {
     SISVVAPPTheme {
         LoginScreen(
-            onLoginSuccess = {}
+            onLoginClick = { _, _ -> }
         )
     }
 }

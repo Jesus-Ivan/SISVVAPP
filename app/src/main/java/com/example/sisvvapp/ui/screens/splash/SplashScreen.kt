@@ -19,17 +19,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.example.sisvvapp.R
+import com.example.sisvvapp.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin
-
-private val GreenDeep   = Color(0xFF1A5C1E)
-private val GreenLime   = Color(0xFF7EC840)
-private val GreenBright = Color(0xFFB8E870)
-private val GreenMid    = Color(0xFF66BB6A)
 
 @Composable
 fun SplashScreen(onNavigateToLogin: () -> Unit) {
@@ -53,7 +50,12 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
     )
 
     // Texto de estado
-    val statusMessages = listOf("Iniciando…", "Cargando datos…", "Configurando…", "¡Bienvenido!")
+    val statusMessages = listOf(
+        stringResource(R.string.splash_status_init),
+        stringResource(R.string.splash_status_loading),
+        stringResource(R.string.splash_status_config),
+        stringResource(R.string.splash_status_welcome)
+    )
     var statusIndex by remember { mutableStateOf(0) }
     val statusAlpha = remember { Animatable(1f) }
 
@@ -96,7 +98,7 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
                 210.dp.toPx() to ring2Alpha,
             ).forEach { (r, a) ->
                 drawCircle(
-                    color = GreenDeep.copy(alpha = a),
+                    color = SplashGreenDeep.copy(alpha = a),
                     radius = r,
                     center = Offset(cx, cy),
                     style = Stroke(width = 0.8.dp.toPx())
@@ -113,7 +115,7 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
             // Logo
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Vista Verde Country Club",
+                contentDescription = stringResource(R.string.common_logo_desc),
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -144,7 +146,7 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Normal,
                 letterSpacing = 2.5.sp,
-                color = GreenDeep.copy(alpha = statusAlpha.value * 0.45f),
+                color = SplashGreenDeep.copy(alpha = statusAlpha.value * 0.45f),
             )
         }
     }
@@ -168,7 +170,7 @@ fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
         // ── Estela ──────────────────────────────────────────────────────
         drawLine(
             brush = Brush.horizontalGradient(
-                colors = listOf(Color.Transparent, GreenLime.copy(alpha = 0.4f)),
+                colors = listOf(Color.Transparent, SplashGreenLime.copy(alpha = 0.4f)),
                 startX = 0f, endX = ballX
             ),
             start = Offset(0f, trackY - trackH - ballR),
@@ -189,7 +191,7 @@ fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
         // ── Césped (pista) ──────────────────────────────────────────────
         drawRoundRect(
             brush = Brush.horizontalGradient(
-                colors = listOf(GreenDeep, GreenMid, GreenDeep)
+                colors = listOf(SplashGreenDeep, SplashGreenMid, SplashGreenDeep)
             ),
             topLeft     = Offset(0f, trackY - trackH),
             size        = Size(trackW, trackH),
@@ -202,8 +204,8 @@ fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
             brush = Brush.radialGradient(
                 colors = listOf(
                     Color.White,
-                    Color(0xFFECECEC),
-                    Color(0xFFC8C8C8)
+                    SplashBallGrayLight,
+                    SplashBallGrayDark
                 ),
                 center = Offset(ballX - ballR * 0.25f, ballY - ballR * 0.25f),
                 radius = ballR * 1.3f

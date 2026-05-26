@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
@@ -30,15 +32,15 @@ fun VentasScreen(
     onNuevaVentaClick: () -> Unit = {}
 ) {
     VistaVerdeScaffold(
-        title = "Ventas",
+        title = stringResource(R.string.ventas_title),
         onMenuClick = onMenuClick,
         showConnectionBanner = true,
         actions = {
             IconButton(onClick = { /* Lógica de búsqueda */ }) {
-                Icon(Icons.Default.Search, contentDescription = "Buscar")
+                Icon(Icons.Default.Search, contentDescription = stringResource(R.string.ventas_search_desc))
             }
             IconButton(onClick = { /* Filtro por fecha */ }) {
-                Icon(Icons.Default.DateRange, contentDescription = "Filtrar por fecha")
+                Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.ventas_filter_date_desc))
             }
         }
     ) {
@@ -52,7 +54,7 @@ fun VentasScreen(
                     .padding(horizontal = 16.dp)
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
-                VistaVerdeSectionHeader(text = "Ventas Recientes")
+                VistaVerdeSectionHeader(text = stringResource(R.string.ventas_section_recent))
                 Spacer(modifier = Modifier.height(8.dp))
 
                 LazyColumn(
@@ -86,7 +88,7 @@ fun VentasScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Nueva Venta",
+                    contentDescription = stringResource(R.string.ventas_new_sale_desc),
                     modifier = Modifier.size(28.dp) // Icono un poquito más grande para resaltar
                 )
             }
