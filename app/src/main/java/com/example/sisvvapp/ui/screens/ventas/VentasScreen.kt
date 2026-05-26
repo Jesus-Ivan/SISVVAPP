@@ -47,10 +47,8 @@ fun VentasScreen(
             }
         }
     ) {
-        // 1. EL BOX PRINCIPAL: Permite poner el botón flotando encima de la lista
         Box(modifier = Modifier.fillMaxSize()) {
 
-            // La columna normal con tu título y la lista
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -69,8 +67,6 @@ fun VentasScreen(
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        // 2. EL TRUCO DEL PADDING: Le damos espacio extra abajo a la lista
-                        // para que el último ticket no se esconda detrás del botón flotante
                         contentPadding = PaddingValues(bottom = 88.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -91,16 +87,16 @@ fun VentasScreen(
             FloatingActionButton(
                 onClick = onNuevaVentaClick,
                 modifier = Modifier
-                    .align(Alignment.BottomEnd) // Lo anclamos abajo a la derecha
-                    .padding(16.dp), // Separación de los bordes de la pantalla
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
                 containerColor = VerdePrincipal,
                 contentColor = Color.White,
-                shape = RoundedCornerShape(12.dp) // Forma de rectángulo redondeado como en la imagen
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = stringResource(R.string.ventas_new_sale_desc),
-                    modifier = Modifier.size(28.dp) // Icono un poquito más grande para resaltar
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
