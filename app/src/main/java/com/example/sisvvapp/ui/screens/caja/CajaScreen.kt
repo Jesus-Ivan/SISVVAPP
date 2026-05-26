@@ -44,7 +44,9 @@ fun CajaScreen(
             VistaVerdeSectionHeader(text = stringResource(R.string.caja_section_open))
             Spacer(modifier = Modifier.height(8.dp))
 
-            Box(modifier = Modifier.weight(1f)) {
+            Box(modifier = Modifier.weight(1f)
+                .fillMaxWidth(),
+                contentAlignment = Alignment.Center) {
                 if (isLoading && cajas.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else {

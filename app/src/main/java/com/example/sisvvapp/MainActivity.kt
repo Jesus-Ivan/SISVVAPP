@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -26,6 +27,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val sessionManager = SessionManager.getInstance(this)
+
         setContent {
             SISVVAPPTheme(darkTheme = false) {
                 val navController = rememberNavController()
@@ -33,14 +37,14 @@ class MainActivity : ComponentActivity() {
                 val sisvvViewModel: SisvvViewModel = viewModel(
                     factory = SisvvViewModelFactory(this)
                 )
-                val startDestination = Screen.Splash.route
 
+                // El NavHost arranca en Splash para mostrar la animación Premium
                 NavHost(
                     navController    = navController,
-                    startDestination = startDestination
+                    startDestination = Screen.Splash.route
                 ) {
+                    // --- 1. PANTALLA DE SPLASH (Animación de Golf) ---
                     composable(Screen.Splash.route) {
-                        val sessionManager = SessionManager.getInstance(LocalContext.current)
                         SplashScreen(
                             onNavigateToLogin = {
                                 val destination = if (sessionManager.isLoggedIn()) {
@@ -54,20 +58,37 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+
+                    // --- 2. PANTALLA DE LOGIN (State Hoisting aplicado) ---
                     composable(Screen.Login.route) {
-                        LoginScreen(
-                            onLoginSuccess = {
+                        val isLoading = sisvvViewModel.isLoading
+                        val loginSuccess = sisvvViewModel.loginSuccess
+                        val loginError = sisvvViewModel.loginError ?: sisvvViewModel.networkError
+
+                        LaunchedEffect(loginSuccess) {
+                            if (loginSuccess) {
                                 navController.navigate(Screen.Main.route) {
                                     popUpTo(Screen.Login.route) { inclusive = true }
                                 }
                             }
+                        }
+
+                        LoginScreen(
+                            isLoading = isLoading,
+                            serverError = loginError,
+                            onLoginClick = { email, password ->
+                                sisvvViewModel.login(email, password)
+                            }
                         )
                     }
+
+                    // --- 3. CONTENEDOR PRINCIPAL (Caja, Ventas, Socios) ---
                     composable(Screen.Main.route) {
                         MainContainer(
                             viewModel            = sisvvViewModel,
                             windowWidthSizeClass = windowSizeClass.widthSizeClass,
                             onLogout             = {
+                                sisvvViewModel.logout()
                                 navController.navigate(Screen.Login.route) {
                                     popUpTo(0) { inclusive = true }
                                 }

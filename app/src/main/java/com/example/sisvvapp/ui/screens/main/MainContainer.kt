@@ -22,7 +22,7 @@ import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.screens.caja.CajaScreen
 import com.example.sisvvapp.ui.screens.login.LoginScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
-import com.example.sisvvapp.ui.screens.splash.SplashScreen
+import com.example.sisvvapp.ui.screens.socios.SociosScreen
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
@@ -45,11 +45,11 @@ fun MainContainer(
     val scope = rememberCoroutineScope()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: ScreenRoutes.SPLASH
+    val currentRoute = navBackStackEntry?.destination?.route ?: ScreenRoutes.CAJA
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = currentRoute != ScreenRoutes.LOGIN && currentRoute != ScreenRoutes.SPLASH,
+        gesturesEnabled = true,
         drawerContent = {
             AppNavigationDrawerContent(
                 currentRoute = currentRoute,
@@ -64,29 +64,10 @@ fun MainContainer(
             )
         }
     ) {
-        NavHost(navController = navController, startDestination = ScreenRoutes.SPLASH) {
+        NavHost(navController = navController, startDestination = ScreenRoutes.CAJA) {
 
-            /* --- 1. PANTALLA DE SPLASH
-            composable(ScreenRoutes.SPLASH) {
-                SplashScreen(
-                    onNavigateToLogin = {
-                        navController.navigate(ScreenRoutes.LOGIN) {
-                            popUpTo(ScreenRoutes.SPLASH) { inclusive = true }
-                        }
-                    }
-                )
-            } */
 
-            // --- 2. PANTALLA DE LOGIN ---
-            composable(ScreenRoutes.LOGIN) {
-                LoginScreen(
-                    onLoginSuccess = {
-                        navController.navigate(ScreenRoutes.CAJA) {
-                            popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
-                        }
-                    }
-                )
-            }
+
 
             // --- 3. PANTALLA DE CAJA  ---
             composable(ScreenRoutes.CAJA) {
@@ -129,7 +110,32 @@ fun MainContainer(
                 )
             }
 
-            // --- 5. PERFIL DEL SOCIO ---
+            // --- 5. PANTALLA DE SOCIOS (LISTA PRINCIPAL) ---
+            composable(ScreenRoutes.SOCIOS) {
+                val context = LocalContext.current
+                val sociosViewModel: SociosViewModel = viewModel(factory = SisvvViewModelFactory(context))
+
+                val socios by sociosViewModel.socios.collectAsState()
+                val isLoading by sociosViewModel.isLoading.collectAsState()
+
+                var searchQuery by remember { mutableStateOf("") }
+
+                SociosScreen(
+                    socios = socios,
+                    isLoading = isLoading,
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { query ->
+                        searchQuery = query
+                        sociosViewModel.search(query)
+                    },
+                    onMenuClick = { scope.launch { drawerState.open() } },
+                    onSocioClick = { socioId ->
+                        navController.navigate(ScreenRoutes.crearRutaPerfilSocio(socioId))
+                    }
+                )
+            }
+
+            // --- 5.1 NUEVA PANTALLA: PERFIL DEL SOCIO (DETALLE) ---
             composable(
                 route = ScreenRoutes.PERFIL_SOCIO,
                 arguments = listOf(navArgument("socioId") { type = NavType.IntType })
@@ -139,10 +145,8 @@ fun MainContainer(
                 val context = LocalContext.current
                 val sociosViewModel: SociosViewModel = viewModel(factory = SisvvViewModelFactory(context))
 
-
                 val socios by sociosViewModel.socios.collectAsState()
                 val socioSeleccionado = socios.find { it.id == socioId }
-
 
                 val integrantes by sociosViewModel.integrantes.collectAsState(initial = emptyList())
 
