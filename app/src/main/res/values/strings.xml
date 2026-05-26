@@ -24,6 +24,7 @@
     <string name="caja_title_select">Selecciona el corte de caja</string>
     <string name="caja_section_open">Cajas abiertas</string>
     <string name="caja_button_continue">Continuar \u2192</string>
+    <string name="caja_empty_state">Aún no hay cajas abiertas en este turno.</string>
 
     <!-- Pantalla de Ventas -->
     <string name="ventas_title">Ventas</string>
@@ -37,6 +38,8 @@
     <string name="title_buscar_socio">Buscar socio…</string>
     <string name="socios_section_search">Buscar Socios</string>
     <string name="socios_search_placeholder">Buscar\u2026</string>
+    <string name="socios_empty_state">No hay socios registrados.</string>
+    <string name="socios_empty_search_results">No se encontraron socios que coincidan con \"%1$s\".</string>
 
     <!-- Perfil del Socio -->
     <string name="perfil_socio_title">Perfil del socio</string>
@@ -56,6 +59,7 @@
     <!-- Ajustes -->
     <string name="ajustes_title">Ajustes</string>
     <string name="ajustes_cajas_abiertas">Cajas abiertas</string>
+    <string name="ajustes_cajas_empty">No hay cajas abiertas actualmente.</string>
     <string name="ajustes_sincronizar_datos">Sincronizar datos</string>
     <string name="ajustes_sync_desc">Esta acción sincronizará la información del servidor</string>
     <string name="ajustes_btn_actualizar">Actualizar Datos</string>

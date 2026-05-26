@@ -8,19 +8,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import com.example.sisvvapp.ui.utils.getDeviceType
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
-import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
-import com.example.sisvvapp.ui.viewmodel.SociosViewModel
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.R
@@ -66,8 +63,17 @@ fun SociosScreen(
 
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = com.example.sisvvapp.ui.theme.VerdePrincipal)
                 }
+            } else if (socios.isEmpty()) {
+                VistaVerdeEmptyState(
+                    icon = Icons.Default.SearchOff,
+                    message = if (searchQuery.isEmpty())
+                        stringResource(R.string.socios_empty_state)
+                    else
+                        stringResource(R.string.socios_empty_search_results, searchQuery),
+                    modifier = Modifier.weight(1f)
+                )
             } else {
                 SociosList(
                     socios = socios,

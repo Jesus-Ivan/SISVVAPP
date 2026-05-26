@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
+import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.screens.caja.VistaVerdeCajaCard
@@ -32,7 +34,7 @@ import com.example.sisvvapp.ui.theme.VerdePrincipal
 fun AjustesScreen(
     cajas: List<CajaDto>,
     selectedCajaId: Int?,
-    lastSyncDate: String, // <-- Recibimos la fecha real desde el ViewModel o SessionManager
+    lastSyncDate: String,
     onCajaClick: (CajaDto) -> Unit,
     onSyncClick: () -> Unit,
     onLogoutClick: () -> Unit,
@@ -54,12 +56,22 @@ fun AjustesScreen(
                 VistaVerdeSectionHeader(text = stringResource(id = R.string.ajustes_cajas_abiertas))
             }
 
-            items(items = cajas, key = { it.id }) { caja ->
-                VistaVerdeCajaCard(
-                    caja = caja,
-                    isSelected = caja.id == selectedCajaId,
-                    onClick = { onCajaClick(caja) }
-                )
+            if (cajas.isEmpty()) {
+                item {
+                    VistaVerdeEmptyState(
+                        icon = Icons.Default.Inbox,
+                        message = stringResource(R.string.ajustes_cajas_empty),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+                    )
+                }
+            } else {
+                items(items = cajas, key = { it.id }) { caja ->
+                    VistaVerdeCajaCard(
+                        caja = caja,
+                        isSelected = caja.id == selectedCajaId,
+                        onClick = { onCajaClick(caja) }
+                    )
+                }
             }
 
             // --- 2. SECCIÓN: SINCRONIZAR DATOS ---
@@ -162,7 +174,7 @@ fun AjustesScreenPreview() {
         AjustesScreen(
             cajas = mockCajas,
             selectedCajaId = 6858,
-            lastSyncDate = "Hoy 11:24 AM", // En Preview podemos poner algo temporal para visualizar
+            lastSyncDate = "Hoy 11:24 AM",
             onCajaClick = {},
             onSyncClick = {},
             onLogoutClick = {},
