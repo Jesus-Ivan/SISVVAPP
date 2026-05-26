@@ -50,6 +50,16 @@ class SisvvViewModel(
     var loginSuccess by mutableStateOf(false)
         private set
 
+    // ── Theme State ─────────────────────────────────────────────────────────
+
+    var themeMode by mutableStateOf(sessionManager.getThemeMode())
+        private set
+
+    fun updateThemeMode(mode: Int) {
+        themeMode = mode
+        sessionManager.saveThemeMode(mode)
+    }
+
     // ── Logout ──────────────────────────────────────────────────────────────
 
     fun logout() {

@@ -59,7 +59,8 @@ fun MainContainer(
                         restoreState = true
                     }
                 },
-                onCloseDrawer = { scope.launch { drawerState.close() } }
+                onCloseDrawer = { scope.launch { drawerState.close() } },
+                viewModel = viewModel
             )
         }
     ) {
@@ -181,10 +182,10 @@ fun MainContainer(
                 AjustesScreen(
                     cajas = cajasDto,
                     selectedCajaId = selectedCajaId,
-                    lastSyncDate = "Pendiente de sincronizar", // Aquí luego le pasaremos la variable real de tu ViewModel
+                    lastSyncDate = "Pendiente de sincronizar",
                     onCajaClick = { caja -> cajaViewModel.selectCaja(caja.id) },
                     onSyncClick = { /* Lógica de Retrofit pendiente */ },
-                    onLogoutClick = { onLogout() }, // ¡Desata el cierre de sesión en MainActivity!
+                    onLogoutClick = { onLogout() },
                     onMenuClick = { scope.launch { drawerState.open() } }
                 )
             }

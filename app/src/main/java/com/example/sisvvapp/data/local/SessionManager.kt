@@ -35,8 +35,17 @@ class SessionManager private constructor(context: Context) {
     fun getUserId(): Int = prefs.getInt(KEY_USER_ID, -1)
 
     fun clearSession() {
+        // Al limpiar sesión, queremos mantener la preferencia del tema
+        val currentTheme = getThemeMode()
         prefs.edit().clear().commit()
+        saveThemeMode(currentTheme)
     }
+
+    fun saveThemeMode(mode: Int) {
+        prefs.edit().putInt(KEY_THEME_MODE, mode).apply()
+    }
+
+    fun getThemeMode(): Int = prefs.getInt(KEY_THEME_MODE, 0) // 0 = Sistema, 1 = Claro, 2 = Oscuro
 
     fun isLoggedIn(): Boolean = getToken() != null
 
@@ -47,6 +56,7 @@ class SessionManager private constructor(context: Context) {
         private const val PREFS_NAME = "sisvv_prefs"
         private const val KEY_TOKEN = "token"
         private const val KEY_USER_ID = "user_id"
+        private const val KEY_THEME_MODE = "theme_mode"
 
         fun getInstance(context: Context): SessionManager =
             INSTANCE ?: synchronized(this) {
