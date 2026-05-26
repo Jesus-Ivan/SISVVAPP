@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private const val BASE_URL = "https://plain-zoos-fail.loca.lt/api"
+    private const val BASE_URL = "https://plain-zoos-fail.loca.lt/api/"
 
     private var apiService: ApiService? = null
 
@@ -45,6 +45,14 @@ object RetrofitClient {
             chain.proceed(request)
         }
 
+        val authResponseInterceptor = Interceptor { chain ->
+            val response = chain.proceed(chain.request())
+            if (response.code == 401) {
+                sessionManager.clearSession()
+            }
+            response
+        }
+
         val isDebug = context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
 
         val client = OkHttpClient.Builder()
@@ -55,6 +63,7 @@ object RetrofitClient {
                 }
             }
             .addInterceptor(authInterceptor)
+            .addInterceptor(authResponseInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
