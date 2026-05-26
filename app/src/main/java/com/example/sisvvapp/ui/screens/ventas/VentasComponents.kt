@@ -27,8 +27,8 @@ fun VistaVerdeSaleCard(
     val esAbierta = venta.estatus.equals("Abierta", ignoreCase = true)
     val isDark = isSystemInDarkTheme()
 
-    val colorTextoPrincipal = if (isDark) TextoPrincipalOscuro else TextoPrincipalClaro
-    val colorTextoSecundario = if (isDark) TextoSecundarioOscuro else TextoSecundarioClaro
+    val colorFolioFecha = if (isDark) TextoSecundarioOscuro else TextoSecundarioClaro
+    val colorNombreSocio = if (isDark) TextoPrincipalOscuro else TextoPrincipalClaro
     val colorTotal = if (isDark) VerdePremiumDark else VerdePrincipal
 
     VistaVerdeBaseCard(modifier = modifier) {
@@ -40,20 +40,20 @@ fun VistaVerdeSaleCard(
                 Text(
                     text = "Folio: ${venta.folio}",
                     fontSize = 11.sp,
-                    color = colorTextoSecundario
+                    color = colorFolioFecha
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "${venta.socioId ?: "N/A"} - ${venta.nombreCliente}",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
-                    color = colorTextoPrincipal
+                    color = colorNombreSocio
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "${venta.fecha ?: "Sin fecha"} | ${venta.hora}",
                     fontSize = 11.sp,
-                    color = colorTextoSecundario
+                    color = colorFolioFecha
                 )
             }
 
