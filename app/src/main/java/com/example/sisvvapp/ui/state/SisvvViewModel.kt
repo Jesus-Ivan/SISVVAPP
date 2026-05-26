@@ -63,13 +63,23 @@ class SisvvViewModel(
     // ── Logout ──────────────────────────────────────────────────────────────
 
     fun logout() {
-        sessionManager.clearSession()
-        loginSuccess = false
-        loginError = null
-        try {
-            WorkManager.getInstance(context).cancelAllWork()
-        } catch (e: Exception) {
-            Log.e("LOGOUT", "Error al cancelar WorkManager", e)
+        viewModelScope.launch {
+            try {
+                if (isNetworkAvailable()) {
+                    api.logout()
+                }
+            } catch (e: Exception) {
+                Log.e("LOGOUT", "Error al llamar logout API", e)
+            } finally {
+                sessionManager.clearSession()
+                loginSuccess = false
+                loginError = null
+                try {
+                    WorkManager.getInstance(context).cancelAllWork()
+                } catch (e: Exception) {
+                    Log.e("LOGOUT", "Error al cancelar WorkManager", e)
+                }
+            }
         }
     }
 
