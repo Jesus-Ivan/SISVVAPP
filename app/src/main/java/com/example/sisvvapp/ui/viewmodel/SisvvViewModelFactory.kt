@@ -36,13 +36,6 @@ class SisvvViewModelFactory(
             modelClass.isAssignableFrom(VentasViewModel::class.java) ->
                 VentasViewModel(VentaRepository(api, db.ventaColaDao())) as T
 
-            modelClass.isAssignableFrom(NuevaVentaViewModel::class.java) ->
-                NuevaVentaViewModel(
-                    ProductoRepository(api, db.productoDao()),
-                    SocioRepository(api, db.socioDao()),
-                    VentaRepository(api, db.ventaColaDao())
-                ) as T
-
             else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }
     }

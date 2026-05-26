@@ -20,14 +20,12 @@ import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.screens.caja.CajaScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
 import com.example.sisvvapp.ui.screens.socios.SociosScreen
-import com.example.sisvvapp.ui.screens.ventas.NuevaVentaScreen
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
 import com.example.sisvvapp.ui.screens.ajustes.AjustesScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
 import com.example.sisvvapp.ui.viewmodel.CajaViewModel
-import com.example.sisvvapp.ui.viewmodel.NuevaVentaViewModel
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.viewmodel.SociosViewModel
 import com.example.sisvvapp.ui.viewmodel.VentasViewModel
@@ -118,35 +116,7 @@ fun MainContainer(
                     onVentaClick = { _ ->
                     },
                     onNuevaVentaClick = {
-                        navController.navigate(ScreenRoutes.NUEVA_VENTA)
                     }
-                )
-            }
-
-            // --- 4.1 NUEVA VENTA (FLUJO MULTI-PASO) ---
-            composable(ScreenRoutes.NUEVA_VENTA) {
-                val context = LocalContext.current
-                val nuevaVentaViewModel: NuevaVentaViewModel = viewModel(factory = SisvvViewModelFactory(context))
-                val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
-
-                val cajas by cajaViewModel.cajas.collectAsState()
-                val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
-
-                LaunchedEffect(selectedCajaId, cajas) {
-                    val cajaId = selectedCajaId
-                    if (cajaId != null) {
-                        val caja = cajas.find { it.id == cajaId }
-                        if (caja != null) {
-                            nuevaVentaViewModel.corteCaja = caja.id
-                            nuevaVentaViewModel.nombreCaja = caja.nombre
-                            nuevaVentaViewModel.clavePuntoVenta = caja.nombre
-                        }
-                    }
-                }
-
-                NuevaVentaScreen(
-                    viewModel = nuevaVentaViewModel,
-                    onBack = { navController.popBackStack() }
                 )
             }
 
