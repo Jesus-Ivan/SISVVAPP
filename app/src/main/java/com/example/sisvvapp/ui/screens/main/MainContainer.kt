@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -21,6 +22,7 @@ import com.example.sisvvapp.ui.screens.caja.CajaScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
 import com.example.sisvvapp.ui.screens.socios.SociosScreen
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
+import com.example.sisvvapp.R
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
