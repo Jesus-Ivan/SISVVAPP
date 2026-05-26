@@ -19,7 +19,6 @@ import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
-import com.example.sisvvapp.ui.screens.socios.SociosList
 import com.example.sisvvapp.ui.theme.Inter
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
@@ -36,7 +35,7 @@ fun CajaScreen(
     onContinueClick: (Int) -> Unit
 ) {
     VistaVerdeScaffold(
-        title = stringResource(R.string.caja_title_select),
+        title = stringResource(R.string.caja_section_open),
         onMenuClick = onMenuClick,
         isOnline = isOnline
     ) {
@@ -46,7 +45,7 @@ fun CajaScreen(
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            VistaVerdeSectionHeader(text = stringResource(R.string.caja_section_open))
+            VistaVerdeSectionHeader(text = stringResource(R.string.caja_title_select))
             Spacer(modifier = Modifier.height(8.dp))
 
             if (isLoading) {

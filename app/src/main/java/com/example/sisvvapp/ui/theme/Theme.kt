@@ -7,52 +7,66 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// 1. ESQUEMA OSCURO
 private val DarkColorScheme = darkColorScheme(
-    primary = VerdePrincipalOscuro,
-    onPrimary = FondoAppOscuro,
-    background = FondoAppOscuro,
-    surface = FondoCardsOscuro,
-    surfaceVariant = FondoInputOscuro,
-    onSurface = TextoPrincipalOscuro,
-    onSurfaceVariant = TextoSecundarioOscuro,
+    // Colores Principales
+    primary = VerdePremiumDark,
+    onPrimary = Grey950,
+    primaryContainer = VerdePremiumSoft,
+    onPrimaryContainer = VerdePremiumDark,
 
-    // Usamos estos roles para los banners de conexión dinámicos
-    primaryContainer = EstadoExitoOscuro,
-    onPrimaryContainer = Color.White,
-    errorContainer = EstadoAlertaOscuro,
-    onErrorContainer = TextoAlertaOscuro
+    // Fondos y Superficies (Jerarquía SaaS)
+    background = Grey900,
+    onBackground = Grey100,
+    surface = Grey850,         // Las tarjetas heredarán este color automáticamente
+    onSurface = Grey100,
+    surfaceVariant = Grey800,  // Inputs y elementos decorativos
+    onSurfaceVariant = Grey400,
+
+    // Bordes y Divisores
+    outline = Grey700,
+    outlineVariant = Grey800,
+
+    // Estados
+    error = RedSaaS,
+    errorContainer = Color(0xFF450A0A),
+    onErrorContainer = RedSaaS,
+    
+    // Mapeo para componentes personalizados (ej. Banners)
+    secondaryContainer = EstadoAlertaOscuro,
+    onSecondaryContainer = TextoAlertaOscuro
 )
 
-// 2. ESQUEMA CLARO (Tus códigos de Figma)
 private val LightColorScheme = lightColorScheme(
     primary = VerdePrincipal,
-    onPrimary = FondoCardsClaro,
-    background = FondoAppClaro,
-    surface = FondoCardsClaro,
-    surfaceVariant = FondoInputClaro,
-    onSurface = TextoPrincipalClaro,
-    onSurfaceVariant = TextoSecundarioClaro,
-
+    onPrimary = Color.White,
     primaryContainer = EstadoExitoClaro,
     onPrimaryContainer = VerdePrincipal,
+
+    background = FondoAppClaro,
+    onBackground = TextoPrincipalClaro,
+    surface = FondoCardsClaro,
+    onSurface = TextoPrincipalClaro,
+    surfaceVariant = Color(0xFFF1F1F4),
+    onSurfaceVariant = TextoSecundarioClaro,
+
+    outline = Color(0xFFE4E4E7),
+    outlineVariant = Color(0xFFF4F4F5),
+
+    error = RedSaaS,
     errorContainer = EstadoAlertaClaro,
     onErrorContainer = Color(0xFF937410)
 )
 
 @Composable
 fun SISVVAPPTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(), // Detecta el modo del sistema automáticamente
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography, // La tipografía local con Poppins e Inter que creamos
+        typography = Typography,
         content = content
     )
 }

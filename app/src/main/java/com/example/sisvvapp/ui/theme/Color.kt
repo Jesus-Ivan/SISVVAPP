@@ -2,58 +2,56 @@ package com.example.sisvvapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ==========================================
-// PALETA DE COLORES VISTA VERDE POS
-// ==========================================
+// ── PALETA DE GRISES PREMIUM (SaaS Estilo) ──────────────────────────
+val Grey950 = Color(0xFF0C0C0E) // Fondo más profundo
+val Grey900 = Color(0xFF121214) // Fondo base
+val Grey850 = Color(0xFF1E1E22) // Superficie de Tarjetas (Elevación 1)
+val Grey800 = Color(0xFF2A2A2F) // Superficie de Inputs / Hover
+val Grey700 = Color(0xFF3F3F46) // Bordes sutiles y Divisores
+val Grey400 = Color(0xFFA1A1AA) // Texto secundario / Deshabilitado
+val Grey100 = Color(0xFFF4F4F5) // Texto Principal en Modo Oscuro
 
-// --- TEMA CLARO (Tus colores de Figma) ---
-val VerdePrincipal = Color(0xFF006D40)
-val FondoAppClaro = Color(0xFFF9FAFB)
+// ── VERDE BRANDING REFINADO ──────────────────────────────────────────
+val VerdePrincipal = Color(0xFF226038)      // Verde Original para Modo Claro
+val VerdePremiumDark = Color(0xFF54D683)    // Verde Esmeralda desaturado (No vibra, brilla)
+val VerdePremiumSoft = Color(0xFF1A3826)    // Contenedor de éxito oscuro (Fondo)
+
+// ── MODO CLARO (EXISTENTE REFINADO) ──────────────────────────────────
+val FondoAppClaro = Color(0xFFF8F9FA)
 val FondoCardsClaro = Color(0xFFFFFFFF)
-val FondoInputClaro = Color(0xFFEDEFF2)
+val TextoPrincipalClaro = Color(0xFF18181B)
+val TextoSecundarioClaro = Color(0xFF71717A)
 
-val TextoPrincipalClaro = Color(0xFF1F2937)
-val TextoSecundarioClaro = Color(0xFF878D98)
+// ── ALERTAS Y ESTADOS (SaaS Palette) ─────────────────────────────────
+val RedSaaS = Color(0xFFEF4444)
+val OrangeSaaS = Color(0xFFF59E0B)
 
-// --- TEMA OSCURO (Equivalentes Premium) ---
-val VerdePrincipalOscuro = Color(0xFF22C55E) // Un verde más vivo para que resalte en la oscuridad
-val FondoAppOscuro = Color(0xFF121212)       // Gris oscuro/carbón para el fondo de la app
-val FondoCardsOscuro = Color(0xFF1E1E1E)     // Gris ligeramente más claro para que las tarjetas "floten"
-val FondoInputOscuro = Color(0xFF2A2B2E)     // Fondo para la barra de búsqueda de noche
+// Colores adicionales para compatibilidad con componentes existentes
+val VerdePrincipalOscuro = VerdePremiumDark
+val FondoAppOscuro = Grey900
+val FondoCardsOscuro = Grey850
+val FondoInputOscuro = Grey800
+val TextoPrincipalOscuro = Grey100
+val TextoSecundarioOscuro = Grey400
+val EstadoExitoOscuro = VerdePremiumSoft
+val TextoExitoOscuro = VerdePremiumDark
+val EstadoAlertaOscuro = Color(0xFF452E00) // Naranja muy profundo para fondo
+val TextoAlertaOscuro = OrangeSaaS
+val EstadoExitoClaro = Color(0xFFDCFCE7)
+val EstadoAlertaClaro = Color(0xFFFEF3C7)
 
-val TextoPrincipalOscuro = Color(0xFFF9FAFB) // Blanco hueso para títulos de noche (no cansa la vista)
-val TextoSecundarioOscuro = Color(0xFF9CA3AF)// Gris claro para subtítulos e IDs
+// Colores de estatus inactivo
+val FondoInactivo = Color(0xFFF1F1F4)
+val TextoInactivo = Color(0xFF71717A)
+val FondoInputClaro = Color(0xFFF1F1F4)
 
-// --- ESTADOS (Banners y Badges comunes) ---
-val EstadoExitoClaro = Color(0xFFC1FFD6)    // Caja cerrada / Banner Conectado
-val EstadoExitoOscuro = Color(0xFF064E3B)   // Verde muy oscuro para fondo de badge de noche
-val TextoExitoOscuro = Color(0xFF4ADE80)    // Texto verde brillante para el badge de noche
-
-val EstadoAlertaClaro = Color(0xFFFFEDBA)   // Banner de No Conexión
-val EstadoAlertaOscuro = Color(0xFF78350F)   // Fondo café/naranja oscuro para alerta de noche
-val TextoAlertaOscuro = Color(0xFFFDE68A)   // Texto amarillo claro para alerta de noche
-
-// --- ESTADOS SOCIO / BADGES ---
-val FondoInactivo = Color(0xFFFCD2D6)
-val TextoInactivo = Color(0xFFFB4A59)
+// Otros colores específicos si se usan
+val FondoAbierta = Color(0xFFE8F5E9)
+val TextoAbierta = Color(0xFF2E7D32)
 val FondoErrorClaro = Color(0xFFFFEBEE)
-val TextoErrorFuerte = Color(0xFFD32F2F)
-
-// --- ESTADOS VENTAS ---
-val FondoAbierta = Color(0xFFFEF3C7)
-val TextoAbierta = Color(0xFF92400E)
-
-// --- BRANDING ---
-val EcoGreenPrimary = Color(0xFF006D40)
-val EcoBackground = Color(0xFFF9FAFB)
-val EcoTextHigh = Color(0xFF1F2937)
-val EcoTextMedium = Color(0xFF878D98)
-val EcoDivider = Color(0xFFE5E7EB)
-
-// --- SPLASH COLORS ---
-val SplashGreenDeep = Color(0xFF1A5C1E)
-val SplashGreenLime = Color(0xFF7EC840)
-val SplashGreenBright = Color(0xFFB8E870)
-val SplashGreenMid = Color(0xFF66BB6A)
-val SplashBallGrayLight = Color(0xFFECECEC)
-val SplashBallGrayDark = Color(0xFFC8C8C8)
+val TextoErrorFuerte = Color(0xFFC62828)
+val SplashGreenDeep = Color(0xFF1B4332)
+val SplashGreenMid = Color(0xFF2D6A4F)
+val SplashGreenLime = Color(0xFF95D5B2)
+val SplashBallGrayLight = Color(0xFFF8F9FA)
+val SplashBallGrayDark = Color(0xFFDEE2E6)
