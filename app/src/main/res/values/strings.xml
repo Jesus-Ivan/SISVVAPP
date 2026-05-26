@@ -53,7 +53,13 @@
     <string name="splash_status_welcome">¡Bienvenido!</string>
     <string name="common_logo_desc">Vista Verde Country Club</string>
 
-    <!-- Otros -->
-    <string name="settings_construction">Pantalla de Ajustes en construcción</string>
+    <!-- Ajustes -->
+    <string name="ajustes_title">Ajustes</string>
+    <string name="ajustes_cajas_abiertas">Cajas abiertas</string>
+    <string name="ajustes_sincronizar_datos">Sincronizar datos</string>
+    <string name="ajustes_sync_desc">Esta acción sincronizará la información del servidor</string>
+    <string name="ajustes_btn_actualizar">Actualizar Datos</string>
+    <string name="ajustes_ultima_act">Última actualización:\n%1$s</string>
+    <string name="ajustes_btn_cerrar_sesion">Cerrar Sesión</string>
 
 </resources>
