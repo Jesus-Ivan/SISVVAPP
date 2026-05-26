@@ -20,9 +20,7 @@ import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.AppNavigationDrawerContent
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.screens.caja.CajaScreen
-import com.example.sisvvapp.ui.screens.login.LoginScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
-import com.example.sisvvapp.ui.screens.socios.SociosScreen
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
@@ -66,10 +64,7 @@ fun MainContainer(
     ) {
         NavHost(navController = navController, startDestination = ScreenRoutes.CAJA) {
 
-
-
-
-            // --- 3. PANTALLA DE CAJA  ---
+            // --- 2. PANTALLA DE CAJA  ---
             composable(ScreenRoutes.CAJA) {
                 val context = LocalContext.current
                 val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
