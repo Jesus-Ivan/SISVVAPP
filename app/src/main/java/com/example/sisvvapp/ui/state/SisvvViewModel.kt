@@ -60,6 +60,28 @@ class SisvvViewModel(
         sessionManager.saveThemeMode(mode)
     }
 
+    // ── Network State ───────────────────────────────────────────────────────
+
+    var isOnline by mutableStateOf(isNetworkAvailable())
+        private set
+
+    init {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkRequest = android.net.NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+
+        connectivityManager.registerNetworkCallback(networkRequest, object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: android.net.Network) {
+                isOnline = true
+            }
+
+            override fun onLost(network: android.net.Network) {
+                isOnline = false
+            }
+        })
+    }
+
     // ── Logout ──────────────────────────────────────────────────────────────
 
     fun logout() {

@@ -30,13 +30,14 @@ import com.example.sisvvapp.ui.theme.VerdePrincipal
 fun VentasScreen(
     onMenuClick: () -> Unit,
     ventas: List<VentaDto> = emptyList(),
+    isOnline: Boolean = true,
     onVentaClick: (VentaDto) -> Unit = {},
     onNuevaVentaClick: () -> Unit = {}
 ) {
     VistaVerdeScaffold(
         title = stringResource(R.string.ventas_title),
         onMenuClick = onMenuClick,
-        showConnectionBanner = true,
+        isOnline = isOnline,
         actions = {
             IconButton(onClick = { /* Lógica de búsqueda */ }) {
                 Icon(Icons.Default.Search, contentDescription = stringResource(R.string.ventas_search_desc))

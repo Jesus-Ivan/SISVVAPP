@@ -30,6 +30,7 @@ import com.example.sisvvapp.ui.utils.DeviceType
 fun SociosScreen(
     socios: List<SocioEntity>,
     isLoading: Boolean,
+    isOnline: Boolean = true,
     searchQuery: String,
 
     onSearchQueryChange: (String) -> Unit,
@@ -42,7 +43,7 @@ fun SociosScreen(
     VistaVerdeScaffold(
         title = stringResource(R.string.title_socios),
         onMenuClick = onMenuClick,
-        showConnectionBanner = true
+        isOnline = isOnline
 
     ) {
         Column(modifier = Modifier
