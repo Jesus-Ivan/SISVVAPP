@@ -18,9 +18,7 @@ import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.AppNavigationDrawerContent
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.screens.caja.CajaScreen
-import com.example.sisvvapp.ui.screens.login.LoginScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
-import com.example.sisvvapp.ui.screens.splash.SplashScreen
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
@@ -62,31 +60,9 @@ fun MainContainer(
             )
         }
     ) {
-        NavHost(navController = navController, startDestination = ScreenRoutes.SPLASH) {
+        NavHost(navController = navController, startDestination = ScreenRoutes.CAJA) {
 
-            // --- 1. PANTALLA DE SPLASH ---
-            composable(ScreenRoutes.SPLASH) {
-                SplashScreen(
-                    onNavigateToLogin = {
-                        navController.navigate(ScreenRoutes.LOGIN) {
-                            popUpTo(ScreenRoutes.SPLASH) { inclusive = true }
-                        }
-                    }
-                )
-            }
-
-            // --- 2. PANTALLA DE LOGIN ---
-            composable(ScreenRoutes.LOGIN) {
-                LoginScreen(
-                    onLoginSuccess = {
-                        navController.navigate(ScreenRoutes.CAJA) {
-                            popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
-                        }
-                    }
-                )
-            }
-
-            // --- 3. PANTALLA DE CAJA  ---
+            // --- 2. PANTALLA DE CAJA  ---
             composable(ScreenRoutes.CAJA) {
                 val context = LocalContext.current
                 val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
