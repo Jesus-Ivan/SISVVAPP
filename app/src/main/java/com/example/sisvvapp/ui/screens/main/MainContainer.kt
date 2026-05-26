@@ -19,6 +19,7 @@ import com.example.sisvvapp.ui.components.AppNavigationDrawerContent
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.screens.caja.CajaScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
+import com.example.sisvvapp.ui.screens.socios.SociosScreen
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
@@ -99,6 +100,32 @@ fun MainContainer(
                         /* Abrir detalle de la venta */
                     },
                     onNuevaVentaClick = {
+                    }
+                )
+            }
+
+            // --- 4. PANTALLA DE SOCIOS ---
+            composable(ScreenRoutes.SOCIOS) {
+                val context = LocalContext.current
+                val sociosViewModel: SociosViewModel = viewModel(factory = SisvvViewModelFactory(context))
+
+                val socios by sociosViewModel.socios.collectAsState()
+                val isLoading by sociosViewModel.isLoading.collectAsState()
+                var searchQuery by remember { mutableStateOf("") }
+
+                LaunchedEffect(searchQuery) {
+                    if (searchQuery.isBlank()) sociosViewModel.sync()
+                    else sociosViewModel.search(searchQuery)
+                }
+
+                SociosScreen(
+                    socios = socios,
+                    isLoading = isLoading,
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { searchQuery = it },
+                    onMenuClick = { scope.launch { drawerState.open() } },
+                    onSocioClick = { socioId ->
+                        navController.navigate(ScreenRoutes.crearRutaPerfilSocio(socioId))
                     }
                 )
             }
