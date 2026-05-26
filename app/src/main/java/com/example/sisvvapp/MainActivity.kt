@@ -4,9 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 // import androidx.activity.enableEdgeToEdge // Eliminado para respetar la barra de estado
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,17 +27,24 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // enableEdgeToEdge() // Se comenta para respetar la barra de estado del sistema (batería, hora, etc.)
 
         val sessionManager = SessionManager.getInstance(this)
 
         setContent {
-            SISVVAPPTheme(darkTheme = false) {
+            val sisvvViewModel: SisvvViewModel = viewModel(
+                factory = SisvvViewModelFactory(this)
+            )
+
+
+            val isDarkTheme = when (sisvvViewModel.themeMode) {
+                1 -> false // Claro
+                2 -> true  // Oscuro
+                else -> isSystemInDarkTheme() // Sistema (0)
+            }
+
+            SISVVAPPTheme(darkTheme = isDarkTheme) {
                 val navController = rememberNavController()
                 val windowSizeClass = calculateWindowSizeClass(this)
-                val sisvvViewModel: SisvvViewModel = viewModel(
-                    factory = SisvvViewModelFactory(this)
-                )
 
                 NavHost(
                     navController    = navController,

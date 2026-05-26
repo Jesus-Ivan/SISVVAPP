@@ -1,6 +1,8 @@
 package com.example.sisvvapp.ui.screens.caja
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.cajas.CajaDto
+import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.screens.socios.SociosList
@@ -47,8 +50,14 @@ fun CajaScreen(
 
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = VerdePrincipal)
                 }
+            } else if (cajas.isEmpty()) {
+                VistaVerdeEmptyState(
+                    icon = Icons.Default.Inbox,
+                    message = stringResource(R.string.caja_empty_state),
+                    modifier = Modifier.weight(1f)
+                )
             } else {
                 CajasList(
                     cajas = cajas,

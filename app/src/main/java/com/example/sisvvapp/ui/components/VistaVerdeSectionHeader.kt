@@ -29,12 +29,12 @@ fun VistaVerdeSectionHeader(
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             fontFamily = Inter,
-            color = TextoPrincipalClaro
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(4.dp))
         HorizontalDivider(
             thickness = 1.dp,
-            color = VerdePrincipal.copy(alpha = 0.5f)
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
         )
     }
 }
