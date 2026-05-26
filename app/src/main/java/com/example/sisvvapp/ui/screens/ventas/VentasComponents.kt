@@ -50,12 +50,11 @@ fun VistaVerdeSaleCard(
             Column(horizontalAlignment = Alignment.End) {
                 VistaVerdeStatusBadge(
                     text = if (esAbierta) "Abierta" else "Cerrada",
-                    containerColor = if (esAbierta) FondoAbierta else EstadoExitoClaro,
-                    textColor = if (esAbierta) TextoAbierta else VerdePrincipal
+                    containerColor = if (esAbierta) FondoAbierta else EstadoAlertaClaro,
+                    textColor = if (esAbierta) TextoAbierta else OrangeSaaS
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    // Solución: Usamos Locale.US para asegurar el formato consistente
                     text = "TOTAL: $${String.format(Locale.US, "%.2f", venta.total)}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
