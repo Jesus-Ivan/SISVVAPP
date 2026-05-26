@@ -8,7 +8,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -22,7 +21,7 @@ import com.example.sisvvapp.ui.screens.caja.CajaScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
 import com.example.sisvvapp.ui.screens.socios.SociosScreen
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
-import com.example.sisvvapp.R
+import com.example.sisvvapp.ui.screens.ajustes.AjustesScreen // <-- IMPORT NUEVO
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
@@ -33,6 +32,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun MainContainer(
     viewModel: SisvvViewModel? = null,
@@ -65,7 +65,7 @@ fun MainContainer(
     ) {
         NavHost(navController = navController, startDestination = ScreenRoutes.CAJA) {
 
-            // --- 2. PANTALLA DE CAJA  ---
+            // --- 3. PANTALLA DE CAJA  ---
             composable(ScreenRoutes.CAJA) {
                 val context = LocalContext.current
                 val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
@@ -85,7 +85,7 @@ fun MainContainer(
                     isLoading = isLoading,
                     onCajaClick = { id -> cajaViewModel.selectCaja(id) },
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onContinueClick = { cajaId ->
+                    onContinueClick = { _ ->
                         navController.navigate(ScreenRoutes.VENTAS) {
                         }
                     }
@@ -98,7 +98,7 @@ fun MainContainer(
                 VentasScreen(
                     onMenuClick = { scope.launch { drawerState.open() } },
                     ventas = emptyList(),
-                    onVentaClick = { venta ->
+                    onVentaClick = { _ ->
                         /* Abrir detalle de la venta */
                     },
                     onNuevaVentaClick = {
@@ -167,9 +167,26 @@ fun MainContainer(
 
             // --- 6. PANTALLA DE AJUSTES ---
             composable(ScreenRoutes.AJUSTES) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.settings_construction))
+                // Reutilizamos la lógica del CajaViewModel para pintar las cajas aquí también
+                val context = LocalContext.current
+                val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
+
+                val cajas by cajaViewModel.cajas.collectAsState()
+                val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
+
+                val cajasDto = cajas.map { entity ->
+                    CajaDto(entity.id, entity.nombre, entity.fechaApertura, entity.fechaCierre, entity.activo, entity.meseroId)
                 }
+
+                AjustesScreen(
+                    cajas = cajasDto,
+                    selectedCajaId = selectedCajaId,
+                    lastSyncDate = "Pendiente de sincronizar", // Aquí luego le pasaremos la variable real de tu ViewModel
+                    onCajaClick = { caja -> cajaViewModel.selectCaja(caja.id) },
+                    onSyncClick = { /* Lógica de Retrofit pendiente */ },
+                    onLogoutClick = { onLogout() }, // ¡Desata el cierre de sesión en MainActivity!
+                    onMenuClick = { scope.launch { drawerState.open() } }
+                )
             }
         }
     }

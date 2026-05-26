@@ -16,6 +16,7 @@ import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
+import com.example.sisvvapp.ui.screens.socios.SociosList
 import com.example.sisvvapp.ui.theme.Inter
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
@@ -44,18 +45,18 @@ fun CajaScreen(
             VistaVerdeSectionHeader(text = stringResource(R.string.caja_section_open))
             Spacer(modifier = Modifier.height(8.dp))
 
-            Box(modifier = Modifier.weight(1f)
-                .fillMaxWidth(),
-                contentAlignment = Alignment.Center) {
-                if (isLoading && cajas.isEmpty()) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                } else {
-                    CajasList(
-                        cajas = cajas, // Pasamos directamente la lista de DTOs
-                        selectedCajaId = selectedCajaId,
-                        onCajaClick = { caja -> onCajaClick(caja.id) }
-                    )
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
+            } else {
+                CajasList(
+                    cajas = cajas,
+                    selectedCajaId = selectedCajaId,
+                    onCajaClick = { caja ->
+                        onCajaClick(caja.id)
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

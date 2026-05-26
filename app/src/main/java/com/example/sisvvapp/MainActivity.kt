@@ -3,11 +3,10 @@ package com.example.sisvvapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+// import androidx.activity.enableEdgeToEdge // Eliminado para respetar la barra de estado
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,7 +25,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // enableEdgeToEdge() // Se comenta para respetar la barra de estado del sistema (batería, hora, etc.)
 
         val sessionManager = SessionManager.getInstance(this)
 
@@ -38,12 +37,11 @@ class MainActivity : ComponentActivity() {
                     factory = SisvvViewModelFactory(this)
                 )
 
-                // El NavHost arranca en Splash para mostrar la animación Premium
                 NavHost(
                     navController    = navController,
                     startDestination = Screen.Splash.route
                 ) {
-                    // --- 1. PANTALLA DE SPLASH (Animación de Golf) ---
+                    // --- 1. PANTALLA DE SPLASH ---
                     composable(Screen.Splash.route) {
                         SplashScreen(
                             onNavigateToLogin = {
@@ -59,7 +57,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // --- 2. PANTALLA DE LOGIN (State Hoisting aplicado) ---
+                    // --- 2. PANTALLA DE LOGIN ---
                     composable(Screen.Login.route) {
                         val isLoading = sisvvViewModel.isLoading
                         val loginSuccess = sisvvViewModel.loginSuccess
