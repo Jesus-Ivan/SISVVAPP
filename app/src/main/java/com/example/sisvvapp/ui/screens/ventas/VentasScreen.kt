@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Search
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.ventas.VentaDto
+import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
@@ -57,21 +59,29 @@ fun VentasScreen(
                 VistaVerdeSectionHeader(text = stringResource(R.string.ventas_section_recent))
                 Spacer(modifier = Modifier.height(8.dp))
 
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    // 2. EL TRUCO DEL PADDING: Le damos espacio extra abajo a la lista
-                    // para que el último ticket no se esconda detrás del botón flotante
-                    contentPadding = PaddingValues(bottom = 88.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(
-                        items = ventas,
-                        key = { venta -> venta.folio }
-                    ) { venta ->
-                        VistaVerdeSaleCard(
-                            venta = venta,
-                            modifier = Modifier.clickable { onVentaClick(venta) }
-                        )
+                if (ventas.isEmpty()) {
+                    VistaVerdeEmptyState(
+                        icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                        message = stringResource(R.string.ventas_empty_state),
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        // 2. EL TRUCO DEL PADDING: Le damos espacio extra abajo a la lista
+                        // para que el último ticket no se esconda detrás del botón flotante
+                        contentPadding = PaddingValues(bottom = 88.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            items = ventas,
+                            key = { venta -> venta.folio }
+                        ) { venta ->
+                            VistaVerdeSaleCard(
+                                venta = venta,
+                                modifier = Modifier.clickable { onVentaClick(venta) }
+                            )
+                        }
                     }
                 }
             }
