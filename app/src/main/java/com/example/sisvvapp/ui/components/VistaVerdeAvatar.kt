@@ -19,7 +19,7 @@ import com.example.sisvvapp.ui.theme.FondoInputOscuro
 fun VistaVerdeAvatar(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .size(40.dp) // Tamaño estándar para tus tarjetas
+            .size(40.dp)
             .clip(CircleShape)
             .background(FondoInputClaro),
         contentAlignment = Alignment.Center
