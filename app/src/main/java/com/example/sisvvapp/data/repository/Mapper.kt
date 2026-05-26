@@ -35,7 +35,7 @@ fun SocioDto.toIntegranteEntities(): List<IntegranteEntity> = integrantes.map { 
 }
 
 fun ProductoDto.toProductoEntity() = ProductoEntity(
-    id = 0,
+    id = clave,
     clave = clave.toString(),
     descripcion = descripcion,
     precio = costoUnitario,

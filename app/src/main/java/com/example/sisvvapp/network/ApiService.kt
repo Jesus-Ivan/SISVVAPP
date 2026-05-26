@@ -6,8 +6,8 @@ import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.network.dto.productos.GrupoModificadorDto
 import com.example.sisvvapp.network.dto.productos.ProductoDto
 import com.example.sisvvapp.network.dto.socios.SocioDto
-import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.network.dto.ventas.VentaRequest
+import com.example.sisvvapp.network.dto.ventas.VentaResponse
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -33,18 +33,21 @@ interface ApiService {
     suspend fun getCajasActivas(): Response<List<CajaDto>>
 
     @GET("ventas")
-    suspend fun getVentasAbiertas(): Response<List<VentaDto>>
+    suspend fun getVentas(
+        @Query("fecha") fecha: String?,
+        @Query("corte_caja") corteCaja: Int?
+    ): Response<List<VentaResponse>>
 
     @POST("ventas")
     suspend fun crearVenta(
         @Body request: VentaRequest
-    ): Response<VentaDto>
+    ): Response<VentaResponse>
 
     @POST("ventas/{folio}/productos")
     suspend fun appendProductos(
         @Path("folio") folio: Int,
         @Body request: VentaRequest
-    ): Response<VentaDto>
+    ): Response<VentaResponse>
 
     @POST("logout")
     suspend fun logout(): Response<Unit>

@@ -2,6 +2,7 @@ package com.example.sisvvapp.data.repository
 
 import android.util.Log
 import com.example.sisvvapp.data.local.dao.SocioDao
+import com.example.sisvvapp.data.local.dao.SocioWithIntegrantes
 import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.network.ApiService
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +15,9 @@ class SocioRepository(
     fun getSocios(): Flow<List<SocioEntity>> = socioDao.getAllSocios()
 
     fun searchSocios(query: String): Flow<List<SocioEntity>> = socioDao.searchSocios(query)
+
+    suspend fun getSocioConIntegrantes(socioId: Int): SocioWithIntegrantes? =
+        socioDao.getSocioConIntegrantes(socioId)
 
     suspend fun sync(): Result<Unit> = runCatching {
         val response = api.getSocios()

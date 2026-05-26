@@ -3,7 +3,8 @@ package com.example.sisvvapp.data.sync
 import android.content.Context
 import androidx.work.*
 import com.example.sisvvapp.data.local.AppDatabase
-import kotlinx.coroutines.delay
+import com.example.sisvvapp.data.repository.VentaRepository
+import com.example.sisvvapp.network.RetrofitClient
 import java.util.concurrent.TimeUnit
 
 class SyncWorker(
@@ -13,17 +14,17 @@ class SyncWorker(
 
     override suspend fun doWork(): Result {
         val db = AppDatabase.getInstance(applicationContext)
-        val ventaColaDao = db.ventaColaDao()
+        val ventaRepository = VentaRepository(
+            RetrofitClient.create(applicationContext),
+            db.ventaColaDao()
+        )
 
         return try {
-            val pendientes = ventaColaDao.getPendientes()
+            val pendientes = ventaRepository.getPendientes()
             if (pendientes.isEmpty()) return Result.success()
 
             for (venta in pendientes) {
-                // Simulate API call — replace with real Retrofit call in production
-                delay(500)
-                // On success, remove from queue
-                ventaColaDao.deleteById(venta.idTemporal)
+                ventaRepository.enviarVentaOffline(venta)
             }
             Result.success()
         } catch (e: Exception) {

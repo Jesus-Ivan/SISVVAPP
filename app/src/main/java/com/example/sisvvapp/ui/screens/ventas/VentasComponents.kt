@@ -50,8 +50,8 @@ fun VistaVerdeSaleCard(
             Column(horizontalAlignment = Alignment.End) {
                 VistaVerdeStatusBadge(
                     text = if (esAbierta) "Abierta" else "Cerrada",
-                    containerColor = if (esAbierta) FondoAbierta else EstadoAlertaClaro,
-                    textColor = if (esAbierta) TextoAbierta else OrangeSaaS
+                    containerColor = if (esAbierta) EstadoAlertaClaro else  FondoAbierta,
+                    textColor = if (esAbierta) OrangeSaaS  else  TextoAbierta
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(

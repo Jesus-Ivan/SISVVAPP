@@ -47,6 +47,10 @@ class SociosViewModel(
 
     fun getIntegrantesPorSocio(socioId: Int) {
         viewModelScope.launch {
+            val result = socioRepository.getSocioConIntegrantes(socioId)
+            if (result != null) {
+                _integrantes.value = result.integrantes
+            }
         }
     }
 
