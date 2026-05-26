@@ -1,6 +1,7 @@
 package com.example.sisvvapp.ui.screens.ventas
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,6 +25,11 @@ fun VistaVerdeSaleCard(
     modifier: Modifier = Modifier
 ) {
     val esAbierta = venta.estatus.equals("Abierta", ignoreCase = true)
+    val isDark = isSystemInDarkTheme()
+
+    val colorFolioFecha = if (isDark) TextoSecundarioOscuro else TextoSecundarioClaro
+    val colorNombreSocio = if (isDark) TextoPrincipalOscuro else TextoPrincipalClaro
+    val colorTotal = if (isDark) VerdePremiumDark else VerdePrincipal
 
     VistaVerdeBaseCard(modifier = modifier) {
         Row(
@@ -31,34 +37,40 @@ fun VistaVerdeSaleCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Folio: ${venta.folio}", fontSize = 11.sp, color = TextoSecundarioClaro)
+                Text(
+                    text = "Folio: ${venta.folio}",
+                    fontSize = 11.sp,
+                    color = colorFolioFecha
+                )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "${venta.socioId ?: "N/A"} - ${venta.nombreCliente}",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
-                    color = TextoPrincipalClaro
+                    color = colorNombreSocio
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "${venta.fecha ?: "Sin fecha"} | ${venta.hora}",
                     fontSize = 11.sp,
-                    color = TextoSecundarioClaro
+                    color = colorFolioFecha
                 )
             }
 
             Column(horizontalAlignment = Alignment.End) {
                 VistaVerdeStatusBadge(
                     text = if (esAbierta) "Abierta" else "Cerrada",
-                    containerColor = if (esAbierta) EstadoAlertaClaro else  FondoAbierta,
-                    textColor = if (esAbierta) OrangeSaaS  else  TextoAbierta
+                    containerColor = if (esAbierta) (if (isDark) EstadoAlertaOscuro else EstadoAlertaClaro)
+                    else (if (isDark) EstadoExitoOscuro else FondoAbierta),
+                    textColor = if (esAbierta) (if (isDark) TextoAlertaOscuro else TextoAbierta)
+                    else (if (isDark) TextoExitoOscuro else VerdePrincipal)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "TOTAL: $${String.format(Locale.US, "%.2f", venta.total)}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
-                    color = VerdePrincipal
+                    color = colorTotal
                 )
             }
         }
