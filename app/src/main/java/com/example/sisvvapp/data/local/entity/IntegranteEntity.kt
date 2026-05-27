@@ -22,6 +22,8 @@ data class IntegranteEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: Int,
     @ColumnInfo(name = "socio_id") val socioId: Int,
     @ColumnInfo(name = "nombre") val nombre: String,
+    @ColumnInfo(name = "apellido_p") val apellidoP: String?,
+    @ColumnInfo(name = "apellido_m") val apellidoM: String?,
     @ColumnInfo(name = "parentesco") val parentesco: String,
     @ColumnInfo(name = "foto_url") val fotoUrl: String?
 )

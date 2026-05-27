@@ -1,30 +1,30 @@
 package com.example.sisvvapp.ui.screens.socios
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import com.example.sisvvapp.ui.utils.getDeviceType
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
-import com.example.sisvvapp.ui.components.VistaVerdeScaffold
-import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.data.local.entity.SocioEntity
+import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
+import com.example.sisvvapp.ui.components.VistaVerdeScaffold
+import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.theme.VerdePrincipal
 import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.getDeviceType
 
 @Composable
 fun SociosScreen(
@@ -32,24 +32,24 @@ fun SociosScreen(
     isLoading: Boolean,
     isOnline: Boolean = true,
     searchQuery: String,
-
+    errorMessage: String? = null,
     onSearchQueryChange: (String) -> Unit,
     onMenuClick: () -> Unit,
-    onSocioClick: (Int) -> Unit
+    onSocioClick: (Int) -> Unit,
+    onRetry: () -> Unit = {}
 ) {
-
     val isTablet = getDeviceType() == DeviceType.TABLET
 
     VistaVerdeScaffold(
         title = stringResource(R.string.title_socios),
         onMenuClick = onMenuClick,
         isOnline = isOnline
-
     ) {
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = if (isTablet) 24.dp else 16.dp)
-            .widthIn(max = if (isTablet) 700.dp else 400.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = if (isTablet) 24.dp else 16.dp)
+                .widthIn(max = if (isTablet) 700.dp else 400.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             VistaVerdeSectionHeader(text = stringResource(R.string.socios_section_search))
@@ -64,7 +64,34 @@ fun SociosScreen(
 
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = com.example.sisvvapp.ui.theme.VerdePrincipal)
+                    CircularProgressIndicator(color = VerdePrincipal)
+                }
+            } else if (errorMessage != null && socios.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.CloudOff,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = errorMessage,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(24.dp))
+                        OutlinedButton(
+                            onClick = onRetry,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Reintentar")
+                        }
+                    }
                 }
             } else if (socios.isEmpty()) {
                 VistaVerdeEmptyState(
@@ -95,12 +122,12 @@ fun SociosScreenPreview() {
         SocioEntity(
             id = 1, nombre = "Cristian", apellidoP = "Meza", apellidoM = "García",
             telefono = null, email = null, firmaAutorizada = true,
-            estatus = "Activo", fotoUrl = "", membresiaTipo = "Gold"
+            estatus = "Activo", fotoUrl = "", numAccion = null, membresiaTipo = "Gold"
         ),
         SocioEntity(
             id = 2, nombre = "Juan", apellidoP = "Pérez", apellidoM = "López",
             telefono = null, email = null, firmaAutorizada = false,
-            estatus = "Inactivo", fotoUrl = "", membresiaTipo = "Silver"
+            estatus = "Inactivo", fotoUrl = "", numAccion = null, membresiaTipo = "Silver"
         )
     )
 

@@ -60,7 +60,7 @@ fun PerfilSocioScreen(
                                 .padding(vertical = 24.dp, horizontal = 16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            VistaVerdeAvatar(modifier = Modifier.size(80.dp))
+                            VistaVerdeAvatar(fotoUrl = socio.fotoUrl, modifier = Modifier.size(80.dp))
 
                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -131,8 +131,13 @@ fun IntegranteCard(integrante: IntegranteEntity) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
+                val nombreCompleto = buildString {
+                    append(integrante.nombre)
+                    if (!integrante.apellidoP.isNullOrBlank()) append(" ${integrante.apellidoP}")
+                    if (!integrante.apellidoM.isNullOrBlank()) append(" ${integrante.apellidoM}")
+                }.ifBlank { integrante.parentesco }
                 Text(
-                    text = "#${integrante.id} - ${integrante.nombre}",
+                    text = nombreCompleto,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     color = TextoPrincipalClaro
@@ -144,7 +149,9 @@ fun IntegranteCard(integrante: IntegranteEntity) {
                     color = TextoSecundarioClaro
                 )
             }
-            VistaVerdeAvatar()
+            if (!integrante.fotoUrl.isNullOrBlank()) {
+                VistaVerdeAvatar(fotoUrl = integrante.fotoUrl)
+            }
         }
     }
 }
@@ -155,13 +162,13 @@ fun PerfilSocioScreenPreview() {
     val mockSocio = SocioEntity(
         id = 1832, nombre = "Cristian", apellidoP = "Meza", apellidoM = "",
         telefono = null, email = null, firmaAutorizada = true,
-        estatus = "Activo", fotoUrl = "", membresiaTipo = "Familiar"
+        estatus = "Activo", fotoUrl = "", numAccion = null, membresiaTipo = "Familiar"
     )
 
     val mockIntegrantes = listOf(
         // 3. CORRECCIÓN: Agregamos fotoUrl = "" a los integrantes del Preview
-        IntegranteEntity(id = 1833, socioId = 1832, nombre = "Alejandro Ramírez", parentesco = "Hijo", fotoUrl = ""),
-        IntegranteEntity(id = 1834, socioId = 1832, nombre = "David López", parentesco = "Hijo", fotoUrl = "")
+        IntegranteEntity(id = 1833, socioId = 1832, nombre = "Alejandro Ramírez", apellidoP = null, apellidoM = null, parentesco = "Hijo", fotoUrl = ""),
+        IntegranteEntity(id = 1834, socioId = 1832, nombre = "David López", apellidoP = null, apellidoM = null, parentesco = "Hijo", fotoUrl = "")
     )
 
     SISVVAPPTheme {

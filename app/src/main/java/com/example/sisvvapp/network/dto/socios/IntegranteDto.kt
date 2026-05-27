@@ -4,7 +4,9 @@ import com.google.gson.annotations.SerializedName
 
 data class IntegranteDto(
     val id: Int?,
-    val nombre: String,
-    val parentesco: String,
+    val nombre: String?,
+    @SerializedName("apellido_p") val apellidoP: String?,
+    @SerializedName("apellido_m") val apellidoM: String?,
+    val parentesco: String?,
     @SerializedName("img_path") val fotoUrl: String?
 )

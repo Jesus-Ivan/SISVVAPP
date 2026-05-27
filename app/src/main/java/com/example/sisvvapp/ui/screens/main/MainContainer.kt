@@ -127,6 +127,7 @@ fun MainContainer(
 
                 val socios by sociosViewModel.socios.collectAsState()
                 val isLoading by sociosViewModel.isLoading.collectAsState()
+                val errorMessage by sociosViewModel.error.collectAsState()
 
                 var searchQuery by remember { mutableStateOf("") }
 
@@ -135,6 +136,7 @@ fun MainContainer(
                     isLoading = isLoading,
                     isOnline = viewModel?.isOnline ?: true,
                     searchQuery = searchQuery,
+                    errorMessage = errorMessage,
                     onSearchQueryChange = { query ->
                         searchQuery = query
                         sociosViewModel.search(query)
@@ -142,7 +144,8 @@ fun MainContainer(
                     onMenuClick = { scope.launch { drawerState.open() } },
                     onSocioClick = { socioId ->
                         navController.navigate(ScreenRoutes.crearRutaPerfilSocio(socioId))
-                    }
+                    },
+                    onRetry = { sociosViewModel.sync() }
                 )
             }
 
