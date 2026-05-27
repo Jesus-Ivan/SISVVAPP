@@ -17,17 +17,24 @@ import com.example.sisvvapp.R
 import com.example.sisvvapp.ui.theme.*
 import kotlinx.coroutines.delay
 
+object BannerSessionTracker {
+    var hasShownConnectedThisSession by mutableStateOf(false)
+}
+
 @Composable
 fun VistaVerdeConnectivityBanner(
     isOnline: Boolean
 ) {
     var showConnected by remember { mutableStateOf(false) }
 
-    // Lógica para mostrar "Conectado" solo temporalmente cuando vuelve la red
     LaunchedEffect(isOnline) {
-        if (isOnline) {
+        if (!isOnline) {
+            showConnected = false
+            BannerSessionTracker.hasShownConnectedThisSession = false
+        } else if (!BannerSessionTracker.hasShownConnectedThisSession) {
             showConnected = true
-            delay(3000) // Se oculta tras 3 segundos
+            BannerSessionTracker.hasShownConnectedThisSession = true
+            delay(3000)
             showConnected = false
         } else {
             showConnected = false
