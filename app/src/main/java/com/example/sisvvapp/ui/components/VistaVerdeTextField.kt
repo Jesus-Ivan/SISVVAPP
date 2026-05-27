@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.ui.theme.Inter
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 @Composable
@@ -41,6 +42,7 @@ fun VistaVerdeTextField(
     // CORRECCIÓN: Le quitamos el "on" para que sea el fondo gris claro
     bgColor: Color = MaterialTheme.colorScheme.surfaceVariant
 ) {
+    val scale = LocalScaleFactor.current
     var passwordVisible by remember{mutableStateOf(false)}
 
     TextField(
@@ -54,7 +56,7 @@ fun VistaVerdeTextField(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(12.dp * scale),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = bgColor,
             unfocusedContainerColor = bgColor,

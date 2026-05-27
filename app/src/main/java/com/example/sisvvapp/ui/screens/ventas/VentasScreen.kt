@@ -23,6 +23,7 @@ import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
 
@@ -47,16 +48,17 @@ fun VentasScreen(
             }
         }
     ) {
+        val scale = LocalScaleFactor.current
         Box(modifier = Modifier.fillMaxSize()) {
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp * scale)
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp * scale))
                 VistaVerdeSectionHeader(text = stringResource(R.string.ventas_section_recent))
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp * scale))
 
                 if (ventas.isEmpty()) {
                     VistaVerdeEmptyState(
@@ -67,8 +69,8 @@ fun VentasScreen(
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 88.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        contentPadding = PaddingValues(bottom = 88.dp * scale),
+                        verticalArrangement = Arrangement.spacedBy(12.dp * scale)
                     ) {
                         items(
                             items = ventas,
@@ -88,15 +90,15 @@ fun VentasScreen(
                 onClick = onNuevaVentaClick,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(16.dp),
+                    .padding(16.dp * scale),
                 containerColor = VerdePrincipal,
                 contentColor = Color.White,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp * scale)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = stringResource(R.string.ventas_new_sale_desc),
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(28.dp * scale)
                 )
             }
         }

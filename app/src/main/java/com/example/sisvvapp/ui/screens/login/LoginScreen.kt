@@ -38,6 +38,7 @@ import com.example.sisvvapp.ui.components.VistaVerdeButton
 import com.example.sisvvapp.ui.components.VistaVerdeTextField
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.Inter
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.Poppins
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
@@ -48,6 +49,7 @@ fun LoginScreen(
     serverError: String? = null,
     onLoginClick: (String, String) -> Unit = { _, _ -> }
 ) {
+    val scale = LocalScaleFactor.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var localError by remember { mutableStateOf("") }
@@ -56,7 +58,7 @@ fun LoginScreen(
     val inputModifier = Modifier
         .shadow(
             elevation = 4.dp,
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(12.dp * scale),
             clip = false
         )
         .fillMaxWidth()
@@ -69,43 +71,40 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 24.dp * scale)
             .wrapContentWidth(Alignment.CenterHorizontally),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = 450.dp)
+                .widthIn(max = 450.dp * scale)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // LOGO
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = stringResource(id = R.string.login_logo_desc),
                 modifier = Modifier
                     .fillMaxWidth(1f)
-                    .padding(bottom = 50.dp)
+                    .padding(bottom = 50.dp * scale)
             )
-            // TITULO PRINCIPAL
             Text(
                 text = stringResource(id = R.string.login_title),
                 fontFamily = Poppins,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 32.sp,
+                fontSize = 32.sp * scale,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp * scale)
             )
             Text(
                 text = stringResource(id = R.string.login_subtitle),
                 fontFamily = Inter,
                 fontWeight = FontWeight.Normal,
-                fontSize = 14.sp,
+                fontSize = 14.sp * scale,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = 32.dp * scale)
             )
-            // INPUT EMAIL
             VistaVerdeTextField(
                 value = email,
                 onValueChange = { email = it; localError = "" },
@@ -114,9 +113,8 @@ fun LoginScreen(
                 modifier = inputModifier,
                 bgColor = MaterialTheme.colorScheme.surface
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp * scale))
 
-            // INPUT PASSWORD
             VistaVerdeTextField(
                 value = password,
                 onValueChange = { password = it; localError = "" },
@@ -125,7 +123,7 @@ fun LoginScreen(
                 modifier = inputModifier,
                 bgColor = MaterialTheme.colorScheme.surface
             )
-            Spacer(modifier = Modifier.height((32.dp)))
+            Spacer(modifier = Modifier.height(32.dp * scale))
 
             val errorMsg = localError.ifEmpty { serverError ?: "" }
 
@@ -133,8 +131,8 @@ fun LoginScreen(
                 Text(
                     text = errorMsg,
                     color = MaterialTheme.colorScheme.error,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    fontSize = 12.sp * scale,
+                    modifier = Modifier.padding(bottom = 16.dp * scale)
                 )
             }
 

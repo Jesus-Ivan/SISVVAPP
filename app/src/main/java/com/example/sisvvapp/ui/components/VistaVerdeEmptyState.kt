@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.ui.theme.Inter
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
 
@@ -26,33 +27,34 @@ fun VistaVerdeEmptyState(
     actionText: String? = null,
     onActionClick: (() -> Unit)? = null
 ) {
+    val scale = LocalScaleFactor.current
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(32.dp),
+            .padding(32.dp * scale),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = "Estado vacío",
-            modifier = Modifier.size(80.dp),
+            modifier = Modifier.size(80.dp * scale),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp * scale))
 
         Text(
             text = message,
             fontFamily = Inter,
-            fontSize = 15.sp,
+            fontSize = 15.sp * scale,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            lineHeight = 22.sp,
+            lineHeight = 22.sp * scale,
             fontWeight = FontWeight.Medium
         )
         if (actionText != null && onActionClick != null) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp * scale))
             OutlinedButton(
                 onClick = onActionClick,
                 colors = ButtonDefaults.outlinedButtonColors(

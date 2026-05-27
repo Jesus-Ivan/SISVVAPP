@@ -20,6 +20,7 @@ import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.theme.Inter
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
 
@@ -34,6 +35,7 @@ fun CajaScreen(
     onMenuClick: () -> Unit,
     onContinueClick: (Int) -> Unit
 ) {
+    val scale = LocalScaleFactor.current
     VistaVerdeScaffold(
         title = stringResource(R.string.caja_section_open),
         onMenuClick = onMenuClick,
@@ -42,11 +44,11 @@ fun CajaScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp * scale)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp * scale))
             VistaVerdeSectionHeader(text = stringResource(R.string.caja_title_select))
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp * scale))
 
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -68,14 +70,14 @@ fun CajaScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp * scale))
 
             Button(
                 onClick = { selectedCajaId?.let { onContinueClick(it) } },
                 enabled = selectedCajaId != null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
+                    .height(54.dp * scale),
                 colors = ButtonDefaults.buttonColors(containerColor = VerdePrincipal),
                 shape = MaterialTheme.shapes.medium
             ) {
@@ -84,12 +86,12 @@ fun CajaScreen(
                     style = TextStyle(
                         fontFamily = Inter,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp,
+                        fontSize = 16.sp * scale,
                         color = Color.White
                     )
                 )
             }
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp * scale))
         }
     }
 }

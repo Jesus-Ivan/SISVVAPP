@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction
 
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 @Composable
@@ -27,12 +28,13 @@ fun VistaVerdeSearchBar(
     modifier: Modifier = Modifier,
     placeholder: String = "Buscar..."
 ) {
+    val scale = LocalScaleFactor.current
     TextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
-            .height(50.dp),
+            .height(50.dp * scale),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         placeholder = {
             Text(
@@ -48,7 +50,7 @@ fun VistaVerdeSearchBar(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(28.dp * scale),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,

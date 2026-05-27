@@ -18,6 +18,7 @@ import com.example.sisvvapp.R
 import com.example.sisvvapp.data.local.entity.IntegranteEntity
 import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.ui.components.*
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.*
 
 @Composable
@@ -27,6 +28,7 @@ fun PerfilSocioScreen(
     isOnline: Boolean = true,
     onBackClick: () -> Unit
 ) {
+    val scale = LocalScaleFactor.current
     VistaVerdeScaffold(
         title = stringResource(R.string.perfil_socio_title),
         onMenuClick = onBackClick,
@@ -42,14 +44,14 @@ fun PerfilSocioScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(bottom = 32.dp)
+                    .padding(horizontal = 16.dp * scale),
+                contentPadding = PaddingValues(bottom = 32.dp * scale)
             ) {
 
                 item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp * scale))
                     VistaVerdeSectionHeader(text = stringResource(R.string.perfil_socio_section_details))
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp * scale))
                 }
 
                 item {
@@ -57,12 +59,12 @@ fun PerfilSocioScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 24.dp, horizontal = 16.dp),
+                                .padding(vertical = 24.dp * scale, horizontal = 16.dp * scale),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            VistaVerdeAvatar(fotoUrl = socio.fotoUrl, modifier = Modifier.size(125.dp))
+                            VistaVerdeAvatar(fotoUrl = socio.fotoUrl, modifier = Modifier.size(125.dp * scale))
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(16.dp * scale))
 
                             Text(
                                 text = listOfNotNull(
@@ -71,35 +73,35 @@ fun PerfilSocioScreen(
                                     socio.apellidoM.takeIf { it.isNotBlank() }
                                 ).joinToString(" "),
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
+                                fontSize = 18.sp * scale,
                                 color = TextoPrincipalClaro
                             )
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(12.dp * scale))
 
                             Text(
                                 text = "Estado membresia: ${socio.estatus}",
-                                fontSize = 13.sp,
+                                fontSize = 13.sp * scale,
                                 color = TextoSecundarioClaro
                             )
 
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(4.dp * scale))
 
                             Text(
                                 text = "Tipo membresia: ${socio.membresiaTipo}",
-                                fontSize = 13.sp,
+                                fontSize = 13.sp * scale,
                                 color = TextoSecundarioClaro
                             )
 
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(4.dp * scale))
 
                             Text(
                                 text = "No.Socio: ${socio.id}",
-                                fontSize = 13.sp,
+                                fontSize = 13.sp * scale,
                                 color = TextoSecundarioClaro
                             )
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(12.dp * scale))
 
                             if (socio.estatus == "CAN") {
                                 VistaVerdeStatusBadge(
@@ -115,13 +117,13 @@ fun PerfilSocioScreen(
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(6.dp * scale))
                             Text(
                                 text = if (socio.firmaAutorizada)
                                     stringResource(R.string.perfil_socio_firma_autorizada)
                                 else
                                     stringResource(R.string.perfil_socio_firma_no_autorizada),
-                                fontSize = 13.sp,
+                                fontSize = 13.sp * scale,
                                 color = if (socio.firmaAutorizada) VerdePrincipal else TextoSecundarioClaro,
                                 fontWeight = if (socio.firmaAutorizada) FontWeight.Medium else FontWeight.Normal
                             )
@@ -130,9 +132,9 @@ fun PerfilSocioScreen(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp * scale))
                     VistaVerdeSectionHeader(text = stringResource(R.string.perfil_socio_section_members))
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp * scale))
                 }
 
                 items(
@@ -140,7 +142,7 @@ fun PerfilSocioScreen(
                     key = { it.id }
                 ) { integrante ->
                     IntegranteCard(integrante)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp * scale))
                 }
             }
         }
@@ -149,11 +151,12 @@ fun PerfilSocioScreen(
 
 @Composable
 fun IntegranteCard(integrante: IntegranteEntity) {
+    val scale = LocalScaleFactor.current
     VistaVerdeBaseCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp * scale),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -166,13 +169,13 @@ fun IntegranteCard(integrante: IntegranteEntity) {
                 Text(
                     text = nombreCompleto,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
+                    fontSize = 15.sp * scale,
                     color = TextoPrincipalClaro
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(4.dp * scale))
                 Text(
                     text = integrante.parentesco,
-                    fontSize = 13.sp,
+                    fontSize = 13.sp * scale,
                     color = TextoSecundarioClaro
                 )
             }

@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.*
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
@@ -24,6 +25,7 @@ fun VistaVerdeSaleCard(
     venta: VentaDto,
     modifier: Modifier = Modifier
 ) {
+    val scale = LocalScaleFactor.current
     val esAbierta = venta.estatus.equals("Abierta", ignoreCase = true)
     val isDark = isSystemInDarkTheme()
 
@@ -33,26 +35,26 @@ fun VistaVerdeSaleCard(
 
     VistaVerdeBaseCard(modifier = modifier) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp * scale),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Folio: ${venta.folio}",
-                    fontSize = 11.sp,
+                    fontSize = 11.sp * scale,
                     color = colorFolioFecha
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(6.dp * scale))
                 Text(
                     text = "${venta.socioId ?: "N/A"} - ${venta.nombreCliente}",
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
+                    fontSize = 15.sp * scale,
                     color = colorNombreSocio
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(6.dp * scale))
                 Text(
                     text = "${venta.fecha ?: "Sin fecha"} | ${venta.hora}",
-                    fontSize = 11.sp,
+                    fontSize = 11.sp * scale,
                     color = colorFolioFecha
                 )
             }
@@ -65,11 +67,11 @@ fun VistaVerdeSaleCard(
                     textColor = if (esAbierta) (if (isDark) TextoAlertaOscuro else TextoAbierta)
                     else (if (isDark) TextoExitoOscuro else VerdePrincipal)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp * scale))
                 Text(
                     text = "TOTAL: $${String.format(Locale.US, "%.2f", venta.total)}",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
+                    fontSize = 15.sp * scale,
                     color = colorTotal
                 )
             }
@@ -79,9 +81,10 @@ fun VistaVerdeSaleCard(
 
 @Composable
 fun VentasList(ventas: List<VentaDto>, onVentaClick: (VentaDto) -> Unit) {
+    val scale = LocalScaleFactor.current
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(16.dp * scale),
+        verticalArrangement = Arrangement.spacedBy(12.dp * scale)
     ) {
         items(items = ventas, key = {venta -> venta.folio}) { venta ->
             VistaVerdeSaleCard(

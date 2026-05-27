@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -21,13 +22,13 @@ import kotlinx.coroutines.delay
 fun VistaVerdeConnectivityBanner(
     isOnline: Boolean
 ) {
+    val scale = LocalScaleFactor.current
     var showConnected by remember { mutableStateOf(false) }
 
-    // Lógica para mostrar "Conectado" solo temporalmente cuando vuelve la red
     LaunchedEffect(isOnline) {
         if (isOnline) {
             showConnected = true
-            delay(3000) // Se oculta tras 3 segundos
+            delay(3000)
             showConnected = false
         } else {
             showConnected = false
@@ -63,7 +64,7 @@ fun VistaVerdeConnectivityBanner(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(backgroundColor)
-                .padding(vertical = 6.dp, horizontal = 16.dp),
+                .padding(vertical = 6.dp * scale, horizontal = 16.dp * scale),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -71,7 +72,7 @@ fun VistaVerdeConnectivityBanner(
                 color = textColor,
                 fontFamily = Inter,
                 fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
+                fontSize = 12.sp * scale,
                 letterSpacing = 0.5.sp
             )
         }
@@ -83,12 +84,13 @@ fun VistaVerdeBanner(
     text: String,
     isError: Boolean = false
 ) {
+    val scale = LocalScaleFactor.current
     val backgroundColor = if (isError) {
         MaterialTheme.colorScheme.errorContainer
     } else {
         MaterialTheme.colorScheme.primaryContainer
     }
-    
+
     val textColor = if (isError) {
         MaterialTheme.colorScheme.onErrorContainer
     } else {
@@ -99,7 +101,7 @@ fun VistaVerdeBanner(
         modifier = Modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .padding(vertical = 8.dp, horizontal = 16.dp),
+            .padding(vertical = 8.dp * scale, horizontal = 16.dp * scale),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -107,7 +109,7 @@ fun VistaVerdeBanner(
             color = textColor,
             fontFamily = Inter,
             fontWeight = FontWeight.Medium,
-            fontSize = 12.sp
+            fontSize = 12.sp * scale
         )
     }
 }

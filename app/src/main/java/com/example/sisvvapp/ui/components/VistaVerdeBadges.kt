@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.ui.theme.Inter
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 //Badge de estado (ventas/socios)
@@ -29,6 +30,7 @@ fun VistaVerdeStatusBadge(
     containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
     textColor: Color = MaterialTheme.colorScheme.onPrimaryContainer
 ) {
+    val scale = LocalScaleFactor.current
     Surface(
         color = containerColor,
         shape = RoundedCornerShape(50),
@@ -40,7 +42,7 @@ fun VistaVerdeStatusBadge(
             fontWeight = FontWeight.SemiBold,
             color = textColor,
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+            modifier = Modifier.padding(horizontal = 12.dp * scale, vertical = 4.dp * scale)
         )
     }
 }
@@ -51,14 +53,15 @@ fun VistaVerdeCounterBadge(
     count: Int,
     modifier: Modifier = Modifier
 ) {
+    val scale = LocalScaleFactor.current
     Surface(
         color = MaterialTheme.colorScheme.primary,
         shape = CircleShape,
-        modifier = modifier.defaultMinSize(minWidth = 20.dp, minHeight = 20.dp)
+        modifier = modifier.defaultMinSize(minWidth = 20.dp * scale, minHeight = 20.dp * scale)
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+            modifier = Modifier.padding(horizontal = 6.dp * scale, vertical = 2.dp * scale)
         ) {
             Text(
                 text = count.toString(),

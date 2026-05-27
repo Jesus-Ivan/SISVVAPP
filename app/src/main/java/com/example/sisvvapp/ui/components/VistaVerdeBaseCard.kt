@@ -9,15 +9,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 
 @Composable
 fun VistaVerdeBaseCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    val scale = LocalScaleFactor.current
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(12.dp * scale),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface

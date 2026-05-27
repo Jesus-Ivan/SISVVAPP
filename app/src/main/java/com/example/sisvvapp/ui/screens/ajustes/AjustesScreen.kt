@@ -26,6 +26,7 @@ import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.screens.caja.VistaVerdeCajaCard
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.TextoSecundarioClaro
 import com.example.sisvvapp.ui.theme.VerdePrincipal
@@ -41,6 +42,7 @@ fun AjustesScreen(
     onLogoutClick: () -> Unit,
     onMenuClick: () -> Unit
 ) {
+    val scale = LocalScaleFactor.current
     VistaVerdeScaffold(
         title = stringResource(id = R.string.ajustes_title),
         onMenuClick = onMenuClick,
@@ -48,8 +50,8 @@ fun AjustesScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp * scale, vertical = 16.dp * scale),
+            verticalArrangement = Arrangement.spacedBy(16.dp * scale)
         ) {
 
             // --- 1. SECCIÓN: CAJAS ABIERTAS ---
@@ -59,11 +61,11 @@ fun AjustesScreen(
 
             if (cajas.isEmpty()) {
                 item {
-                    VistaVerdeEmptyState(
-                        icon = Icons.Default.Inbox,
-                        message = stringResource(R.string.ajustes_cajas_empty),
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
-                    )
+                VistaVerdeEmptyState(
+                    icon = Icons.Default.Inbox,
+                    message = stringResource(R.string.ajustes_cajas_empty),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp * scale)
+                )
                 }
             } else {
                 items(items = cajas, key = { it.id }) { caja ->
@@ -77,7 +79,7 @@ fun AjustesScreen(
 
             // --- 2. SECCIÓN: SINCRONIZAR DATOS ---
             item {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp * scale))
                 VistaVerdeSectionHeader(text = stringResource(id = R.string.ajustes_sincronizar_datos))
             }
 
@@ -86,47 +88,46 @@ fun AjustesScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(16.dp * scale),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = stringResource(id = R.string.ajustes_sync_desc),
-                            fontSize = 13.sp,
+                            fontSize = 13.sp * scale,
                             color = TextoSecundarioClaro,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            modifier = Modifier.padding(bottom = 16.dp * scale)
                         )
 
                         Button(
                             onClick = onSyncClick,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(50.dp),
+                                .height(50.dp * scale),
                             colors = ButtonDefaults.buttonColors(containerColor = VerdePrincipal),
                             shape = MaterialTheme.shapes.medium
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
                                 contentDescription = stringResource(id = R.string.ajustes_btn_actualizar),
-                                modifier = Modifier.padding(end = 8.dp)
+                                modifier = Modifier.padding(end = 8.dp * scale)
                             )
                             Text(
                                 text = stringResource(id = R.string.ajustes_btn_actualizar),
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
+                                fontSize = 15.sp * scale,
                                 color = Color.White
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp * scale))
 
-                        // Pasamos la variable al stringResource para que la inyecte dinámicamente
                         Text(
                             text = stringResource(id = R.string.ajustes_ultima_act, lastSyncDate),
-                            fontSize = 12.sp,
+                            fontSize = 12.sp * scale,
                             color = TextoSecundarioClaro,
                             textAlign = TextAlign.Center,
-                            lineHeight = 18.sp
+                            lineHeight = 18.sp * scale
                         )
                     }
                 }
@@ -134,13 +135,13 @@ fun AjustesScreen(
 
             // --- 3. SECCIÓN: CERRAR SESIÓN ---
             item {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp * scale))
                 VistaVerdeBaseCard(modifier = Modifier.fillMaxWidth()) {
                     OutlinedButton(
                         onClick = onLogoutClick,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(54.dp),
+                            .height(54.dp * scale),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = Color(0xFFFF5252)
                         ),
@@ -150,12 +151,12 @@ fun AjustesScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = stringResource(id = R.string.ajustes_btn_cerrar_sesion),
-                            modifier = Modifier.padding(end = 8.dp)
+                            modifier = Modifier.padding(end = 8.dp * scale)
                         )
                         Text(
                             text = stringResource(id = R.string.ajustes_btn_cerrar_sesion),
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 16.sp
+                            fontSize = 16.sp * scale
                         )
                     }
                 }

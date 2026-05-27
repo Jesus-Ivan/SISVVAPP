@@ -21,25 +21,37 @@ val Inter = FontFamily(
 )
 
 val Typography = Typography(
-
-    // Títulos grandes
     titleLarge = TextStyle(
         fontFamily = Poppins,
         fontWeight = FontWeight.Bold,
         fontSize = 22.sp
     ),
-
-    // Textos normales, descripciones, campos de texto
     bodyLarge = TextStyle(
         fontFamily = Inter,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
     ),
-
-    // Botones, Badges, Etiquetas
     labelLarge = TextStyle(
         fontFamily = Inter,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp
+    )
+)
+
+fun scaleTypography(scale: Float): Typography = Typography(
+    titleLarge = TextStyle(
+        fontFamily = Poppins,
+        fontWeight = FontWeight.Bold,
+        fontSize = (22 * scale).sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.Normal,
+        fontSize = (16 * scale).sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.Medium,
+        fontSize = (14 * scale).sp
     )
 )

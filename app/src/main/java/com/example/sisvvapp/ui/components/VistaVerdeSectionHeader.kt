@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.ui.theme.Inter
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.*
 
 
@@ -23,7 +24,8 @@ fun VistaVerdeSectionHeader(
     text: String,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+    val scale = LocalScaleFactor.current
+    Column(modifier = modifier.fillMaxWidth().padding(vertical = 8.dp * scale)) {
         Text(
             text = text,
             style = MaterialTheme.typography.titleMedium,
@@ -31,7 +33,7 @@ fun VistaVerdeSectionHeader(
             fontFamily = Inter,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(4.dp * scale))
         HorizontalDivider(
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)

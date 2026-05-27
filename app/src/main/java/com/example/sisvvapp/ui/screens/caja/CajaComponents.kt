@@ -12,42 +12,44 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.*
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 
 @Composable
-fun VistaVerdeCajaCard( // Renombrado para consistencia
+fun VistaVerdeCajaCard(
     caja: CajaDto,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val scale = LocalScaleFactor.current
     VistaVerdeBaseCard(
         modifier = Modifier.clickable { onClick() }
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp * scale),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "#${caja.id} - ${caja.nombre}",
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp, // Alineado con tus otros componentes
-                    color = TextoPrincipalClaro // Estilo unificado
+                    fontSize = 15.sp * scale,
+                    color = TextoPrincipalClaro
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(4.dp * scale))
                 Text(
                     text = "${caja.fechaApertura}",
                     fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp,
-                    color = TextoSecundarioClaro // Estilo unificado
+                    fontSize = 12.sp * scale,
+                    color = TextoSecundarioClaro
                 )
                 Text(
                     text = "Cajero: ${caja.meseroId ?: "N/A"}",
                     fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp,
-                    color = TextoSecundarioClaro // Estilo unificado
+                    fontSize = 12.sp * scale,
+                    color = TextoSecundarioClaro
                 )
             }
             RadioButton(
@@ -60,9 +62,10 @@ fun VistaVerdeCajaCard( // Renombrado para consistencia
 
 @Composable
 fun CajasList(cajas: List<CajaDto>, selectedCajaId: Int?, onCajaClick: (CajaDto) -> Unit) {
+    val scale = LocalScaleFactor.current
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(16.dp * scale),
+        verticalArrangement = Arrangement.spacedBy(12.dp * scale)
     ) {
         items(items= cajas, key ={caja -> caja.id}) { caja ->
             VistaVerdeCajaCard(

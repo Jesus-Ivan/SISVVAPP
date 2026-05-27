@@ -16,6 +16,7 @@ import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.ui.components.VistaVerdeAvatar
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeStatusBadge
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.*
 
 @Composable
@@ -23,6 +24,7 @@ fun VistaVerdeSocioCard(
     socio: SocioEntity,
     modifier: Modifier = Modifier
 ) {
+    val scale = LocalScaleFactor.current
     val isActive = socio.estatus == "MEN"
     val membresiaTexto = socio.membresiaTipo ?: "Sin membresía"
 
@@ -30,7 +32,7 @@ fun VistaVerdeSocioCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp * scale),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -40,7 +42,7 @@ fun VistaVerdeSocioCard(
                     text = "#${socio.id} - ${socio.nombre} ${socio.apellidoP}",
                     fontFamily = Inter,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
+                    fontSize = 15.sp * scale,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
@@ -48,18 +50,17 @@ fun VistaVerdeSocioCard(
                     Text(
                         text = "Firma Autorizada",
                         fontFamily = Inter,
-                        fontSize = 12.sp,
+                        fontSize = 12.sp * scale,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(top = 2.dp)
+                        modifier = Modifier.padding(top = 2.dp * scale)
                     )
                 }
-                // CORRECCIÓN: Como la membresía está en otra tabla, usamos un texto fijo por ahora
                 Text(
                     text = membresiaTexto,
                     fontFamily = Inter,
-                    fontSize = 12.sp,
+                    fontSize = 12.sp * scale,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 2.dp)
+                    modifier = Modifier.padding(top = 2.dp * scale)
                 )
             }
             // --- COLUMNA DERECHA ---
@@ -68,7 +69,7 @@ fun VistaVerdeSocioCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 VistaVerdeAvatar(fotoUrl = socio.fotoUrl)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp * scale))
                 VistaVerdeStatusBadge(
                     text = if (isActive) "PERMITIDO" else "DENEGADO",
                     containerColor = if (isActive) EstadoExitoClaro else FondoErrorClaro,
@@ -82,9 +83,10 @@ fun VistaVerdeSocioCard(
 
 @Composable
 fun SociosList(socios: List<SocioEntity>, onSocioClick: (SocioEntity) -> Unit) {
+    val scale = LocalScaleFactor.current
     LazyColumn(
-        contentPadding = PaddingValues(vertical=16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(vertical = 16.dp * scale),
+        verticalArrangement = Arrangement.spacedBy(12.dp * scale)
     ) {
         items(items=socios, key={socio -> socio.id}) { socio ->
             VistaVerdeSocioCard(

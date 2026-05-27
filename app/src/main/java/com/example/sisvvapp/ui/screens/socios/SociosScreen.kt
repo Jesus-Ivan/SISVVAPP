@@ -21,6 +21,7 @@ import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
 import com.example.sisvvapp.ui.utils.DeviceType
@@ -38,6 +39,7 @@ fun SociosScreen(
     onSocioClick: (Int) -> Unit,
     onRetry: () -> Unit = {}
 ) {
+    val scale = LocalScaleFactor.current
     val isTablet = getDeviceType() == DeviceType.TABLET
 
     VistaVerdeScaffold(
@@ -48,19 +50,19 @@ fun SociosScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = if (isTablet) 24.dp else 16.dp)
-                .widthIn(max = if (isTablet) 700.dp else 400.dp)
+                .padding(horizontal = if (isTablet) 24.dp * scale else 16.dp * scale)
+                .widthIn(max = if (isTablet) 700.dp * scale else 400.dp * scale)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp * scale))
             VistaVerdeSectionHeader(text = stringResource(R.string.socios_section_search))
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp * scale))
 
             VistaVerdeSearchBar(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
                 placeholder = stringResource(R.string.socios_search_placeholder)
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(4.dp * scale))
 
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -72,23 +74,23 @@ fun SociosScreen(
                         Icon(
                             Icons.Default.CloudOff,
                             contentDescription = null,
-                            modifier = Modifier.size(64.dp),
+                            modifier = Modifier.size(64.dp * scale),
                             tint = MaterialTheme.colorScheme.error
                         )
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(16.dp * scale))
                         Text(
                             text = errorMessage,
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(Modifier.height(24.dp))
+                        Spacer(Modifier.height(24.dp * scale))
                         OutlinedButton(
                             onClick = onRetry,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp * scale)
                         ) {
                             Icon(Icons.Default.Refresh, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
+                            Spacer(Modifier.width(8.dp * scale))
                             Text("Reintentar")
                         }
                     }

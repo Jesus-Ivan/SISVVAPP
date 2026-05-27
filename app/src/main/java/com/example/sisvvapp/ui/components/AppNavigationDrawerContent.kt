@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.state.SisvvViewModel
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.*
 
 data class DrawerItem(val route: String, val title: String, val icon: ImageVector)
@@ -38,15 +39,16 @@ fun AppNavigationDrawerContent(
         DrawerItem(ScreenRoutes.AJUSTES, stringResource(R.string.menu_ajustes), Icons.Default.Settings)
     )
 
+    val scale = LocalScaleFactor.current
     ModalDrawerSheet(
-        modifier = Modifier.width(300.dp),
+        modifier = Modifier.width(300.dp * scale),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerContentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(24.dp)
+                .padding(24.dp * scale)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
@@ -54,11 +56,11 @@ fun AppNavigationDrawerContent(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = 8.dp * scale)
             )
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp * scale))
 
             Column(modifier = Modifier.weight(1f)) {
                 items.forEach { item ->
@@ -75,7 +77,7 @@ fun AppNavigationDrawerContent(
                                 style = TextStyle(
                                     fontFamily = Inter,
                                     fontWeight = FontWeight.SemiBold,
-                                    fontSize = 15.sp
+                                    fontSize = 15.sp * scale
                                 )
                             )
                         },
@@ -86,7 +88,7 @@ fun AppNavigationDrawerContent(
                             selectedTextColor = MaterialTheme.colorScheme.primary,
                             unselectedTextColor = MaterialTheme.colorScheme.onSurface
                         ),
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        modifier = Modifier.padding(vertical = 4.dp * scale)
                     )
                 }
             }
@@ -94,23 +96,23 @@ fun AppNavigationDrawerContent(
             // --- SECCIÓN DE TEMA AL FINAL ---
             if (viewModel != null) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp * scale))
 
                 Text(
                     text = "Apariencia",
                     style = TextStyle(
                         fontFamily = Inter,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp,
+                        fontSize = 14.sp * scale,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(bottom = 12.dp * scale)
                 )
 
                 val themeMode = viewModel.themeMode
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp * scale)
                 ) {
                     ThemeOptionSmall(
                         icon = Icons.Default.AutoMode,
@@ -146,16 +148,17 @@ fun ThemeOptionSmall(
     val containerColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
     val contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
 
+    val scale = LocalScaleFactor.current
     FilledIconButton(
         onClick = onClick,
         colors = IconButtonDefaults.filledIconButtonColors(
             containerColor = containerColor,
             contentColor = contentColor
         ),
-        modifier = modifier.height(40.dp),
+        modifier = modifier.height(40.dp * scale),
         shape = MaterialTheme.shapes.small
     ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp * scale))
     }
 }
 

@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.sisvvapp.ui.theme.LocalScaleFactor
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 @Composable
@@ -29,13 +30,14 @@ fun VistaVerdeButton(
     leftIcon: ImageVector? = null,
     rightIcon: ImageVector? = null
 ) {
+    val scale = LocalScaleFactor.current
     Button(
        onClick = onClick,
         modifier = modifier
         .fillMaxWidth()
-        .height(56.dp),
+        .height(56.dp * scale),
         enabled = enabled,
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(12.dp * scale),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -50,7 +52,7 @@ fun VistaVerdeButton(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(8.dp * scale))
         }
         Text(
             text = text,
