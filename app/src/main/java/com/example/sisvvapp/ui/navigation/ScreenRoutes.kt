@@ -7,6 +7,7 @@ object ScreenRoutes {
     const val VENTAS = "ventas"
     const val SOCIOS = "socios"
     const val AJUSTES = "ajustes"
+    const val NUEVA_VENTA = "nueva_venta"
 
     const val PERFIL_SOCIO = "perfil_socio/{socioId}"
 

@@ -67,7 +67,7 @@ fun VistaVerdeSocioCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                VistaVerdeAvatar()
+                VistaVerdeAvatar(fotoUrl = socio.fotoUrl)
                 Spacer(modifier = Modifier.height(8.dp))
                 VistaVerdeStatusBadge(
                     text = if (isActive) "Activo" else "Inactivo",
@@ -111,6 +111,7 @@ fun SocioCardPreview() {
             firmaAutorizada = true,
             estatus = "Activo",
             fotoUrl = "",
+            numAccion = null,
             membresiaTipo = "Familiar"
         )
 
@@ -135,6 +136,7 @@ fun SociosListPreview() {
                 firmaAutorizada = true,
                 estatus = "Activo",
                 fotoUrl = "",
+                numAccion = null,
                 membresiaTipo = "Parejas"
             ),
             SocioEntity(
@@ -147,6 +149,7 @@ fun SociosListPreview() {
                 firmaAutorizada = false,
                 estatus = "Inactivo",
                 fotoUrl = "",
+                numAccion = null,
                 membresiaTipo = "Familiar"
             )
         )

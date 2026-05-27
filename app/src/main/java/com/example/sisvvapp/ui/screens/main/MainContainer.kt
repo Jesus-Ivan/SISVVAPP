@@ -21,13 +21,14 @@ import com.example.sisvvapp.ui.screens.caja.CajaScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
 import com.example.sisvvapp.ui.screens.socios.SociosScreen
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
-import com.example.sisvvapp.ui.screens.ajustes.AjustesScreen // <-- IMPORT NUEVO
+import com.example.sisvvapp.ui.screens.ajustes.AjustesScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
 import com.example.sisvvapp.ui.viewmodel.CajaViewModel
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.viewmodel.SociosViewModel
+import com.example.sisvvapp.ui.viewmodel.VentasViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
@@ -96,13 +97,23 @@ fun MainContainer(
 
             // --- 4. PANTALLA DE VENTAS  ---
             composable(ScreenRoutes.VENTAS) {
+                val context = LocalContext.current
+                val ventasViewModel: VentasViewModel = viewModel(factory = SisvvViewModelFactory(context))
+
+                val ventas by ventasViewModel.ventas.collectAsState()
+                val isLoading by ventasViewModel.isLoading.collectAsState()
+                val error by ventasViewModel.error.collectAsState()
+
+                LaunchedEffect(Unit) {
+                    val today = java.time.LocalDate.now().toString()
+                    ventasViewModel.loadVentas(today)
+                }
 
                 VentasScreen(
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    ventas = emptyList(),
+                    ventas = ventas,
                     isOnline = viewModel?.isOnline ?: true,
                     onVentaClick = { _ ->
-                        /* Abrir detalle de la venta */
                     },
                     onNuevaVentaClick = {
                     }
@@ -116,6 +127,7 @@ fun MainContainer(
 
                 val socios by sociosViewModel.socios.collectAsState()
                 val isLoading by sociosViewModel.isLoading.collectAsState()
+                val errorMessage by sociosViewModel.error.collectAsState()
 
                 var searchQuery by remember { mutableStateOf("") }
 
@@ -124,6 +136,7 @@ fun MainContainer(
                     isLoading = isLoading,
                     isOnline = viewModel?.isOnline ?: true,
                     searchQuery = searchQuery,
+                    errorMessage = errorMessage,
                     onSearchQueryChange = { query ->
                         searchQuery = query
                         sociosViewModel.search(query)
@@ -131,7 +144,8 @@ fun MainContainer(
                     onMenuClick = { scope.launch { drawerState.open() } },
                     onSocioClick = { socioId ->
                         navController.navigate(ScreenRoutes.crearRutaPerfilSocio(socioId))
-                    }
+                    },
+                    onRetry = { sociosViewModel.sync() }
                 )
             }
 

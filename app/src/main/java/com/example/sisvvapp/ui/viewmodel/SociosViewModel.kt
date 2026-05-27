@@ -24,6 +24,9 @@ class SociosViewModel(
     private val _integrantes = MutableStateFlow<List<IntegranteEntity>>(emptyList())
     val integrantes: StateFlow<List<IntegranteEntity>> = _integrantes.asStateFlow()
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
     init {
         observeSocios()
         sync()
@@ -38,8 +41,9 @@ class SociosViewModel(
     }
 
     fun search(query: String) {
+        _error.value = null
         viewModelScope.launch {
-            socioRepository.searchSocios(query).collect { lista ->
+            socioRepository.searchSocios("%$query%").collect { lista ->
                 _socios.value = lista
             }
         }
@@ -47,19 +51,27 @@ class SociosViewModel(
 
     fun getIntegrantesPorSocio(socioId: Int) {
         viewModelScope.launch {
+            val result = socioRepository.getSocioConIntegrantes(socioId)
+            Log.d("SociosVM", "getIntegrantesPorSocio($socioId) → ${result?.integrantes?.size} integrantes, socio=${result?.socio?.nombre}")
+            if (result != null) {
+                _integrantes.value = result.integrantes
+            }
         }
     }
 
     fun sync() {
         viewModelScope.launch {
             _isLoading.value = true
-            try {
-                socioRepository.sync()
-            } catch (e: Exception) {
-                Log.e("SociosVM", "Sync falló", e)
-            } finally {
-                _isLoading.value = false
-            }
+            _error.value = null
+            val result = socioRepository.sync()
+            result.fold(
+                onSuccess = { Log.d("SociosVM", "Sync exitoso") },
+                onFailure = { e ->
+                    _error.value = e.message ?: "Error al sincronizar socios"
+                    Log.e("SociosVM", "Sync falló", e)
+                }
+            )
+            _isLoading.value = false
         }
     }
 }

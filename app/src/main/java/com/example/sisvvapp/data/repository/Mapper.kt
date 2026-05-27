@@ -1,5 +1,6 @@
 package com.example.sisvvapp.data.repository
 
+import android.util.Log
 import com.example.sisvvapp.data.local.entity.CajaActivaEntity
 import com.example.sisvvapp.data.local.entity.IntegranteEntity
 import com.example.sisvvapp.data.local.entity.ModificadorEntity
@@ -14,28 +15,32 @@ import com.example.sisvvapp.network.dto.socios.SocioDto
 fun SocioDto.toSocioEntity() = SocioEntity(
     id = id,
     nombre = nombre,
-    apellidoP = apellidoP,
-    apellidoM = apellidoM,
+    apellidoP = apellidoP ?: "",
+    apellidoM = apellidoM ?: "",
     telefono = null,
     email = null,
     firmaAutorizada = firma,
     estatus = membresia?.estado ?: "Inactivo",
     fotoUrl = imgPath,
+    numAccion = numAccion,
     membresiaTipo = membresia?.clave ?: "Sin membresía"
 )
 
-fun SocioDto.toIntegranteEntities(): List<IntegranteEntity> = integrantes.map { int ->
+fun SocioDto.toIntegranteEntities(): List<IntegranteEntity> = integrantes.mapIndexed { index, int ->
+    Log.d("MAPPER", "Integrante: id=${int.id}, nombre='${int.nombre}', apellidoP='${int.apellidoP}', apellidoM='${int.apellidoM}', parentesco='${int.parentesco}', fotoUrl=${int.fotoUrl}")
     IntegranteEntity(
-        id = int.id ?: 0,
+        id = int.id ?: -(index + 1),
         socioId = id,
-        nombre = int.nombre,
-        parentesco = int.parentesco,
+        nombre = int.nombre ?: "",
+        apellidoP = int.apellidoP,
+        apellidoM = int.apellidoM,
+        parentesco = int.parentesco ?: "",
         fotoUrl = int.fotoUrl
     )
 }
 
 fun ProductoDto.toProductoEntity() = ProductoEntity(
-    id = 0,
+    id = clave,
     clave = clave.toString(),
     descripcion = descripcion,
     precio = costoUnitario,

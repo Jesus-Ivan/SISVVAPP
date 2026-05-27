@@ -24,7 +24,7 @@ interface SocioDao {
     @Query("SELECT * FROM socios WHERE id = :id")
     suspend fun getSocioConIntegrantes(id: Int): SocioWithIntegrantes?
 
-    @Query("SELECT * FROM socios WHERE nombre LIKE :term OR apellido_p LIKE :term OR apellido_m LIKE :term")
+    @Query("SELECT * FROM socios WHERE id LIKE :term OR nombre LIKE :term OR apellido_p LIKE :term OR apellido_m LIKE :term")
     fun searchSocios(term: String): Flow<List<SocioEntity>>
 
     @Query("SELECT * FROM socios ORDER BY apellido_p, apellido_m, nombre")

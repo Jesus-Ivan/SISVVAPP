@@ -7,6 +7,7 @@ import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.repository.CajaRepository
 import com.example.sisvvapp.data.repository.ProductoRepository
 import com.example.sisvvapp.data.repository.SocioRepository
+import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.network.RetrofitClient
 
@@ -31,6 +32,9 @@ class SisvvViewModelFactory(
 
             modelClass.isAssignableFrom(CajaViewModel::class.java) ->
                 CajaViewModel(CajaRepository(api, db.cajaActivaDao())) as T
+
+            modelClass.isAssignableFrom(VentasViewModel::class.java) ->
+                VentasViewModel(VentaRepository(api, db.ventaColaDao())) as T
 
             else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }

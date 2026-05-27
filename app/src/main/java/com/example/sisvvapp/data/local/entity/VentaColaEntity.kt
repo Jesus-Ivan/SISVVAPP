@@ -9,6 +9,8 @@ data class VentaColaEntity(
     val tipoVenta: String,
     val idSocio: Int?,
     val nombreCliente: String,
+    val corteCaja: Int,
+    val clavePuntoVenta: String,
     val nombreCaja: String,
     val productosJson: String,
     val fechaCreacion: Long,

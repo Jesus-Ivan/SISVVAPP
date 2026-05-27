@@ -15,5 +15,6 @@ data class SocioEntity(
     @ColumnInfo(name = "firma_autorizada") val firmaAutorizada: Boolean,
     @ColumnInfo(name = "estatus") val estatus: String,
     @ColumnInfo(name = "foto_url") val fotoUrl: String?,
+    @ColumnInfo(name = "num_accion") val numAccion: Int?,
     @ColumnInfo(name = "membresia_tipo") val membresiaTipo: String?
 )
