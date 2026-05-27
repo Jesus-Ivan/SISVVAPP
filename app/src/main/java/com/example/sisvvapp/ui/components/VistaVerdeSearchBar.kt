@@ -32,7 +32,7 @@ fun VistaVerdeSearchBar(
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp),
+            .height(50.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         placeholder = {
             Text(

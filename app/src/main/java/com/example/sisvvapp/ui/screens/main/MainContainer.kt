@@ -76,7 +76,6 @@ fun MainContainer(
                 val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
                 val isLoading by cajaViewModel.isLoading.collectAsState()
 
-                // Transformamos Entity a DTO para la UI
                 val cajasDto = cajas.map { entity ->
                     CajaDto(entity.id, entity.nombre, entity.fechaApertura, entity.fechaCierre, entity.activo, entity.meseroId)
                 }
@@ -149,7 +148,7 @@ fun MainContainer(
                 )
             }
 
-            // --- 5.1 NUEVA PANTALLA: PERFIL DEL SOCIO (DETALLE) ---
+            // --- 5.1 PERFIL DEL SOCIO (DETALLE) ---
             composable(
                 route = ScreenRoutes.PERFIL_SOCIO,
                 arguments = listOf(navArgument("socioId") { type = NavType.IntType })
@@ -186,7 +185,6 @@ fun MainContainer(
 
             // --- 6. PANTALLA DE AJUSTES ---
             composable(ScreenRoutes.AJUSTES) {
-                // Reutilizamos la lógica del CajaViewModel para pintar las cajas aquí también
                 val context = LocalContext.current
                 val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
 

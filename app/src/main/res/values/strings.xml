@@ -18,7 +18,7 @@
     <!-- Errores de Validación -->
     <string name="error_empty_fields">Por favor, llena todos los campos.</string>
     <string name="error_invalid_email">Por favor, ingresa un correo válido.</string>
-    <string name="error_short_password">La contraseña debe tener al menos 6 caracteres.</string>
+    <string name="error_short_password">La contraseña debe tener al menos 8 caracteres.</string>
 
     <!-- Pantalla de Caja -->
     <string name="caja_title_select">Selecciona el corte de caja</string>
@@ -47,8 +47,11 @@
     <string name="perfil_socio_section_details">Detalles</string>
     <string name="perfil_socio_status_active">Activo</string>
     <string name="perfil_socio_firma_autorizada">Firma Autorizada</string>
+    <string name="perfil_socio_firma_no_autorizada">Firma No Autorizada</string>
     <string name="perfil_socio_membership_label">Membresía %1$s</string>
     <string name="perfil_socio_section_members">Integrantes</string>
+    <string name="perfil_socio_acceso_permitido">ACCESO PERMITIDO</string>
+    <string name="perfil_socio_acceso_denegado">ACCESO DENEGADO</string>
 
     <!-- Pantalla de Splash -->
     <string name="splash_status_init">Iniciando\u2026</string>
@@ -68,7 +71,12 @@
     <string name="ajustes_btn_cerrar_sesion">Cerrar Sesión</string>
 
     <!-- Banners de Conexión -->
-    <string name="banner_connected">Conexión con el Servidor</string>
+    <string name="banner_connected">Conectado con el servidor</string>
     <string name="banner_offline">Modo sin conexión - Se sincronizará al volver</string>
+
+    <string name="error_no_internet">Error de conexión al servidor.</string>
+    <string name="error_servidor_caido">No se pudo conectar con el servidor. Intenta de nuevo más tarde.</string>
+    <string name="error_inesperado">Ocurrió un error inesperado. Intenta de nuevo.</string>
+    <string name="credenciales_incorrectas">Credenciales Incorrectas</string>
 
 </resources>

@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
+import com.example.sisvvapp.R
 import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.network.ApiService
 import com.example.sisvvapp.network.RetrofitClient
@@ -114,7 +115,7 @@ class SisvvViewModel(
             networkError = null
 
             if (!isNetworkAvailable()) {
-                networkError = "No hay conexión a internet. Verifica tu red e intenta de nuevo"
+                networkError = context.getString(R.string.error_no_internet)
                 isLoading = false
                 return@launch
             }
@@ -131,18 +132,16 @@ class SisvvViewModel(
                         loginSuccess = true
                     }
                 } else {
-                    loginError = "Credenciales Incorrectas"
+                    loginError = context.getString(R.string.credenciales_incorrectas)
                     Log.e("LOGIN", "Error: ${response.code()}")
                 }
             } catch (e: Exception) {
                 networkError = when (e) {
-                    is UnknownHostException,
+                    is UnknownHostException -> context.getString(R.string.error_no_internet)
                     is ConnectException,
                     is SocketTimeoutException,
-                    is SSLException ->
-                        "No hay conexión a internet. Verifica tu red e intenta de nuevo."
-
-                    else -> "Ocurrió un error inesperado. Intenta de nuevo"
+                    is SSLException -> context.getString(R.string.error_servidor_caido)
+                    else -> context.getString(R.string.error_inesperado)
                 }
                 Log.e("LOGIN", "Exeption", e)
             } finally {
