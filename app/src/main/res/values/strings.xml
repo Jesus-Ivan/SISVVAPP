@@ -18,7 +18,7 @@
     <!-- Errores de Validación -->
     <string name="error_empty_fields">Por favor, llena todos los campos.</string>
     <string name="error_invalid_email">Por favor, ingresa un correo válido.</string>
-    <string name="error_short_password">La contraseña debe tener al menos 6 caracteres.</string>
+    <string name="error_short_password">La contraseña debe tener al menos 8 caracteres.</string>
 
     <!-- Pantalla de Caja -->
     <string name="caja_title_select">Selecciona el corte de caja</string>
@@ -71,7 +71,12 @@
     <string name="ajustes_btn_cerrar_sesion">Cerrar Sesión</string>
 
     <!-- Banners de Conexión -->
-    <string name="banner_connected">Conexión con el Servidor</string>
+    <string name="banner_connected">Conectado con el servidor</string>
     <string name="banner_offline">Modo sin conexión - Se sincronizará al volver</string>
+
+    <string name="error_no_internet">Error de conexión al servidor.</string>
+    <string name="error_servidor_caido">No se pudo conectar con el servidor. Intenta de nuevo más tarde.</string>
+    <string name="error_inesperado">Ocurrió un error inesperado. Intenta de nuevo.</string>
+    <string name="credenciales_incorrectas">Credenciales Incorrectas</string>
 
 </resources>

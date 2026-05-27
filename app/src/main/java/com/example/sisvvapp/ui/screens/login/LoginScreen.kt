@@ -61,7 +61,6 @@ fun LoginScreen(
         )
         .fillMaxWidth()
 
-    // Obtenemos los strings de validación aquí para usarlos dentro del onClick
     val errorEmptyFields = stringResource(id = R.string.error_empty_fields)
     val errorInvalidEmail = stringResource(id = R.string.error_invalid_email)
     val errorShortPassword = stringResource(id = R.string.error_short_password)

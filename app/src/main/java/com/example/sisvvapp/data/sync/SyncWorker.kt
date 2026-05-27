@@ -35,7 +35,6 @@ class SyncWorker(
     companion object {
         const val WORK_NAME = "sisvv_sync_worker"
 
-        /** Enqueue a one-time sync request triggered when going back online. */
         fun enqueue(context: Context) {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
