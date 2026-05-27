@@ -23,7 +23,7 @@ fun VistaVerdeSocioCard(
     socio: SocioEntity,
     modifier: Modifier = Modifier
 ) {
-    val isActive = socio.estatus.equals("Activo", ignoreCase = true)
+    val isActive = socio.estatus == "MEN"
     val membresiaTexto = socio.membresiaTipo ?: "Sin membresía"
 
     VistaVerdeBaseCard(modifier = modifier) {
@@ -70,9 +70,9 @@ fun VistaVerdeSocioCard(
                 VistaVerdeAvatar(fotoUrl = socio.fotoUrl)
                 Spacer(modifier = Modifier.height(8.dp))
                 VistaVerdeStatusBadge(
-                    text = if (isActive) "Activo" else "Inactivo",
-                    containerColor = if (isActive) EstadoExitoClaro else FondoInactivo,
-                    textColor = if (isActive) EstadoExitoOscuro else TextoInactivo
+                    text = if (isActive) "PERMITIDO" else "DENEGADO",
+                    containerColor = if (isActive) EstadoExitoClaro else FondoErrorClaro,
+                    textColor = if (isActive) EstadoExitoOscuro else TextoErrorFuerte
                 )
             }
         }
@@ -109,7 +109,7 @@ fun SocioCardPreview() {
             telefono = null,
             email = null,
             firmaAutorizada = true,
-            estatus = "Activo",
+            estatus = "MEN",
             fotoUrl = "",
             numAccion = null,
             membresiaTipo = "Familiar"
@@ -134,7 +134,7 @@ fun SociosListPreview() {
                 telefono = null,
                 email = null,
                 firmaAutorizada = true,
-                estatus = "Activo",
+                estatus = "MEN",
                 fotoUrl = "",
                 numAccion = null,
                 membresiaTipo = "Parejas"
@@ -147,7 +147,7 @@ fun SociosListPreview() {
                 telefono = null,
                 email = null,
                 firmaAutorizada = false,
-                estatus = "Inactivo",
+                estatus = "CAN",
                 fotoUrl = "",
                 numAccion = null,
                 membresiaTipo = "Familiar"

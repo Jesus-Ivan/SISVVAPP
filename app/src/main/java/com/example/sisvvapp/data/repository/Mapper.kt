@@ -12,6 +12,23 @@ import com.example.sisvvapp.network.dto.productos.ProductoDto
 import com.example.sisvvapp.network.dto.socios.IntegranteDto
 import com.example.sisvvapp.network.dto.socios.SocioDto
 
+fun String?.toMembresiaDescripcion(): String? = when (this) {
+    "CG-F" -> "CG-FAMILIAR"
+    "CG-I" -> "CG-INDIVIDUAL"
+    "CG-P" -> "CG-PAREJA"
+    "CG-V-S" -> "CG-VIUDA S.HIJOS"
+    "CG-V-C" -> "CG-VIUDA C.HIJOS"
+    "CC-F" -> "CC-FAMILIAR"
+    "CC-I" -> "CC-INDIVIDUAL"
+    "CC-P" -> "CC-PAREJA"
+    "CC-V-S" -> "CC-VIUDA S.HIJOS"
+    "CC-V-C" -> "CC-VIUDA C.HIJOS"
+    "INT" -> "INTERMITENTE"
+    "EST" -> "ESTABLE"
+    "COR" -> "CORRIDA"
+    else -> this
+}
+
 fun SocioDto.toSocioEntity() = SocioEntity(
     id = id,
     nombre = nombre,
@@ -23,7 +40,7 @@ fun SocioDto.toSocioEntity() = SocioEntity(
     estatus = membresia?.estado ?: "Inactivo",
     fotoUrl = imgPath,
     numAccion = numAccion,
-    membresiaTipo = membresia?.clave ?: "Sin membresía"
+    membresiaTipo = membresia?.clave?.toMembresiaDescripcion() ?: "Sin membresía"
 )
 
 fun SocioDto.toIntegranteEntities(): List<IntegranteEntity> = integrantes.mapIndexed { index, int ->
