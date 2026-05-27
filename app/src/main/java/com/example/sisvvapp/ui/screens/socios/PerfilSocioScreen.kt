@@ -60,7 +60,7 @@ fun PerfilSocioScreen(
                                 .padding(vertical = 24.dp, horizontal = 16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            VistaVerdeAvatar(fotoUrl = socio.fotoUrl, modifier = Modifier.size(80.dp))
+                            VistaVerdeAvatar(fotoUrl = socio.fotoUrl, modifier = Modifier.size(125.dp))
 
                             Spacer(modifier = Modifier.height(16.dp))
 

@@ -22,7 +22,7 @@ import com.example.sisvvapp.ui.utils.ImageUtils
 @Composable
 fun VistaVerdeAvatar(
     fotoUrl: String? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier.size(57.dp)
 ) {
     val urlFinal = remember(fotoUrl) { ImageUtils.sanitizarUrlFoto(fotoUrl) }
 
@@ -32,13 +32,11 @@ fun VistaVerdeAvatar(
             contentDescription = "Avatar",
             contentScale = ContentScale.Crop,
             modifier = modifier
-                .size(40.dp)
                 .clip(CircleShape)
         )
     } else {
         Box(
             modifier = modifier
-                .size(40.dp)
                 .clip(CircleShape)
                 .background(FondoInputClaro),
             contentAlignment = Alignment.Center
@@ -47,7 +45,7 @@ fun VistaVerdeAvatar(
                 imageVector = Icons.Outlined.Person,
                 contentDescription = "Avatar",
                 tint = FondoInputOscuro,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(32.dp)
             )
         }
     }
