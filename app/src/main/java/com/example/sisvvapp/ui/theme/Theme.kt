@@ -11,36 +11,35 @@ private val DarkColorScheme = darkColorScheme(
     // Colores Principales
     primary = VerdePremiumDark,
     onPrimary = Grey950,
-    primaryContainer = VerdePremiumSoft,
-    onPrimaryContainer = VerdePremiumDark,
+    primaryContainer = EstadoExitoOscuro,
+    onPrimaryContainer = TextoExitoOscuro,
 
     // Fondos y Superficies (Jerarquía SaaS)
     background = Grey900,
     onBackground = Grey100,
-    surface = Grey850,         // Las tarjetas heredarán este color automáticamente
+    surface = Grey850,
     onSurface = Grey100,
-    surfaceVariant = Grey800,  // Inputs y elementos decorativos
+    surfaceVariant = Grey800,
     onSurfaceVariant = Grey400,
 
     // Bordes y Divisores
     outline = Grey700,
     outlineVariant = Grey800,
 
-    // Estados
-    error = RedSaaS,
-    errorContainer = Color(0xFF450A0A),
-    onErrorContainer = RedSaaS,
-    
-    // Mapeo para componentes personalizados (ej. Banners)
+    // Alertas y Estados (Mapping Semántico)
     secondaryContainer = EstadoAlertaOscuro,
-    onSecondaryContainer = TextoAlertaOscuro
+    onSecondaryContainer = TextoAlertaOscuro,
+    
+    error = RedSaaS,
+    errorContainer = FondoErrorOscuro,
+    onErrorContainer = TextoErrorOscuro
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = VerdePrincipal,
     onPrimary = Color.White,
-    primaryContainer = EstadoExitoClaro,
-    onPrimaryContainer = VerdePrincipal,
+    primaryContainer = FondoAbierta,
+    onPrimaryContainer = TextoAbierta,
 
     background = FondoAppClaro,
     onBackground = TextoPrincipalClaro,
@@ -52,9 +51,13 @@ private val LightColorScheme = lightColorScheme(
     outline = Color(0xFFE4E4E7),
     outlineVariant = Color(0xFFF4F4F5),
 
+    // Alertas y Estados (Mapping Semántico)
+    secondaryContainer = EstadoAlertaClaro,
+    onSecondaryContainer = Color(0xFF92400E), // Marrón/Naranja oscuro para contraste sobre amarillo
+
     error = RedSaaS,
-    errorContainer = EstadoAlertaClaro,
-    onErrorContainer = Color(0xFF937410)
+    errorContainer = FondoErrorClaro,
+    onErrorContainer = TextoErrorFuerte
 )
 
 @Composable

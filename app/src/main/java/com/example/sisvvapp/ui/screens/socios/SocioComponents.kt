@@ -23,7 +23,7 @@ fun VistaVerdeSocioCard(
     socio: SocioEntity,
     modifier: Modifier = Modifier
 ) {
-    val isActive = socio.estatus == "MEN"
+    val isActive = socio.estatus != "CAN"
     val membresiaTexto = socio.membresiaTipo ?: "Sin membresía"
 
     VistaVerdeBaseCard(modifier = modifier) {
@@ -35,7 +35,10 @@ fun VistaVerdeSocioCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // --- COLUMNA IZQUIERDA ---
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
                     text = "#${socio.id} - ${socio.nombre} ${socio.apellidoP}",
                     fontFamily = Inter,
@@ -53,7 +56,6 @@ fun VistaVerdeSocioCard(
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
-                // CORRECCIÓN: Como la membresía está en otra tabla, usamos un texto fijo por ahora
                 Text(
                     text = membresiaTexto,
                     fontFamily = Inter,
@@ -71,8 +73,8 @@ fun VistaVerdeSocioCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 VistaVerdeStatusBadge(
                     text = if (isActive) "PERMITIDO" else "DENEGADO",
-                    containerColor = if (isActive) EstadoExitoClaro else FondoErrorClaro,
-                    textColor = if (isActive) EstadoExitoOscuro else TextoErrorFuerte
+                    containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer,
+                    textColor = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
                 )
             }
         }

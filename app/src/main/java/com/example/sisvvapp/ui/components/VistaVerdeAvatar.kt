@@ -32,11 +32,13 @@ fun VistaVerdeAvatar(
             contentDescription = "Avatar",
             contentScale = ContentScale.Crop,
             modifier = modifier
+                .size(57.dp)
                 .clip(CircleShape)
         )
     } else {
         Box(
             modifier = modifier
+                .size(57.dp)
                 .clip(CircleShape)
                 .background(FondoInputClaro),
             contentAlignment = Alignment.Center
@@ -45,7 +47,7 @@ fun VistaVerdeAvatar(
                 imageVector = Icons.Outlined.Person,
                 contentDescription = "Avatar",
                 tint = FondoInputOscuro,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(35.dp)
             )
         }
     }
