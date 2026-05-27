@@ -22,7 +22,7 @@ import com.example.sisvvapp.ui.utils.ImageUtils
 @Composable
 fun VistaVerdeAvatar(
     fotoUrl: String? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier.size(57.dp)
 ) {
     val urlFinal = remember(fotoUrl) { ImageUtils.sanitizarUrlFoto(fotoUrl) }
 
