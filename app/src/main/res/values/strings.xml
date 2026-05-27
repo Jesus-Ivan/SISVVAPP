@@ -47,8 +47,11 @@
     <string name="perfil_socio_section_details">Detalles</string>
     <string name="perfil_socio_status_active">Activo</string>
     <string name="perfil_socio_firma_autorizada">Firma Autorizada</string>
+    <string name="perfil_socio_firma_no_autorizada">Firma No Autorizada</string>
     <string name="perfil_socio_membership_label">Membresía %1$s</string>
     <string name="perfil_socio_section_members">Integrantes</string>
+    <string name="perfil_socio_acceso_permitido">ACCESO PERMITIDO</string>
+    <string name="perfil_socio_acceso_denegado">ACCESO DENEGADO</string>
 
     <!-- Pantalla de Splash -->
     <string name="splash_status_init">Iniciando\u2026</string>

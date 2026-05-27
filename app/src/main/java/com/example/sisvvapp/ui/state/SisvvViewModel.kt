@@ -140,7 +140,7 @@ class SisvvViewModel(
                     is ConnectException,
                     is SocketTimeoutException,
                     is SSLException ->
-                        "No hay conexión a internet. Verifica tu red e intenta de nuevo."
+                        "Error de conexión con el servidor.."
 
                     else -> "Ocurrió un error inesperado. Intenta de nuevo"
                 }
