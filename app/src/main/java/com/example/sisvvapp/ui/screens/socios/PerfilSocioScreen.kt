@@ -64,39 +64,66 @@ fun PerfilSocioScreen(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            val esActivo = socio.estatus.equals(stringResource(R.string.perfil_socio_status_active), ignoreCase = true)
-                            VistaVerdeStatusBadge(
-                                text = socio.estatus,
-                                containerColor = if (esActivo) FondoAbierta else FondoErrorClaro,
-                                textColor = if (esActivo) TextoAbierta else TextoErrorFuerte
-                            )
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
                             Text(
-                                text = "#${socio.id} - ${socio.nombre} ${socio.apellidoP}",
+                                text = listOfNotNull(
+                                    socio.nombre,
+                                    socio.apellidoP.takeIf { it.isNotBlank() },
+                                    socio.apellidoM.takeIf { it.isNotBlank() }
+                                ).joinToString(" "),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp,
                                 color = TextoPrincipalClaro
                             )
 
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
-                            if (socio.firmaAutorizada) {
-                                Text(
-                                    text = stringResource(R.string.perfil_socio_firma_autorizada),
-                                    fontSize = 13.sp,
-                                    color = VerdePrincipal,
-                                    fontWeight = FontWeight.Medium
+                            Text(
+                                text = "Estado membresia: ${socio.estatus}",
+                                fontSize = 13.sp,
+                                color = TextoSecundarioClaro
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = "Tipo membresia: ${socio.membresiaTipo}",
+                                fontSize = 13.sp,
+                                color = TextoSecundarioClaro
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = "No.Socio: ${socio.id}",
+                                fontSize = 13.sp,
+                                color = TextoSecundarioClaro
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            if (socio.estatus == "CAN") {
+                                VistaVerdeStatusBadge(
+                                    text = stringResource(R.string.perfil_socio_acceso_denegado),
+                                    containerColor = FondoErrorClaro,
+                                    textColor = TextoErrorFuerte
+                                )
+                            } else {
+                                VistaVerdeStatusBadge(
+                                    text = stringResource(R.string.perfil_socio_acceso_permitido),
+                                    containerColor = FondoAbierta,
+                                    textColor = TextoAbierta
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(2.dp))
-
+                            Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = stringResource(R.string.perfil_socio_membership_label, socio.membresiaTipo ?: ""),
+                                text = if (socio.firmaAutorizada)
+                                    stringResource(R.string.perfil_socio_firma_autorizada)
+                                else
+                                    stringResource(R.string.perfil_socio_firma_no_autorizada),
                                 fontSize = 13.sp,
-                                color = TextoSecundarioClaro
+                                color = if (socio.firmaAutorizada) VerdePrincipal else TextoSecundarioClaro,
+                                fontWeight = if (socio.firmaAutorizada) FontWeight.Medium else FontWeight.Normal
                             )
                         }
                     }

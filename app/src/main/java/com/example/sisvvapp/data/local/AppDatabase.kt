@@ -24,7 +24,7 @@ import com.example.sisvvapp.data.local.entity.VentaColaEntity
         CajaActivaEntity::class,
         VentaColaEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
