@@ -1,6 +1,7 @@
 package com.example.sisvvapp.ui.screens.socios
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,11 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import com.example.sisvvapp.R
 import com.example.sisvvapp.data.local.entity.IntegranteEntity
 import com.example.sisvvapp.data.local.entity.SocioEntity
@@ -60,7 +64,7 @@ fun PerfilSocioScreen(
                                 .padding(vertical = 24.dp, horizontal = 16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            VistaVerdeAvatar(fotoUrl = socio.fotoUrl, modifier = Modifier.size(80.dp))
+                            VistaVerdeAvatar(fotoUrl = socio.fotoUrl, modifier = Modifier.size(114.dp))
 
                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -72,7 +76,8 @@ fun PerfilSocioScreen(
                                 ).joinToString(" "),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp,
-                                color = TextoPrincipalClaro
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
                             )
 
                             Spacer(modifier = Modifier.height(12.dp))
@@ -80,7 +85,7 @@ fun PerfilSocioScreen(
                             Text(
                                 text = "Estado membresia: ${socio.estatus}",
                                 fontSize = 13.sp,
-                                color = TextoSecundarioClaro
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -88,7 +93,7 @@ fun PerfilSocioScreen(
                             Text(
                                 text = "Tipo membresia: ${socio.membresiaTipo}",
                                 fontSize = 13.sp,
-                                color = TextoSecundarioClaro
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -96,7 +101,7 @@ fun PerfilSocioScreen(
                             Text(
                                 text = "No.Socio: ${socio.id}",
                                 fontSize = 13.sp,
-                                color = TextoSecundarioClaro
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
                             Spacer(modifier = Modifier.height(12.dp))
@@ -104,14 +109,14 @@ fun PerfilSocioScreen(
                             if (socio.estatus == "CAN") {
                                 VistaVerdeStatusBadge(
                                     text = stringResource(R.string.perfil_socio_acceso_denegado),
-                                    containerColor = FondoErrorClaro,
-                                    textColor = TextoErrorFuerte
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    textColor = MaterialTheme.colorScheme.onErrorContainer
                                 )
                             } else {
                                 VistaVerdeStatusBadge(
                                     text = stringResource(R.string.perfil_socio_acceso_permitido),
-                                    containerColor = FondoAbierta,
-                                    textColor = TextoAbierta
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    textColor = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
 
@@ -122,7 +127,7 @@ fun PerfilSocioScreen(
                                 else
                                     stringResource(R.string.perfil_socio_firma_no_autorizada),
                                 fontSize = 13.sp,
-                                color = if (socio.firmaAutorizada) VerdePrincipal else TextoSecundarioClaro,
+                                color = if (socio.firmaAutorizada) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = if (socio.firmaAutorizada) FontWeight.Medium else FontWeight.Normal
                             )
                         }
@@ -157,7 +162,7 @@ fun IntegranteCard(integrante: IntegranteEntity) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 val nombreCompleto = buildString {
                     append(integrante.nombre)
                     if (!integrante.apellidoP.isNullOrBlank()) append(" ${integrante.apellidoP}")
@@ -167,13 +172,15 @@ fun IntegranteCard(integrante: IntegranteEntity) {
                     text = nombreCompleto,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
-                    color = TextoPrincipalClaro
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = integrante.parentesco,
                     fontSize = 13.sp,
-                    color = TextoSecundarioClaro
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             if (!integrante.fotoUrl.isNullOrBlank()) {
