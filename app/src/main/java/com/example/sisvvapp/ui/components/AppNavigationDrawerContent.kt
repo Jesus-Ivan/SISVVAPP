@@ -34,7 +34,6 @@ fun AppNavigationDrawerContent(
     val items = listOf(
         DrawerItem(ScreenRoutes.VENTAS, stringResource(R.string.menu_ventas), Icons.Default.ShoppingCart),
         DrawerItem(ScreenRoutes.SOCIOS, stringResource(R.string.menu_socios), Icons.Default.Person),
-        DrawerItem(ScreenRoutes.CAJA, stringResource(R.string.menu_caja), Icons.Default.AccountBalanceWallet),
         DrawerItem(ScreenRoutes.AJUSTES, stringResource(R.string.menu_ajustes), Icons.Default.Settings)
     )
 
