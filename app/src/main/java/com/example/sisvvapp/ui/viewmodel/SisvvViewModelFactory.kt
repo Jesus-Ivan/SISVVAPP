@@ -32,7 +32,11 @@ class SisvvViewModelFactory(
                 ProductosViewModel(ProductoRepository(api, db.productoDao())) as T
 
             modelClass.isAssignableFrom(CajaViewModel::class.java) ->
-                CajaViewModel(CajaRepository(api, db.cajaActivaDao())) as T
+                CajaViewModel(
+                    CajaRepository(api, db.cajaActivaDao()),
+                    SocioRepository(api, db.socioDao()),
+                    ProductoRepository(api, db.productoDao())
+                ) as T
 
             modelClass.isAssignableFrom(VentasViewModel::class.java) ->
                 VentasViewModel(VentaRepository(api, db.ventaColaDao())) as T
