@@ -40,6 +40,7 @@ fun SociosScreen(
 ) {
     VistaVerdeScaffold(
         title = stringResource(R.string.title_socios),
+        subtitle = stringResource(R.string.socios_subtitle),
         onMenuClick = onMenuClick,
         isOnline = isOnline
     ) {

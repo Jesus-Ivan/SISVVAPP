@@ -45,6 +45,7 @@ fun AjustesScreen(
 ) {
     VistaVerdeScaffold(
         title = stringResource(id = R.string.ajustes_title),
+        subtitle = stringResource(id = R.string.ajustes_subtitle),
         onMenuClick = onMenuClick,
         isOnline = isOnline
     ) {
