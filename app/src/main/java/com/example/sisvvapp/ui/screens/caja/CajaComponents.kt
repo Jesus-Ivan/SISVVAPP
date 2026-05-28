@@ -17,7 +17,7 @@ import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 
 @Composable
-fun VistaVerdeCajaCard( // Renombrado para consistencia
+fun VistaVerdeCajaCard(
     caja: CajaDto,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -33,26 +33,30 @@ fun VistaVerdeCajaCard( // Renombrado para consistencia
                 Text(
                     text = "#${caja.id} - ${caja.nombre}",
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp, // Alineado con tus otros componentes
-                    color = TextoPrincipalClaro // Estilo unificado
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "${caja.fechaApertura}",
                     fontWeight = FontWeight.Medium,
                     fontSize = 12.sp,
-                    color = TextoSecundarioClaro // Estilo unificado
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "Cajero: ${caja.meseroId ?: "N/A"}",
                     fontWeight = FontWeight.Medium,
                     fontSize = 12.sp,
-                    color = TextoSecundarioClaro // Estilo unificado
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             RadioButton(
                 selected = isSelected,
-                onClick = null
+                onClick = null,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = VerdePrincipal,
+                    unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
         }
     }
@@ -64,7 +68,7 @@ fun CajasList(cajas: List<CajaDto>, selectedCajaId: Int?, onCajaClick: (CajaDto)
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(items= cajas, key ={caja -> caja.id}) { caja ->
+        items(items = cajas, key = { caja -> caja.id }) { caja ->
             VistaVerdeCajaCard(
                 caja = caja,
                 isSelected = caja.id == selectedCajaId,
@@ -74,9 +78,10 @@ fun CajasList(cajas: List<CajaDto>, selectedCajaId: Int?, onCajaClick: (CajaDto)
     }
 }
 
-// --- PREVIEWS ---
+// --- PREVIEWS CONFIGURADOS PARA MODO OSCURO ---
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Modo Claro")
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES, name = "Modo Oscuro")
 @Composable
 fun CajaCardPreview() {
     SISVVAPPTheme {
@@ -87,9 +92,8 @@ fun CajaCardPreview() {
     }
 }
 
-// --- PREVIEW DE LA LISTA ---
-
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Lista Modo Claro")
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES, name = "Lista Modo Oscuro")
 @Composable
 fun CajasListPreview() {
     SISVVAPPTheme {
