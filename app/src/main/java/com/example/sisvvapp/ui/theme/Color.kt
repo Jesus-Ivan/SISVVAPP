@@ -57,3 +57,9 @@ val SplashGreenMid = Color(0xFF2D6A4F)
 val SplashGreenLime = Color(0xFF95D5B2)
 val SplashBallGrayLight = Color(0xFFF8F9FA)
 val SplashBallGrayDark = Color(0xFFDEE2E6)
+
+// Colores para badges y contraste
+val BadgeAbiertaContainer = Color(0xFFFEF08A)
+val BadgeAbiertaText = Color(0xFF854D0E)
+val NaranjaOscuroContraste = Color(0xFF92400E)
+val LogoutRed = Color(0xFFFF5252)

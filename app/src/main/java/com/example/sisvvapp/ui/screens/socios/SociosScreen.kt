@@ -23,7 +23,6 @@ import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
-import com.example.sisvvapp.ui.theme.VerdePrincipal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +63,7 @@ fun SociosScreen(
 
                     if (isLoading && socios.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = VerdePrincipal)
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         }
                     } else if (errorMessage != null && socios.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
