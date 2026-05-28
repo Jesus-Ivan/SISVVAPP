@@ -36,7 +36,8 @@ fun SociosScreen(
     onSearchQueryChange: (String) -> Unit,
     onMenuClick: () -> Unit,
     onSocioClick: (Int) -> Unit,
-    onRetry: () -> Unit = {}
+    onRetry: () -> Unit = {},
+    onRefresh: () -> Unit = {}
 ) {
     val isTablet = getDeviceType() == DeviceType.TABLET
 

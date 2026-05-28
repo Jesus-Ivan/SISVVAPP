@@ -67,17 +67,20 @@ fun MainContainer(
     ) {
         NavHost(navController = navController, startDestination = ScreenRoutes.CAJA) {
 
-            // --- 3. PANTALLA DE CAJA  ---
+            // --- PANTALLA DE CAJA ---
             composable(ScreenRoutes.CAJA) {
                 val context = LocalContext.current
                 val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
+
                 val cajas by cajaViewModel.cajas.collectAsState()
                 val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
                 val isLoading by cajaViewModel.isLoading.collectAsState()
                 val errorMessage by cajaViewModel.errorMessage.collectAsState()
+
                 val cajasDto = cajas.map { entity ->
                     CajaDto(entity.id, entity.nombre, entity.fechaApertura, entity.fechaCierre, entity.activo, entity.meseroId)
                 }
+
                 CajaScreen(
                     cajas = cajasDto,
                     selectedCajaId = selectedCajaId,
@@ -87,14 +90,13 @@ fun MainContainer(
                     onCajaClick = { id -> cajaViewModel.selectCaja(id) },
                     onMenuClick = { scope.launch { drawerState.open() } },
                     onContinueClick = { _ ->
-                        navController.navigate(ScreenRoutes.VENTAS) {
-                        }
+                        navController.navigate(ScreenRoutes.VENTAS) { }
                     },
                     onRetry = { cajaViewModel.sync() }
                 )
             }
 
-            // --- 4. PANTALLA DE VENTAS  ---
+            // --- PANTALLA DE VENTAS ---
             composable(ScreenRoutes.VENTAS) {
                 val context = LocalContext.current
                 val ventasViewModel: VentasViewModel = viewModel(factory = SisvvViewModelFactory(context))
@@ -112,14 +114,17 @@ fun MainContainer(
                     onMenuClick = { scope.launch { drawerState.open() } },
                     ventas = ventas,
                     isOnline = viewModel?.isOnline ?: true,
-                    onVentaClick = { _ ->
+                    isLoading = isLoading,
+                    onRefresh = {
+                        val today = java.time.LocalDate.now().toString()
+                        ventasViewModel.loadVentas(today)
                     },
-                    onNuevaVentaClick = {
-                    }
+                    onVentaClick = { _ -> },
+                    onNuevaVentaClick = { }
                 )
             }
 
-            // --- 5. PANTALLA DE SOCIOS (LISTA PRINCIPAL) ---
+            // --- PANTALLA DE SOCIOS (LISTA PRINCIPAL) ---
             composable(ScreenRoutes.SOCIOS) {
                 val context = LocalContext.current
                 val sociosViewModel: SociosViewModel = viewModel(factory = SisvvViewModelFactory(context))
@@ -144,11 +149,12 @@ fun MainContainer(
                     onSocioClick = { socioId ->
                         navController.navigate(ScreenRoutes.crearRutaPerfilSocio(socioId))
                     },
-                    onRetry = { sociosViewModel.sync() }
+                    onRetry = { sociosViewModel.sync() },
+                    onRefresh = { sociosViewModel.sync() }
                 )
             }
 
-            // --- 5.1 PERFIL DEL SOCIO (DETALLE) ---
+            // --- PERFIL DEL SOCIO (DETALLE) ---
             composable(
                 route = ScreenRoutes.PERFIL_SOCIO,
                 arguments = listOf(navArgument("socioId") { type = NavType.IntType })
@@ -183,13 +189,14 @@ fun MainContainer(
                 }
             }
 
-            // --- 6. PANTALLA DE AJUSTES ---
+            // --- PANTALLA DE AJUSTES ---
             composable(ScreenRoutes.AJUSTES) {
                 val context = LocalContext.current
                 val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
 
                 val cajas by cajaViewModel.cajas.collectAsState()
                 val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
+                val isLoading by cajaViewModel.isLoading.collectAsState()
 
                 val cajasDto = cajas.map { entity ->
                     CajaDto(entity.id, entity.nombre, entity.fechaApertura, entity.fechaCierre, entity.activo, entity.meseroId)
@@ -199,11 +206,13 @@ fun MainContainer(
                     cajas = cajasDto,
                     selectedCajaId = selectedCajaId,
                     lastSyncDate = "Pendiente de sincronizar",
+                    isLoading = isLoading,
                     isOnline = viewModel?.isOnline ?: true,
                     onCajaClick = { caja -> cajaViewModel.selectCaja(caja.id) },
                     onSyncClick = { /* Lógica de Retrofit pendiente */ },
                     onLogoutClick = { onLogout() },
-                    onMenuClick = { scope.launch { drawerState.open() } }
+                    onMenuClick = { scope.launch { drawerState.open() } },
+                    onRefresh = { cajaViewModel.sync() }
                 )
             }
         }

@@ -1,5 +1,11 @@
 package com.example.sisvvapp.ui.screens.splash
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -21,8 +27,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.sisvvapp.R
 import com.example.sisvvapp.ui.theme.*
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
+import com.example.sisvvapp.ui.viewmodel.SplashViewModel
+import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -30,13 +41,26 @@ import kotlin.math.abs
 import kotlin.math.sin
 
 @Composable
-fun SplashScreen(onNavigateToLogin: () -> Unit) {
+fun SplashScreen(
+    onNavigate: (String) -> Unit,
+    viewModel: SplashViewModel = viewModel(
+        factory = SisvvViewModelFactory(androidx.compose.ui.platform.LocalContext.current)
+    )
+) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
 
-    // Logo
+    // --- LOGICA DE NAVEGACION ---
+    LaunchedEffect(Unit) {
+        viewModel.destination.collect { route ->
+            onNavigate(route)
+        }
+    }
+
+    // Logo Animations
     val logoScale = remember { Animatable(0f) }
     val logoAlpha = remember { Animatable(0f) }
 
-    // Pelota: progreso 0f→1f sobre la pista
+    // Pelota Animation
     val ballProgress = remember { Animatable(0f) }
 
     // Anillos pulsantes
@@ -57,8 +81,7 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
         stringResource(R.string.splash_status_config),
         stringResource(R.string.splash_status_welcome)
     )
-    var statusIndex by remember { mutableStateOf(0) }
-    val statusAlpha = remember { Animatable(1f) }
+    var statusIndex by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         launch { logoAlpha.animateTo(1f, tween(700)) }
@@ -69,19 +92,15 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
             delay(300)
             ballProgress.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(2800, easing = CubicBezierEasing(0.4f, 0f, 0.2f, 1f))
+                animationSpec = tween(2600, easing = CubicBezierEasing(0.4f, 0f, 0.2f, 1f))
             )
         }
         launch {
             repeat(statusMessages.size - 1) {
-                delay(900)
-                statusAlpha.animateTo(0f, tween(250))
+                delay(850)
                 statusIndex++
-                statusAlpha.animateTo(1f, tween(250))
             }
         }
-        delay(3200)
-        onNavigateToLogin()
     }
 
     Box(
@@ -91,14 +110,15 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         val ringColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-        
-        // Anillos decorativos
+
         Canvas(modifier = Modifier.fillMaxSize()) {
             val cx = size.width / 2f
-            val cy = size.height * 0.44f
+            val cy = size.height * 0.45f
+            val baseRadius = if (size.width > 600.dp.toPx()) 200.dp.toPx() else 140.dp.toPx()
+
             listOf(
-                140.dp.toPx() to ring1Alpha,
-                210.dp.toPx() to ring2Alpha,
+                baseRadius to ring1Alpha,
+                (baseRadius * 1.5f) to ring2Alpha,
             ).forEach { (r, a) ->
                 drawCircle(
                     color = ringColor.copy(alpha = a),
@@ -109,11 +129,12 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
             }
         }
 
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(horizontal = 28.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 28.dp)
         ) {
             // Logo
             Image(
@@ -122,6 +143,7 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .widthIn(max = if (isTablet) 420.dp else 280.dp)
                     .aspectRatio(3.4f)
                     .graphicsLayer {
                         scaleX = logoScale.value
@@ -130,47 +152,53 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
                     }
             )
 
-            Spacer(Modifier.height(56.dp))
+            Spacer(Modifier.height(if (isTablet) 80.dp else 56.dp))
 
-            // Pista con pelota
             GolfBallLoader(
                 progress = ballProgress.value,
                 modifier = Modifier
-                    .width(220.dp)
-                    .height(48.dp)   // espacio para el rebote
+                    .width(if (isTablet) 320.dp else 220.dp)
+                    .height(48.dp)
                     .alpha(if (ballProgress.value > 0f) 1f else 0f)
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
 
-            // Texto dinámico
-            Text(
-                text = statusMessages[statusIndex],
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Normal,
-                letterSpacing = 2.5.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = statusAlpha.value),
-            )
+            // Texto de estado con transición suave
+            AnimatedContent(
+                targetState = statusMessages[statusIndex],
+                transitionSpec = {
+                    (fadeIn(tween(400)) + slideInVertically { it / 2 })
+                        .togetherWith(fadeOut(tween(400)) + slideOutVertically { -it / 2 })
+                },
+                label = "statusText"
+            ) { text ->
+                Text(
+                    text = text,
+                    fontSize = if (isTablet) 12.sp else 10.sp,
+                    fontWeight = FontWeight.Normal,
+                    letterSpacing = 2.5.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
 
 @Composable
 fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
-
-    // Rebote: función senoidal sobre el progreso, 3 botes completos
     val bounceY = abs(sin(progress * PI.toFloat() * 3f))
 
     Canvas(modifier = modifier) {
-        val trackY    = size.height               // base del césped
+        val trackY    = size.height
         val trackH    = 5.dp.toPx()
-        val ballR     = 16.dp.toPx()              // radio pelota (32dp diámetro)
+        val ballR     = 16.dp.toPx()
         val trackW    = size.width
         val ballX     = progress * (trackW - ballR * 2f) + ballR
         val maxBounce = 24.dp.toPx()
         val ballY     = trackY - trackH - ballR - bounceY * maxBounce
 
-        // ── Estela ──────────────────────────────────────────────────────
+        // --- Estela ---
         drawLine(
             brush = Brush.horizontalGradient(
                 colors = listOf(Color.Transparent, SplashGreenLime.copy(alpha = 0.4f)),
@@ -182,7 +210,7 @@ fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
             cap = StrokeCap.Round
         )
 
-        // ── Sombra de la pelota ─────────────────────────────────────────
+        // --- Sombra de la pelota ---
         val shadowAlpha  = 0.18f - bounceY * 0.10f
         val shadowScaleX = 1f - bounceY * 0.4f
         drawOval(
@@ -191,7 +219,7 @@ fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
             size    = Size(ballR * 2f * shadowScaleX, 7.dp.toPx())
         )
 
-        // ── Césped (pista) ──────────────────────────────────────────────
+        // --- Césped ---
         drawRoundRect(
             brush = Brush.horizontalGradient(
                 colors = listOf(SplashGreenDeep, SplashGreenMid, SplashGreenDeep)
@@ -201,15 +229,10 @@ fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
             cornerRadius = androidx.compose.ui.geometry.CornerRadius(999f)
         )
 
-        // ── Pelota de golf ──────────────────────────────────────────────
-        // Sombra interior / volumen
+        // --- Pelota de golf ---
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(
-                    Color.White,
-                    SplashBallGrayLight,
-                    SplashBallGrayDark
-                ),
+                colors = listOf(Color.White, SplashBallGrayLight, SplashBallGrayDark),
                 center = Offset(ballX - ballR * 0.25f, ballY - ballR * 0.25f),
                 radius = ballR * 1.3f
             ),
@@ -217,48 +240,31 @@ fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
             center = Offset(ballX, ballY)
         )
 
-        // Brillo superior
+        // Brillo
         drawCircle(
             color  = Color.White.copy(alpha = 0.75f),
             radius = ballR * 0.35f,
             center = Offset(ballX - ballR * 0.28f, ballY - ballR * 0.28f)
         )
 
+        // Hoyuelos (Optimizados con loop matemático simple para no pesar)
+        val dimpleColor = Color.Black.copy(alpha = 0.12f)
+        val dimpleR     = 1.5.dp.toPx()
 
-
-
-// Hoyuelos (dimples) — esparcidos uniformemente para simular una textura esférica
-        val dimpleColor = Color.Black.copy(alpha = 0.12f) // Un poco más sutil
-        val dimpleR     = 1.8.dp.toPx() // Reducido ligeramente para evitar que se encimen
-
-        val dimpleOffsets = listOf(
-            // Zona Central (bien espaciados)
-            Offset(ballX - ballR * 0.15f, ballY - ballR * 0.10f),
-            Offset(ballX + ballR * 0.20f, ballY - ballR * 0.15f),
-            Offset(ballX - ballR * 0.20f, ballY + ballR * 0.25f),
-            Offset(ballX + ballR * 0.15f, ballY + ballR * 0.20f),
-
-            // Zona Intermedia (distribución radial)
-            Offset(ballX - ballR * 0.45f, ballY - ballR * 0.30f),
-            Offset(ballX + ballR * 0.40f, ballY - ballR * 0.40f),
-            Offset(ballX - ballR * 0.40f, ballY + ballR * 0.40f),
-            Offset(ballX + ballR * 0.45f, ballY + ballR * 0.35f),
-
-            // Bordes Superiores e Inferiores
-            Offset(ballX - ballR * 0.05f, ballY - ballR * 0.65f),
-            Offset(ballX + ballR * 0.25f, ballY - ballR * 0.60f),
-            Offset(ballX - ballR * 0.25f, ballY + ballR * 0.65f),
-            Offset(ballX + ballR * 0.02f, ballY + ballR * 0.68f),
-
-            // Bordes Laterales Extremos
-            Offset(ballX - ballR * 0.65f, ballY - ballR * 0.05f),
-            Offset(ballX - ballR * 0.68f, ballY + ballR * 0.18f),
-            Offset(ballX + ballR * 0.65f, ballY - ballR * 0.12f),
-            Offset(ballX + ballR * 0.68f, ballY + ballR * 0.10f)
-        )
-
-        dimpleOffsets.forEach { center ->
-            drawCircle(color = dimpleColor, radius = dimpleR, center = center)
+        // Dibujamos unos cuantos hoyuelos representativos en lugar de una lista gigante
+        for (i in -2..2) {
+            for (j in -2..2) {
+                if (abs(i) + abs(j) < 4) { // Forma circular aproximada
+                    drawCircle(
+                        color = dimpleColor,
+                        radius = dimpleR,
+                        center = Offset(
+                            ballX + (i * ballR * 0.35f),
+                            ballY + (j * ballR * 0.35f)
+                        )
+                    )
+                }
+            }
         }
     }
 }

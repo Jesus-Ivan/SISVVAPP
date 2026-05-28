@@ -31,6 +31,8 @@ fun VentasScreen(
     onMenuClick: () -> Unit,
     ventas: List<VentaDto> = emptyList(),
     isOnline: Boolean = true,
+    isLoading: Boolean = false,
+    onRefresh: () -> Unit = {},
     onVentaClick: (VentaDto) -> Unit = {},
     onNuevaVentaClick: () -> Unit = {}
 ) {
@@ -39,45 +41,51 @@ fun VentasScreen(
         onMenuClick = onMenuClick,
         isOnline = isOnline,
         actions = {
-            IconButton(onClick = { /* Lógica de búsqueda */ }) {
+            IconButton(onClick = { onRefresh() }) {
                 Icon(Icons.Default.Search, contentDescription = stringResource(R.string.ventas_search_desc))
             }
-            IconButton(onClick = { /* Filtro por fecha */ }) {
+            IconButton(onClick = { onRefresh() }) {
                 Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.ventas_filter_date_desc))
             }
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                VistaVerdeSectionHeader(text = stringResource(R.string.ventas_section_recent))
-                Spacer(modifier = Modifier.height(8.dp))
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = VerdePrincipal)
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    VistaVerdeSectionHeader(text = stringResource(R.string.ventas_section_recent))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                if (ventas.isEmpty()) {
-                    VistaVerdeEmptyState(
-                        icon = Icons.AutoMirrored.Filled.ReceiptLong,
-                        message = stringResource(R.string.ventas_empty_state),
-                        modifier = Modifier.weight(1f)
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 88.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(
-                            items = ventas,
-                            key = { venta -> venta.folio }
-                        ) { venta ->
-                            VistaVerdeSaleCard(
-                                venta = venta,
-                                modifier = Modifier.clickable { onVentaClick(venta) }
-                            )
+                    if (ventas.isEmpty()) {
+                        VistaVerdeEmptyState(
+                            icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                            message = stringResource(R.string.ventas_empty_state),
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 88.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(
+                                items = ventas,
+                                key = { venta -> venta.folio }
+                            ) { venta ->
+                                VistaVerdeSaleCard(
+                                    venta = venta,
+                                    modifier = Modifier.clickable { onVentaClick(venta) }
+                                )
+                            }
                         }
                     }
                 }

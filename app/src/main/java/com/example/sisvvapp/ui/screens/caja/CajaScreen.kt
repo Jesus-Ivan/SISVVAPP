@@ -1,6 +1,5 @@
 package com.example.sisvvapp.ui.screens.caja
 
-import android.os.Message
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Inbox
@@ -30,15 +29,18 @@ fun CajaScreen(
     selectedCajaId: Int?,
     isLoading: Boolean,
     isOnline: Boolean = true,
+    isFromSettings: Boolean = false,
     errorMessage: String? = null,
     onCajaClick: (Int) -> Unit,
-    onMenuClick: () -> Unit,
+    onMenuClick: () -> Unit = {},
+    onNavigationClick: () -> Unit = {},
     onContinueClick: (Int) -> Unit,
     onRetry: () -> Unit = {}
 ) {
     VistaVerdeScaffold(
         title = stringResource(R.string.caja_section_open),
-        onMenuClick = onMenuClick,
+        onMenuClick = if (isFromSettings) onMenuClick else onNavigationClick,
+        isBackButton = !isFromSettings,
         isOnline = isOnline
     ) {
         Column(
@@ -120,7 +122,6 @@ fun CajaScreenPreview() {
             selectedCajaId = 6858,
             isLoading = false,
             onCajaClick = {},
-            onMenuClick = {},
             onContinueClick = {}
         )
     }
