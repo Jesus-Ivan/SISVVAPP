@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 @Composable
 fun SplashScreen(
@@ -190,80 +191,105 @@ fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
     val bounceY = abs(sin(progress * PI.toFloat() * 3f))
 
     Canvas(modifier = modifier) {
-        val trackY    = size.height
-        val trackH    = 5.dp.toPx()
-        val ballR     = 16.dp.toPx()
-        val trackW    = size.width
-        val ballX     = progress * (trackW - ballR * 2f) + ballR
-        val maxBounce = 24.dp.toPx()
-        val ballY     = trackY - trackH - ballR - bounceY * maxBounce
+        val trackY = size.height
+        val trackH = 5.dp.toPx()
+        val ballR = 14.dp.toPx()
+        val trackW = size.width
+        val ballX = progress * (trackW - ballR * 2f) + ballR
+        val maxBounce = 22.dp.toPx()
+        val ballY = trackY - trackH - ballR - bounceY * maxBounce
 
-        // --- Estela ---
-        drawLine(
-            brush = Brush.horizontalGradient(
-                colors = listOf(Color.Transparent, SplashGreenLime.copy(alpha = 0.4f)),
-                startX = 0f, endX = ballX
-            ),
-            start = Offset(0f, trackY - trackH - ballR),
-            end   = Offset(ballX - ballR, trackY - trackH - ballR),
-            strokeWidth = 2.dp.toPx(),
-            cap = StrokeCap.Round
-        )
-
-        // --- Sombra de la pelota ---
-        val shadowAlpha  = 0.18f - bounceY * 0.10f
-        val shadowScaleX = 1f - bounceY * 0.4f
-        drawOval(
-            color = Color.Black.copy(alpha = shadowAlpha),
-            topLeft = Offset(ballX - ballR * shadowScaleX, trackY - 6.dp.toPx()),
-            size    = Size(ballR * 2f * shadowScaleX, 7.dp.toPx())
-        )
-
-        // --- Césped ---
+        // ── Césped ──
         drawRoundRect(
             brush = Brush.horizontalGradient(
                 colors = listOf(SplashGreenDeep, SplashGreenMid, SplashGreenDeep)
             ),
-            topLeft     = Offset(0f, trackY - trackH),
-            size        = Size(trackW, trackH),
+            topLeft = Offset(0f, trackY - trackH),
+            size = Size(trackW, trackH),
             cornerRadius = androidx.compose.ui.geometry.CornerRadius(999f)
         )
 
-        // --- Pelota de golf ---
+        // ── Estela ──
+        drawLine(
+            brush = Brush.horizontalGradient(
+                colors = listOf(Color.Transparent, SplashGreenLime.copy(alpha = 0.4f))
+            ),
+            start = Offset(0f, trackY - trackH - ballR),
+            end = Offset((ballX - ballR).coerceAtLeast(0f), trackY - trackH - ballR),
+            strokeWidth = 2.dp.toPx(),
+            cap = StrokeCap.Round
+        )
+
+        // ── Sombra de la pelota ──
+        val shadowAlpha = 0.18f - bounceY * 0.10f
+        val shadowScaleX = 1f - bounceY * 0.4f
+        drawOval(
+            color = Color.Black.copy(alpha = shadowAlpha),
+            topLeft = Offset(ballX - ballR * shadowScaleX, trackY - 5.dp.toPx()),
+            size = Size(ballR * 2f * shadowScaleX, 6.dp.toPx())
+        )
+
+        // ── Pelota de golf (mejorada) ──
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(Color.White, SplashBallGrayLight, SplashBallGrayDark),
-                center = Offset(ballX - ballR * 0.25f, ballY - ballR * 0.25f),
-                radius = ballR * 1.3f
+                colors = listOf(
+                    Color.White,
+                    Color(0xFFF5F5F5),
+                    SplashBallGrayLight,
+                    SplashBallGrayDark
+                ),
+                center = Offset(ballX - ballR * 0.3f, ballY - ballR * 0.3f),
+                radius = ballR * 1.4f
             ),
             radius = ballR,
             center = Offset(ballX, ballY)
         )
 
-        // Brillo
+        // Brillo principal
         drawCircle(
-            color  = Color.White.copy(alpha = 0.75f),
-            radius = ballR * 0.35f,
-            center = Offset(ballX - ballR * 0.28f, ballY - ballR * 0.28f)
+            color = Color.White.copy(alpha = 0.85f),
+            radius = ballR * 0.28f,
+            center = Offset(ballX - ballR * 0.3f, ballY - ballR * 0.35f)
+        )
+        // Brillo secundario
+        drawCircle(
+            color = Color.White.copy(alpha = 0.4f),
+            radius = ballR * 0.15f,
+            center = Offset(ballX - ballR * 0.1f, ballY - ballR * 0.55f)
         )
 
-        // Hoyuelos (Optimizados con loop matemático simple para no pesar)
-        val dimpleColor = Color.Black.copy(alpha = 0.12f)
-        val dimpleR     = 1.5.dp.toPx()
+        // Hoyuelos (patrón hexagonal)
+        val dimpleColor = Color.Black.copy(alpha = 0.07f)
+        val dimpleHighlight = Color.White.copy(alpha = 0.15f)
+        val dimpleR = 1.2.dp.toPx()
+        val spacing = ballR * 0.32f
 
-        // Dibujamos unos cuantos hoyuelos representativos en lugar de una lista gigante
-        for (i in -2..2) {
-            for (j in -2..2) {
-                if (abs(i) + abs(j) < 4) { // Forma circular aproximada
-                    drawCircle(
-                        color = dimpleColor,
-                        radius = dimpleR,
-                        center = Offset(
-                            ballX + (i * ballR * 0.35f),
-                            ballY + (j * ballR * 0.35f)
-                        )
-                    )
-                }
+        val dimpleOffsets = listOf(
+            0f to 0f,
+            spacing to 0f, -spacing to 0f,
+            spacing * 0.5f to spacing * 0.87f, -spacing * 0.5f to spacing * 0.87f,
+            spacing * 0.5f to -spacing * 0.87f, -spacing * 0.5f to -spacing * 0.87f,
+            spacing * 1.5f to spacing * 0.87f, -spacing * 1.5f to spacing * 0.87f,
+            spacing * 1.5f to -spacing * 0.87f, -spacing * 1.5f to -spacing * 0.87f,
+            spacing * 2f to 0f, -spacing * 2f to 0f,
+            0f to spacing * 1.74f, 0f to -spacing * 1.74f,
+            spacing to spacing * 1.74f, -spacing to spacing * 1.74f,
+            spacing to -spacing * 1.74f, -spacing to -spacing * 1.74f,
+        )
+
+        for ((dx, dy) in dimpleOffsets) {
+            val dist = sqrt(dx * dx + dy * dy)
+            if (dist < ballR * 0.85f) {
+                drawCircle(
+                    color = dimpleColor,
+                    radius = dimpleR,
+                    center = Offset(ballX + dx, ballY + dy)
+                )
+                drawCircle(
+                    color = dimpleHighlight,
+                    radius = dimpleR * 0.6f,
+                    center = Offset(ballX + dx - 0.3f, ballY + dy - 0.3f)
+                )
             }
         }
     }

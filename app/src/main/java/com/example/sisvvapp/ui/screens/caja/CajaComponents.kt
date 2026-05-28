@@ -43,12 +43,6 @@ fun VistaVerdeCajaCard(
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text(
-                    text = "Cajero: ${caja.meseroId ?: "N/A"}",
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
             RadioButton(
                 selected = isSelected,
