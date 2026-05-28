@@ -2,8 +2,9 @@ package com.example.sisvvapp.ui.screens.ventas
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,6 +17,8 @@ import com.example.sisvvapp.ui.theme.*
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeStatusBadge
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 import java.util.Locale
 
 @Composable
@@ -70,12 +73,22 @@ fun VistaVerdeSaleCard(
 }
 
 @Composable
-fun VentasList(ventas: List<VentaDto>, onVentaClick: (VentaDto) -> Unit) {
-    LazyColumn(
+fun VentasList(
+    ventas: List<VentaDto>,
+    onVentaClick: (VentaDto) -> Unit
+) {
+    val deviceType = LocalDeviceType.current
+    val isTablet = deviceType == DeviceType.TABLET
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(if (isTablet) 2 else 1),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        // Espaciado vertical entre filas de ventas
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxSize()
     ) {
-        items(items = ventas, key = {venta -> venta.folio}) { venta ->
+        items(items = ventas, key = { venta -> venta.folio }) { venta ->
             VistaVerdeSaleCard(
                 venta = venta,
                 modifier = Modifier.clickable { onVentaClick(venta) }
@@ -91,17 +104,9 @@ fun VentasList(ventas: List<VentaDto>, onVentaClick: (VentaDto) -> Unit) {
 fun SaleCardPreview() {
     SISVVAPPTheme {
         val mockVenta = VentaDto(
-            folio = 59490,
-            nombreCliente = "Cristian Meza",
-            hora = "15:34",
-            total = 983.0,
-            estatus = "Abierta",
-            cajaId = 1,
-            socioId = 1832,
-            tipoCliente = "Socio",
-            fecha = "15/06/2026",
-            productos = emptyList(),
-            pagos = emptyList()
+            folio = 59490, nombreCliente = "Cristian Meza", hora = "15:34",
+            total = 983.0, estatus = "Abierta", cajaId = 1, socioId = 1832,
+            tipoCliente = "Socio", fecha = "15/06/2026", productos = emptyList(), pagos = emptyList()
         )
         Surface(modifier = Modifier.padding(16.dp)) {
             VistaVerdeSaleCard(venta = mockVenta)

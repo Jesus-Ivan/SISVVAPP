@@ -2,8 +2,9 @@ package com.example.sisvvapp.ui.screens.socios
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +18,8 @@ import com.example.sisvvapp.ui.components.VistaVerdeAvatar
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeStatusBadge
 import com.example.sisvvapp.ui.theme.*
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 
 @Composable
 fun VistaVerdeSocioCard(
@@ -81,14 +84,23 @@ fun VistaVerdeSocioCard(
     }
 }
 
-
 @Composable
-fun SociosList(socios: List<SocioEntity>, onSocioClick: (SocioEntity) -> Unit) {
-    LazyColumn(
-        contentPadding = PaddingValues(vertical=16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+fun SociosList(
+    socios: List<SocioEntity>,
+    onSocioClick: (SocioEntity) -> Unit
+) {
+    val deviceType = LocalDeviceType.current
+    val isTablet = deviceType == DeviceType.TABLET
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(if (isTablet) 2 else 1),
+        contentPadding = PaddingValues(vertical = 16.dp),
+        // Espaciado vertical entre tarjetas
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxSize()
     ) {
-        items(items=socios, key={socio -> socio.id}) { socio ->
+        items(items = socios, key = { socio -> socio.id }) { socio ->
             VistaVerdeSocioCard(
                 socio = socio,
                 modifier = Modifier.clickable { onSocioClick(socio) }
@@ -104,19 +116,10 @@ fun SociosList(socios: List<SocioEntity>, onSocioClick: (SocioEntity) -> Unit) {
 fun SocioCardPreview() {
     SISVVAPPTheme {
         val mockSocio = SocioEntity(
-            id = 1,
-            nombre = "Cristian",
-            apellidoP = "Meza",
-            apellidoM = "",
-            telefono = null,
-            email = null,
-            firmaAutorizada = true,
-            estatus = "MEN",
-            fotoUrl = "",
-            numAccion = null,
-            membresiaTipo = "Familiar"
+            id = 1, nombre = "Cristian", apellidoP = "Meza", apellidoM = "",
+            telefono = null, email = null, firmaAutorizada = true,
+            estatus = "MEN", fotoUrl = "", numAccion = null, membresiaTipo = "Familiar"
         )
-
         Surface(modifier = Modifier.padding(16.dp)) {
             VistaVerdeSocioCard(socio = mockSocio)
         }
@@ -129,33 +132,16 @@ fun SociosListPreview() {
     SISVVAPPTheme {
         val mockSocios = listOf(
             SocioEntity(
-                id = 1,
-                nombre = "Cristian",
-                apellidoP = "Meza",
-                apellidoM = "",
-                telefono = null,
-                email = null,
-                firmaAutorizada = true,
-                estatus = "MEN",
-                fotoUrl = "",
-                numAccion = null,
-                membresiaTipo = "Parejas"
+                id = 1, nombre = "Cristian", apellidoP = "Meza", apellidoM = "",
+                telefono = null, email = null, firmaAutorizada = true,
+                estatus = "MEN", fotoUrl = "", numAccion = null, membresiaTipo = "Parejas"
             ),
             SocioEntity(
-                id = 2,
-                nombre = "Juan",
-                apellidoP = "Pérez",
-                apellidoM = "López",
-                telefono = null,
-                email = null,
-                firmaAutorizada = false,
-                estatus = "CAN",
-                fotoUrl = "",
-                numAccion = null,
-                membresiaTipo = "Familiar"
+                id = 2, nombre = "Juan", apellidoP = "Pérez", apellidoM = "López",
+                telefono = null, email = null, firmaAutorizada = false,
+                estatus = "CAN", fotoUrl = "", numAccion = null, membresiaTipo = "Familiar"
             )
         )
-
         Surface(modifier = Modifier.fillMaxSize()) {
             SociosList(socios = mockSocios, onSocioClick = {})
         }
