@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,12 +21,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.ventas.VentaDto
+import com.example.sisvvapp.ui.components.ResponsiveContainer
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VentasScreen(
     onMenuClick: () -> Unit,
@@ -41,71 +44,69 @@ fun VentasScreen(
         onMenuClick = onMenuClick,
         isOnline = isOnline,
         actions = {
-            IconButton(onClick = { onRefresh() }) {
+            IconButton(onClick = { /* Lógica de búsqueda */ }) {
                 Icon(Icons.Default.Search, contentDescription = stringResource(R.string.ventas_search_desc))
             }
-            IconButton(onClick = { onRefresh() }) {
+            IconButton(onClick = { /* Filtro por fecha */ }) {
                 Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.ventas_filter_date_desc))
             }
         }
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        ResponsiveContainer {
+            Box(modifier = Modifier.fillMaxSize()) {
 
-            if (isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = VerdePrincipal)
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp)
+                PullToRefreshBox(
+                    isRefreshing = isLoading,
+                    onRefresh = onRefresh,
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    VistaVerdeSectionHeader(text = stringResource(R.string.ventas_section_recent))
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        VistaVerdeSectionHeader(text = stringResource(R.string.ventas_section_recent))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    if (ventas.isEmpty()) {
-                        VistaVerdeEmptyState(
-                            icon = Icons.AutoMirrored.Filled.ReceiptLong,
-                            message = stringResource(R.string.ventas_empty_state),
-                            modifier = Modifier.weight(1f)
-                        )
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(bottom = 88.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(
-                                items = ventas,
-                                key = { venta -> venta.folio }
-                            ) { venta ->
-                                VistaVerdeSaleCard(
-                                    venta = venta,
-                                    modifier = Modifier.clickable { onVentaClick(venta) }
-                                )
+                        if (ventas.isEmpty() && !isLoading) {
+                            VistaVerdeEmptyState(
+                                icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                                message = stringResource(R.string.ventas_empty_state),
+                                modifier = Modifier.weight(1f)
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(bottom = 88.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(
+                                    items = ventas,
+                                    key = { venta -> venta.folio }
+                                ) { venta ->
+                                    VistaVerdeSaleCard(
+                                        venta = venta,
+                                        modifier = Modifier.clickable { onVentaClick(venta) }
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // 3. EL BOTÓN FLOTANTE (FAB)
-            FloatingActionButton(
-                onClick = onNuevaVentaClick,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp),
-                containerColor = VerdePrincipal,
-                contentColor = Color.White,
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.ventas_new_sale_desc),
-                    modifier = Modifier.size(28.dp)
-                )
+                // FAB
+                FloatingActionButton(
+                    onClick = onNuevaVentaClick,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp),
+                    containerColor = VerdePrincipal,
+                    contentColor = Color.White,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.ventas_new_sale_desc),
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
         }
     }

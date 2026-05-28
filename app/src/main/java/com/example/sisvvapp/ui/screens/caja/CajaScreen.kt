@@ -13,9 +13,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.cajas.CajaDto
+import com.example.sisvvapp.ui.components.ResponsiveContainer
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
@@ -38,19 +38,16 @@ fun CajaScreen(
     onRetry: () -> Unit = {}
 ) {
     VistaVerdeScaffold(
-        title = stringResource(R.string.caja_section_open),
+        title = "Selección de Caja",
         onMenuClick = if (isFromSettings) onMenuClick else onNavigationClick,
         isBackButton = !isFromSettings,
         isOnline = isOnline
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-        ) {
+        ResponsiveContainer {
             Spacer(modifier = Modifier.height(16.dp))
-            VistaVerdeSectionHeader(text = stringResource(R.string.caja_title_select))
+            VistaVerdeSectionHeader(text = "Cajas Abiertas")
             Spacer(modifier = Modifier.height(8.dp))
+
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = VerdePrincipal)
@@ -66,7 +63,7 @@ fun CajaScreen(
             } else if (cajas.isEmpty()) {
                 VistaVerdeEmptyState(
                     icon = Icons.Default.Inbox,
-                    message = stringResource(R.string.caja_empty_state),
+                    message = "No hay cajas abiertas disponibles.",
                     modifier = Modifier.weight(1f),
                     actionText = "Reintentar",
                     onActionClick = onRetry
@@ -80,7 +77,9 @@ fun CajaScreen(
                     }
                 )
             }
+
             Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = { selectedCajaId?.let { onContinueClick(it) } },
                 enabled = selectedCajaId != null,
@@ -91,7 +90,7 @@ fun CajaScreen(
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(
-                    text = stringResource(R.string.caja_button_continue),
+                    text = "CONTINUAR",
                     style = TextStyle(
                         fontFamily = Inter,
                         fontWeight = FontWeight.SemiBold,
@@ -111,9 +110,7 @@ fun CajaScreen(
 fun CajaScreenPreview() {
     val mockCajas = listOf(
         CajaDto(6858, "Bar", "Sáb 05 / May / 2026 15:23:08", null, true, 123),
-        CajaDto(6857, "Barra/Restaurant", "Sáb 05 / May / 2026 15:23:08", null, true, 123),
-        CajaDto(6856, "Cafetería", "Sáb 05 / May / 2026 15:23:08", null, true, 123),
-        CajaDto(6855, "Caddie Bar", "Sáb 05 / May / 2026 15:23:08", null, true, 123)
+        CajaDto(6857, "Barra/Restaurant", "Sáb 05 / May / 2026 15:23:08", null, true, 123)
     )
 
     SISVVAPPTheme {
