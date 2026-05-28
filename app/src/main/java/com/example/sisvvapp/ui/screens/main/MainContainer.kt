@@ -17,7 +17,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.AppNavigationDrawerContent
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
-import com.example.sisvvapp.ui.screens.caja.CajaScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
 import com.example.sisvvapp.ui.screens.socios.SociosScreen
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
@@ -45,7 +44,7 @@ fun MainContainer(
     val scope = rememberCoroutineScope()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: ScreenRoutes.CAJA
+    val currentRoute = navBackStackEntry?.destination?.route ?: ScreenRoutes.VENTAS
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -65,36 +64,7 @@ fun MainContainer(
             )
         }
     ) {
-        NavHost(navController = navController, startDestination = ScreenRoutes.CAJA) {
-
-            // --- PANTALLA DE CAJA ---
-            composable(ScreenRoutes.CAJA) {
-                val context = LocalContext.current
-                val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
-
-                val cajas by cajaViewModel.cajas.collectAsState()
-                val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
-                val isLoading by cajaViewModel.isLoading.collectAsState()
-                val errorMessage by cajaViewModel.errorMessage.collectAsState()
-
-                val cajasDto = cajas.map { entity ->
-                    CajaDto(entity.id, entity.nombre, entity.fechaApertura, entity.fechaCierre, entity.activo, entity.meseroId)
-                }
-
-                CajaScreen(
-                    cajas = cajasDto,
-                    selectedCajaId = selectedCajaId,
-                    isLoading = isLoading,
-                    isOnline = viewModel?.isOnline ?: true,
-                    errorMessage = errorMessage,
-                    onCajaClick = { id -> cajaViewModel.selectCaja(id) },
-                    onMenuClick = { scope.launch { drawerState.open() } },
-                    onContinueClick = { _ ->
-                        navController.navigate(ScreenRoutes.VENTAS) { }
-                    },
-                    onRetry = { cajaViewModel.sync() }
-                )
-            }
+        NavHost(navController = navController, startDestination = ScreenRoutes.VENTAS) {
 
             // --- PANTALLA DE VENTAS ---
             composable(ScreenRoutes.VENTAS) {
@@ -103,7 +73,6 @@ fun MainContainer(
 
                 val ventas by ventasViewModel.ventas.collectAsState()
                 val isLoading by ventasViewModel.isLoading.collectAsState()
-                val error by ventasViewModel.error.collectAsState()
 
                 LaunchedEffect(Unit) {
                     val today = java.time.LocalDate.now().toString()
@@ -209,7 +178,7 @@ fun MainContainer(
                     isLoading = isLoading,
                     isOnline = viewModel?.isOnline ?: true,
                     onCajaClick = { caja -> cajaViewModel.selectCaja(caja.id) },
-                    onSyncClick = { /* Lógica de Retrofit pendiente */ },
+                    onSyncClick = { cajaViewModel.sync() },
                     onLogoutClick = { onLogout() },
                     onMenuClick = { scope.launch { drawerState.open() } },
                     onRefresh = { cajaViewModel.sync() }
