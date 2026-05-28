@@ -24,19 +24,16 @@ import com.example.sisvvapp.data.local.entity.VentaColaEntity
         CajaActivaEntity::class,
         VentaColaEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
-
     abstract fun socioDao(): SocioDao
     abstract fun productoDao(): ProductoDao
     abstract fun cajaActivaDao(): CajaActivaDao
     abstract fun ventaColaDao(): VentaColaDao
-
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
-
         fun getInstance(context: Context): AppDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(

@@ -71,26 +71,26 @@ fun MainContainer(
             composable(ScreenRoutes.CAJA) {
                 val context = LocalContext.current
                 val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
-
                 val cajas by cajaViewModel.cajas.collectAsState()
                 val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
                 val isLoading by cajaViewModel.isLoading.collectAsState()
-
+                val errorMessage by cajaViewModel.errorMessage.collectAsState()
                 val cajasDto = cajas.map { entity ->
                     CajaDto(entity.id, entity.nombre, entity.fechaApertura, entity.fechaCierre, entity.activo, entity.meseroId)
                 }
-
                 CajaScreen(
                     cajas = cajasDto,
                     selectedCajaId = selectedCajaId,
                     isLoading = isLoading,
                     isOnline = viewModel?.isOnline ?: true,
+                    errorMessage = errorMessage,
                     onCajaClick = { id -> cajaViewModel.selectCaja(id) },
                     onMenuClick = { scope.launch { drawerState.open() } },
                     onContinueClick = { _ ->
                         navController.navigate(ScreenRoutes.VENTAS) {
                         }
-                    }
+                    },
+                    onRetry = { cajaViewModel.sync() }
                 )
             }
 
