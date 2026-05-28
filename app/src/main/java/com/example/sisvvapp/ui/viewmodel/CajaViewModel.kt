@@ -12,49 +12,41 @@ import kotlinx.coroutines.launch
 class CajaViewModel(
     private val cajaRepository: CajaRepository
 ) : ViewModel() {
-
-    // Lista de todas las cajas abiertas
     private val _cajas = MutableStateFlow<List<CajaActivaEntity>>(emptyList())
     val cajas: StateFlow<List<CajaActivaEntity>> = _cajas
-
-    // Estado para saber qué caja seleccionó el usuario
     private val _selectedCajaId = MutableStateFlow<Int?>(null)
     val selectedCajaId: StateFlow<Int?> = _selectedCajaId
-
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
-
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
     init {
         observeCajas()
         sync()
     }
-
     private fun observeCajas() {
         viewModelScope.launch {
             cajaRepository.getCajasAbiertas().collect { lista ->
                 _cajas.value = lista
-                // Si la lista tiene elementos y no hay nada seleccionado, podríamos seleccionar el primero por defecto (opcional)
                 if (lista.isNotEmpty() && _selectedCajaId.value == null) {
                     _selectedCajaId.value = lista.first().id
                 }
             }
         }
     }
-
     fun selectCaja(id: Int) {
         _selectedCajaId.value = id
     }
-
     fun sync() {
         viewModelScope.launch {
             _isLoading.value = true
-            try {
-                cajaRepository.sync()
-            } catch (e: Exception) {
+            _errorMessage.value = null
+            val result = cajaRepository.sync()
+            result.onFailure { e ->
                 Log.e("CajaVM", "Sync falló", e)
-            } finally {
-                _isLoading.value = false
+                _errorMessage.value = e.message ?: "Error al sincronizar cajas"
             }
+            _isLoading.value = false
         }
     }
 }

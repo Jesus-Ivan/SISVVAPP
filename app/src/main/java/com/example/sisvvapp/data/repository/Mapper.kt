@@ -86,5 +86,8 @@ fun CajaDto.toCajaActivaEntity() = CajaActivaEntity(
     fechaApertura = fechaApertura,
     fechaCierre = fechaCierre,
     activo = activo,
-    meseroId = meseroId
+    meseroId = meseroId,
+    corte = corte,
+    cambioInicial = cambioInicial,
+    clavePuntoVenta = clavePuntoVenta
 )

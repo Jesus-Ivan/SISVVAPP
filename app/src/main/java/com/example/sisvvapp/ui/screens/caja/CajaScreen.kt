@@ -1,5 +1,6 @@
 package com.example.sisvvapp.ui.screens.caja
 
+import android.os.Message
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Inbox
@@ -29,10 +30,11 @@ fun CajaScreen(
     selectedCajaId: Int?,
     isLoading: Boolean,
     isOnline: Boolean = true,
-
+    errorMessage: String? = null,
     onCajaClick: (Int) -> Unit,
     onMenuClick: () -> Unit,
-    onContinueClick: (Int) -> Unit
+    onContinueClick: (Int) -> Unit,
+    onRetry: () -> Unit = {}
 ) {
     VistaVerdeScaffold(
         title = stringResource(R.string.caja_section_open),
@@ -47,16 +49,25 @@ fun CajaScreen(
             Spacer(modifier = Modifier.height(16.dp))
             VistaVerdeSectionHeader(text = stringResource(R.string.caja_title_select))
             Spacer(modifier = Modifier.height(8.dp))
-
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = VerdePrincipal)
                 }
+            } else if (errorMessage != null) {
+                VistaVerdeEmptyState(
+                    icon = Icons.Default.Inbox,
+                    message = errorMessage,
+                    modifier = Modifier.weight(1f),
+                    actionText = "Reintentar",
+                    onActionClick = onRetry
+                )
             } else if (cajas.isEmpty()) {
                 VistaVerdeEmptyState(
                     icon = Icons.Default.Inbox,
                     message = stringResource(R.string.caja_empty_state),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    actionText = "Reintentar",
+                    onActionClick = onRetry
                 )
             } else {
                 CajasList(
@@ -67,9 +78,7 @@ fun CajaScreen(
                     }
                 )
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             Button(
                 onClick = { selectedCajaId?.let { onContinueClick(it) } },
                 enabled = selectedCajaId != null,
