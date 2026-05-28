@@ -7,18 +7,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.ResponsiveContainer
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
-import com.example.sisvvapp.ui.theme.Inter
-import com.example.sisvvapp.ui.theme.VerdePrincipal
 
 @Composable
 fun CajaScreen(
@@ -52,7 +46,7 @@ fun CajaScreen(
 
                 if (isLoading) {
                     Box(modifier = Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = VerdePrincipal)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 } else if (errorMessage != null) {
                     VistaVerdeEmptyState(
@@ -94,17 +88,12 @@ fun CajaScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = VerdePrincipal),
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Text(
                         text = "CONTINUAR",
-                        style = TextStyle(
-                            fontFamily = Inter,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 16.sp,
-                            color = Color.White
-                        )
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
                 Spacer(modifier = Modifier.height(32.dp))

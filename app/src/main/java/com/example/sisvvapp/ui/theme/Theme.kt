@@ -45,15 +45,15 @@ private val LightColorScheme = lightColorScheme(
     onBackground = TextoPrincipalClaro,
     surface = FondoCardsClaro,
     onSurface = TextoPrincipalClaro,
-    surfaceVariant = Color(0xFFF1F1F4),
+    surfaceVariant = FondoInactivo,
     onSurfaceVariant = TextoSecundarioClaro,
 
-    outline = Color(0xFFE4E4E7),
-    outlineVariant = Color(0xFFF4F4F5),
+    outline = Grey700,
+    outlineVariant = Grey100,
 
     // Alertas y Estados (Mapping Semántico)
     secondaryContainer = EstadoAlertaClaro,
-    onSecondaryContainer = Color(0xFF92400E), // Marrón/Naranja oscuro para contraste sobre amarillo
+    onSecondaryContainer = NaranjaOscuroContraste,
 
     error = RedSaaS,
     errorContainer = FondoErrorClaro,

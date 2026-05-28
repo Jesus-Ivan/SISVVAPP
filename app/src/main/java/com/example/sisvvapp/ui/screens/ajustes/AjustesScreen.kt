@@ -13,7 +13,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,8 +28,6 @@ import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.screens.caja.VistaVerdeCajaCard
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
-import com.example.sisvvapp.ui.theme.TextoSecundarioClaro
-import com.example.sisvvapp.ui.theme.VerdePrincipal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,8 +100,8 @@ fun AjustesScreen(
                             ) {
                                 Text(
                                     text = stringResource(id = R.string.ajustes_sync_desc),
-                                    fontSize = 13.sp,
-                                    color = TextoSecundarioClaro,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.padding(bottom = 16.dp)
                                 )
@@ -114,7 +111,6 @@ fun AjustesScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(50.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = VerdePrincipal),
                                     shape = MaterialTheme.shapes.medium
                                 ) {
                                     Icon(
@@ -126,7 +122,7 @@ fun AjustesScreen(
                                         text = stringResource(id = R.string.ajustes_btn_actualizar),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
-                                        color = Color.White
+                                        color = MaterialTheme.colorScheme.onPrimary
                                     )
                                 }
 
@@ -134,8 +130,8 @@ fun AjustesScreen(
 
                                 Text(
                                     text = stringResource(id = R.string.ajustes_ultima_act, lastSyncDate),
-                                    fontSize = 12.sp,
-                                    color = TextoSecundarioClaro,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center,
                                     lineHeight = 18.sp
                                 )
@@ -153,9 +149,9 @@ fun AjustesScreen(
                                     .fillMaxWidth()
                                     .height(54.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = Color(0xFFFF5252)
+                                    contentColor = MaterialTheme.colorScheme.error
                                 ),
-                                border = BorderStroke(0.dp, Color.Transparent),
+                                border = BorderStroke(0.dp, MaterialTheme.colorScheme.surface),
                                 shape = MaterialTheme.shapes.medium
                             ) {
                                 Icon(

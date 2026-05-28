@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.sisvvapp.ui.theme.BadgeAbiertaContainer
+import com.example.sisvvapp.ui.theme.BadgeAbiertaText
 import com.example.sisvvapp.ui.theme.Inter
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
@@ -64,7 +66,7 @@ fun VistaVerdeCounterBadge(
                 text = count.toString(),
                 fontFamily = Inter,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = MaterialTheme.colorScheme.onPrimary,
                 style = MaterialTheme.typography.labelSmall
             )
         }
@@ -92,8 +94,8 @@ fun BadgesPreview() {
             // Ejemplo 3: Abierta
             VistaVerdeStatusBadge(
                 text = "Abierta",
-                containerColor = Color(0xFFFEF08A),
-                textColor = Color(0xFF854D0E)
+                containerColor = BadgeAbiertaContainer,
+                textColor = BadgeAbiertaText
             )
         }
     }

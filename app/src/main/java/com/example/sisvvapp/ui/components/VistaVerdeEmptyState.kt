@@ -13,10 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.sisvvapp.ui.theme.Inter
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
-import com.example.sisvvapp.ui.theme.VerdePrincipal
 
 @Composable
 fun VistaVerdeEmptyState(
@@ -37,18 +34,16 @@ fun VistaVerdeEmptyState(
             imageVector = icon,
             contentDescription = "Estado vacío",
             modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = message,
-            fontFamily = Inter,
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            lineHeight = 22.sp,
             fontWeight = FontWeight.Medium
         )
         if (actionText != null && onActionClick != null) {
@@ -56,7 +51,7 @@ fun VistaVerdeEmptyState(
             OutlinedButton(
                 onClick = onActionClick,
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = VerdePrincipal
+                    contentColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = MaterialTheme.shapes.medium
             ) {
