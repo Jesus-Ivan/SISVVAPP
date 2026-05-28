@@ -39,6 +39,7 @@ fun VentasScreen(
 ) {
     VistaVerdeScaffold(
         title = stringResource(R.string.ventas_title),
+        subtitle = stringResource(R.string.ventas_subtitle),
         onMenuClick = onMenuClick,
         isOnline = isOnline,
         actions = {

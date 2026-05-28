@@ -21,13 +21,16 @@
     <string name="error_short_password">La contraseña debe tener al menos 8 caracteres.</string>
 
     <!-- Pantalla de Caja -->
+    <string name="caja_title">Selección de Caja</string>
+    <string name="caja_subtitle">Selecciona el punto de venta</string>
     <string name="caja_title_select">Selecciona el corte de caja</string>
-    <string name="caja_section_open">Cajas abiertas</string>
+    <string name="caja_section_open">Cajas Abiertas</string>
     <string name="caja_button_continue">Continuar \u2192</string>
     <string name="caja_empty_state">Aún no hay cajas abiertas en este turno.</string>
 
     <!-- Pantalla de Ventas -->
     <string name="ventas_title">Ventas</string>
+    <string name="ventas_subtitle">Gestiona las comandas del día</string>
     <string name="ventas_section_recent">Ventas Recientes</string>
     <string name="ventas_search_desc">Buscar</string>
     <string name="ventas_filter_date_desc">Filtrar por fecha</string>
@@ -36,6 +39,7 @@
 
     <!-- Pantalla de Socios -->
     <string name="title_socios">Socios</string>
+    <string name="socios_subtitle">Busca y consulta información de socios</string>
     <string name="title_buscar_socio">Buscar socio…</string>
     <string name="socios_section_search">Buscar Socios</string>
     <string name="socios_search_placeholder">Buscar\u2026</string>
@@ -44,6 +48,7 @@
 
     <!-- Perfil del Socio -->
     <string name="perfil_socio_title">Perfil del socio</string>
+    <string name="perfil_socio_subtitle">Información detallada</string>
     <string name="perfil_socio_section_details">Detalles</string>
     <string name="perfil_socio_status_active">Activo</string>
     <string name="perfil_socio_firma_autorizada">Firma Autorizada</string>
@@ -62,6 +67,7 @@
 
     <!-- Ajustes -->
     <string name="ajustes_title">Ajustes</string>
+    <string name="ajustes_subtitle">Configuración y sincronización</string>
     <string name="ajustes_cajas_abiertas">Cajas abiertas</string>
     <string name="ajustes_cajas_empty">No hay cajas abiertas actualmente.</string>
     <string name="ajustes_sincronizar_datos">Sincronizar datos</string>

@@ -1,5 +1,7 @@
 package com.example.sisvvapp.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -15,6 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
@@ -26,19 +30,29 @@ fun VistaVerdeTopBar(
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
     isBackButton: Boolean = false,
+    subtitle: String? = null,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
         title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
-            )
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (subtitle != null) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
-                // Evaluamos qué ícono y descripción mostrar
                 Icon(
                     imageVector = if (isBackButton) Icons.Default.ArrowBack else Icons.Default.Menu,
                     contentDescription = if (isBackButton) "Regresar" else "Menú principal",
@@ -48,11 +62,18 @@ fun VistaVerdeTopBar(
         },
         actions = actions,
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = Color.Transparent,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
             actionIconContentColor = MaterialTheme.colorScheme.onSurface
         ),
-        modifier = modifier
+        modifier = modifier.background(
+            Brush.verticalGradient(
+                colors = listOf(
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                    MaterialTheme.colorScheme.background
+                )
+            )
+        )
     )
 }
 
@@ -63,6 +84,7 @@ fun TopBarPreviewSinIconos() {
     SISVVAPPTheme {
         VistaVerdeTopBar(
             title = "Ajustes",
+            subtitle = "Configuración y sincronización",
             onMenuClick = {}
         )
     }
@@ -74,6 +96,7 @@ fun TopBarPreviewConBotonRegreso() {
     SISVVAPPTheme {
         VistaVerdeTopBar(
             title = "Perfil del socio",
+            subtitle = "Información detallada",
             isBackButton = true,
             onMenuClick = {}
         )
@@ -86,6 +109,7 @@ fun TopBarPreviewDosIconos() {
     SISVVAPPTheme {
         VistaVerdeTopBar(
             title = "Ventas",
+            subtitle = "Gestiona las comandas del día",
             onMenuClick = {},
             actions = {
                 IconButton(onClick = { }) {

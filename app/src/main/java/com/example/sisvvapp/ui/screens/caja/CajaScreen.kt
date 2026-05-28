@@ -7,7 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.ResponsiveContainer
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
@@ -29,7 +31,8 @@ fun CajaScreen(
     onRetry: () -> Unit = {}
 ) {
     VistaVerdeScaffold(
-        title = "Selección de Caja",
+        title = stringResource(R.string.caja_title),
+        subtitle = stringResource(R.string.caja_subtitle),
         onMenuClick = if (isFromSettings) onMenuClick else onNavigationClick,
         isBackButton = isFromSettings,
         isOnline = isOnline
@@ -41,7 +44,7 @@ fun CajaScreen(
                     .padding(horizontal = 16.dp)
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
-                VistaVerdeSectionHeader(text = "Cajas Abiertas")
+                VistaVerdeSectionHeader(text = stringResource(R.string.caja_section_open))
                 Spacer(modifier = Modifier.height(8.dp))
 
                 if (isLoading) {

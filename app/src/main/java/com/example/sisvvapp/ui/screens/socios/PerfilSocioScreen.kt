@@ -33,6 +33,7 @@ fun PerfilSocioScreen(
 ) {
     VistaVerdeScaffold(
         title = stringResource(R.string.perfil_socio_title),
+        subtitle = stringResource(R.string.perfil_socio_subtitle),
         onMenuClick = onBackClick,
         isBackButton = true,
         isOnline = isOnline

@@ -14,9 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.sisvvapp.ui.theme.Inter
-import com.example.sisvvapp.ui.theme.*
-
+import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 @Composable
 fun VistaVerdeSectionHeader(
@@ -26,15 +24,14 @@ fun VistaVerdeSectionHeader(
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 8.dp)) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            fontFamily = Inter,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         HorizontalDivider(
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            thickness = 2.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         )
     }
 }
