@@ -106,7 +106,7 @@ class SisvvViewModel(
         }
     }
 
-    // ── Login ───────────────────────────────────────────────────────────────
+    // ── Login Modificado ───────────────────────────────────────────────────
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
@@ -132,8 +132,18 @@ class SisvvViewModel(
                         loginSuccess = true
                     }
                 } else {
-                    loginError = context.getString(R.string.credenciales_incorrectas)
-                    Log.e("LOGIN", "Error: ${response.code()}")
+                    when (response.code()) {
+                        401, 400 -> {
+                            loginError = context.getString(R.string.credenciales_incorrectas)
+                        }
+                        500, 502, 503, 504 -> {
+                            networkError = context.getString(R.string.error_servidor_caido)
+                        }
+                        else -> {
+                            networkError = context.getString(R.string.error_inesperado)
+                        }
+                    }
+                    Log.e("LOGIN", "Error HTTP Código: ${response.code()}")
                 }
             } catch (e: Exception) {
                 networkError = when (e) {
@@ -143,7 +153,7 @@ class SisvvViewModel(
                     is SSLException -> context.getString(R.string.error_servidor_caido)
                     else -> context.getString(R.string.error_inesperado)
                 }
-                Log.e("LOGIN", "Exeption", e)
+                Log.e("LOGIN", "Exception de conexión física", e)
             } finally {
                 isLoading = false
             }

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.sisvvapp.data.local.AppDatabase
+import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.repository.CajaRepository
 import com.example.sisvvapp.data.repository.ProductoRepository
 import com.example.sisvvapp.data.repository.SocioRepository
@@ -35,6 +36,9 @@ class SisvvViewModelFactory(
 
             modelClass.isAssignableFrom(VentasViewModel::class.java) ->
                 VentasViewModel(VentaRepository(api, db.ventaColaDao())) as T
+
+            modelClass.isAssignableFrom(SplashViewModel::class.java) ->
+                SplashViewModel(SessionManager.getInstance(context)) as T
 
             else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }

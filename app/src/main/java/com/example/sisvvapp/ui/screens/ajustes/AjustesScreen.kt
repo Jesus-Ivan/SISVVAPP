@@ -36,10 +36,12 @@ fun AjustesScreen(
     selectedCajaId: Int?,
     lastSyncDate: String,
     isOnline: Boolean = true,
+    isLoading: Boolean = false,
     onCajaClick: (CajaDto) -> Unit,
     onSyncClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    onMenuClick: () -> Unit
+    onMenuClick: () -> Unit,
+    onRefresh: () -> Unit = {}
 ) {
     VistaVerdeScaffold(
         title = stringResource(id = R.string.ajustes_title),
