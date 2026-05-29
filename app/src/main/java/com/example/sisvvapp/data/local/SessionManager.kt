@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import java.io.File
+import java.sql.Timestamp
 
 class SessionManager private constructor(context: Context) {
 
@@ -117,6 +118,21 @@ class SessionManager private constructor(context: Context) {
 
     fun isLoggedIn(): Boolean = getToken() != null
 
+    fun saveLastSyncDate(timestamp: Long) {
+        try {
+            prefs.edit().putLong(KEY_LAST_SYNC_DATE, timestamp).apply()
+        } catch (e: Exception) {
+            Log.e("SessionManager", "Error al guardar lastSyncDate", e)
+        }
+    }
+
+    fun getLastSyncDate(): Long = try {
+        prefs.getLong(KEY_LAST_SYNC_DATE, 0L)
+    } catch (e: Exception) {
+        Log.e("SessionManager", "Error al leer lastSyncDate", e)
+        0L
+    }
+
     companion object {
         @Volatile
         private var INSTANCE: SessionManager? = null
@@ -125,6 +141,8 @@ class SessionManager private constructor(context: Context) {
         private const val KEY_TOKEN = "token"
         private const val KEY_USER_ID = "user_id"
         private const val KEY_THEME_MODE = "theme_mode"
+
+        private const val KEY_LAST_SYNC_DATE = "last_sync_date"
 
         fun getInstance(context: Context): SessionManager =
             INSTANCE ?: synchronized(this) {

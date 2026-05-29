@@ -18,4 +18,7 @@ interface CajaActivaDao {
 
     @Query("SELECT * FROM cajas_activas WHERE activo = 1")
     fun getCajasAbiertas(): Flow<List<CajaActivaEntity>>
+
+    @Query("DELETE FROM cajas_activas")
+    suspend fun deleteAll()
 }

@@ -34,12 +34,16 @@ import com.example.sisvvapp.ui.viewmodel.CajaViewModel // Importamos el CajaView
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
+import com.example.sisvvapp.data.sync.SyncWorker
 
 class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Programar sync periódico
+        SyncWorker.enqueuePeriodic(this)
 
         setContent {
             val sisvvViewModel: SisvvViewModel = viewModel(
