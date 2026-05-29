@@ -15,6 +15,7 @@ fun VistaVerdeScaffold(
     actions: @Composable RowScope.() -> Unit = {},
     isOnline: Boolean = true,
     isBackButton: Boolean = false,
+    showNavigationIcon: Boolean = true,
     subtitle: String? = null,
     content: @Composable () -> Unit
 ) {
@@ -25,6 +26,7 @@ fun VistaVerdeScaffold(
                 onMenuClick = onMenuClick,
                 actions = actions,
                 isBackButton = isBackButton,
+                showNavigationIcon = showNavigationIcon,
                 subtitle = subtitle
             )
         }

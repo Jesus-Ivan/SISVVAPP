@@ -38,7 +38,8 @@ fun VistaVerdeTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true,
     minLines: Int = 1,
-    // CORRECCIÓN: Le quitamos el "on" para que sea el fondo gris claro
+    readOnly: Boolean = false,
+    enabled: Boolean = true,
     bgColor: Color = MaterialTheme.colorScheme.surfaceVariant
 ) {
     var passwordVisible by remember{mutableStateOf(false)}
@@ -47,6 +48,9 @@ fun VistaVerdeTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
+        readOnly = readOnly,
+        enabled = enabled,
+
         label = {
             Text(
                 text = label,
@@ -87,7 +91,6 @@ fun VistaVerdeTextField(
     )
 }
 
-// Dejamos solo este Preview hasta abajo, y le agregué el ejemplo de la contraseña
 @Preview(showBackground = true)
 @Composable
 fun TextFieldPreview() {
