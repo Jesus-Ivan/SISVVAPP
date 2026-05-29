@@ -26,10 +26,9 @@ class SocioRepository(
                 val sociosDto = response.body().orEmpty()
                 val sociosEnt = sociosDto.map { it.toSocioEntity() }
                 val integrantesEnt = sociosDto.flatMap { it.toIntegranteEntities() }
-
+                socioDao.deleteAll()
                 socioDao.insertAllSocios(sociosEnt)
                 socioDao.insertAllIntegrantes(integrantesEnt)
-
                 Log.d("SocioRepo", "Sincronizados ${sociosEnt.size} socios")
                 Result.success(Unit)
             } else {

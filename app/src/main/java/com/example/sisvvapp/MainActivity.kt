@@ -28,6 +28,7 @@ import com.example.sisvvapp.ui.viewmodel.CajaViewModel
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
+import com.example.sisvvapp.data.sync.SyncWorker
 
 class MainActivity : ComponentActivity() {
 
@@ -36,6 +37,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Forzamos vertical antes de cualquier otra cosa
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        // Programar sync periódico
+        SyncWorker.enqueuePeriodic(this)
 
         setContent {
             val sisvvViewModel: SisvvViewModel = viewModel(
