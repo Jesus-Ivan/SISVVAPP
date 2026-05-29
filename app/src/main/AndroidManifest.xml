@@ -22,13 +22,9 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.SISVVAPP"
             tools:ignore="LockedOrientationActivity">
-
-            <property
-                android:name="android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE"
-                android:value="false" />
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

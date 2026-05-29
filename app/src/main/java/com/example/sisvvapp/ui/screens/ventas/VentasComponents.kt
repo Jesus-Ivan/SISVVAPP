@@ -63,6 +63,7 @@ fun VistaVerdeSaleCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "TOTAL: $${String.format(Locale.US, "%.2f", venta.total)}",
+                    fontFamily = Poppins,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     color = MaterialTheme.colorScheme.primary
@@ -83,7 +84,6 @@ fun VentasList(
     LazyVerticalGrid(
         columns = GridCells.Fixed(if (isTablet) 2 else 1),
         contentPadding = PaddingValues(16.dp),
-        // Espaciado vertical entre filas de ventas
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxSize()
