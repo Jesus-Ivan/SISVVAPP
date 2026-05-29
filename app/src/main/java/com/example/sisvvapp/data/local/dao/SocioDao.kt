@@ -34,6 +34,7 @@ interface SocioDao {
     suspend fun deleteAll()
 }
 
+
 data class SocioWithIntegrantes(
     @Embedded val socio: SocioEntity,
     @Relation(

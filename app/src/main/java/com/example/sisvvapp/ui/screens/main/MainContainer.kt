@@ -31,6 +31,7 @@ import com.example.sisvvapp.ui.viewmodel.SociosViewModel
 import com.example.sisvvapp.ui.viewmodel.VentasViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.sisvvapp.data.local.SessionManager
 import kotlinx.coroutines.launch
 
 
@@ -198,19 +199,24 @@ fun MainContainer(
             composable(ScreenRoutes.AJUSTES) {
                 val context = LocalContext.current
                 val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(context))
-
                 val cajas by cajaViewModel.cajas.collectAsState()
                 val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
                 val isLoading by cajaViewModel.isLoading.collectAsState()
-
                 val cajasDto = cajas.map { entity ->
                     CajaDto(entity.id, entity.nombre, entity.fechaApertura, entity.fechaCierre, entity.activo, entity.meseroId)
                 }
-
+                val sessionManager = SessionManager.getInstance(context)
+                val lastSyncTimestamp = sessionManager.getLastSyncDate()
+                val lastSyncText = if (lastSyncTimestamp > 0) {
+                    val sdf = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+                    sdf.format(java.util.Date(lastSyncTimestamp))
+                } else {
+                    "Pendiente de sincronizar"
+                }
                 AjustesScreen(
                     cajas = cajasDto,
                     selectedCajaId = selectedCajaId,
-                    lastSyncDate = "Pendiente de sincronizar",
+                    lastSyncDate = lastSyncText,
                     isLoading = isLoading,
                     isOnline = viewModel?.isOnline ?: true,
                     onCajaClick = { caja -> cajaViewModel.selectCaja(caja.id) },

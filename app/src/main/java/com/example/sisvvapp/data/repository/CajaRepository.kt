@@ -16,6 +16,7 @@ class CajaRepository(
         val response = api.getCajasActivas()
         if (response.isSuccessful) {
             val listaCajas = response.body() ?: emptyList()
+            cajaActivaDao.deleteAll()
             listaCajas.forEach { cajaDto ->
                 cajaActivaDao.insertCajaActiva(cajaDto.toCajaActivaEntity())
             }

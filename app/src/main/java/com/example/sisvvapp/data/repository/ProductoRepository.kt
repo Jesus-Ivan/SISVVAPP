@@ -26,10 +26,9 @@ class ProductoRepository(
             val productosDto = response.body().orEmpty()
             val productosEnt = productosDto.map { it.toProductoEntity() }
             val modificadoresEnt = productosDto.flatMap { it.toModificadorEntities() }
-
+            productoDao.deleteAll()
             productoDao.insertAllProductos(productosEnt)
             productoDao.insertAllModificadores(modificadoresEnt)
-
             Log.d("ProdRepo", "Sincronizados ${productosEnt.size} productos")
         } else {
             Log.w("ProdRepo", "Error sync productos: ${response.code()}")
