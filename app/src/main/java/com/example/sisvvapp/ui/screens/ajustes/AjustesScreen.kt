@@ -10,6 +10,8 @@ import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,10 +52,21 @@ fun AjustesScreen(
         isOnline = isOnline
     ) {
         ResponsiveContainer {
+            val pullState = rememberPullToRefreshState()
             PullToRefreshBox(
                 isRefreshing = isLoading,
                 onRefresh = onRefresh,
-                modifier = Modifier.fillMaxSize()
+                state = pullState,
+                modifier = Modifier.fillMaxSize(),
+                indicator = {
+                    PullToRefreshDefaults.Indicator(
+                        state = pullState,
+                        isRefreshing = isLoading,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),

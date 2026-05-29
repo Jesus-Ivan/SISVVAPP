@@ -31,7 +31,8 @@ fun VistaVerdeTopBar(
     modifier: Modifier = Modifier,
     isBackButton: Boolean = false,
     subtitle: String? = null,
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable RowScope.() -> Unit = {},
+    showNavigationIcon: Boolean = true // 1. Agregamos "= true" para no romper las otras pantallas
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -52,12 +53,15 @@ fun VistaVerdeTopBar(
             }
         },
         navigationIcon = {
-            IconButton(onClick = onMenuClick) {
-                Icon(
-                    imageVector = if (isBackButton) Icons.Default.ArrowBack else Icons.Default.Menu,
-                    contentDescription = if (isBackButton) "Regresar" else "Menú principal",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
+            // 2. Envolvemos el botón en el IF
+            if (showNavigationIcon) {
+                IconButton(onClick = onMenuClick) {
+                    Icon(
+                        imageVector = if (isBackButton) Icons.Default.ArrowBack else Icons.Default.Menu,
+                        contentDescription = if (isBackButton) "Regresar" else "Menú principal",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         },
         actions = actions,
@@ -84,8 +88,8 @@ fun TopBarPreviewSinIconos() {
     SISVVAPPTheme {
         VistaVerdeTopBar(
             title = "Ajustes",
+            onMenuClick = {},
             subtitle = "Configuración y sincronización",
-            onMenuClick = {}
         )
     }
 }
@@ -96,9 +100,9 @@ fun TopBarPreviewConBotonRegreso() {
     SISVVAPPTheme {
         VistaVerdeTopBar(
             title = "Perfil del socio",
-            subtitle = "Información detallada",
+            onMenuClick = {},
             isBackButton = true,
-            onMenuClick = {}
+            subtitle = "Información detallada",
         )
     }
 }
@@ -109,8 +113,8 @@ fun TopBarPreviewDosIconos() {
     SISVVAPPTheme {
         VistaVerdeTopBar(
             title = "Ventas",
-            subtitle = "Gestiona las comandas del día",
             onMenuClick = {},
+            subtitle = "Gestiona las comandas del día",
             actions = {
                 IconButton(onClick = { }) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar")
@@ -118,7 +122,7 @@ fun TopBarPreviewDosIconos() {
                 IconButton(onClick = { }) {
                     Icon(imageVector = Icons.Default.Refresh, contentDescription = "Actualizar")
                 }
-            }
+            },
         )
     }
 }
