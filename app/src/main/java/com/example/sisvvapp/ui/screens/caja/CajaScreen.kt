@@ -15,6 +15,7 @@ import com.example.sisvvapp.ui.components.ResponsiveContainer
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
+import com.example.sisvvapp.ui.components.VistaVerdeButton
 
 @Composable
 fun CajaScreen(
@@ -35,6 +36,7 @@ fun CajaScreen(
         subtitle = stringResource(R.string.caja_subtitle),
         onMenuClick = if (isFromSettings) onMenuClick else onNavigationClick,
         isBackButton = isFromSettings,
+        showNavigationIcon = isFromSettings,
         isOnline = isOnline
     ) {
         ResponsiveContainer {
@@ -85,20 +87,12 @@ fun CajaScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
+                VistaVerdeButton(
+                    text = "CONTINUAR",
                     onClick = { selectedCajaId?.let { onContinueClick(it) } },
-                    enabled = selectedCajaId != null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Text(
-                        text = "CONTINUAR",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
+                    enabled = selectedCajaId != null
+                )
+
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }

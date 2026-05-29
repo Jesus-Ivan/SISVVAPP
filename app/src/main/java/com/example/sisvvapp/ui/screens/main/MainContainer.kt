@@ -21,8 +21,10 @@ import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
 import com.example.sisvvapp.ui.screens.socios.SociosScreen
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
 import com.example.sisvvapp.ui.screens.ajustes.AjustesScreen
+import com.example.sisvvapp.ui.screens.ventas.NuevaVentaConfigScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.theme.VerdePrincipal
 import com.example.sisvvapp.ui.viewmodel.CajaViewModel
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.viewmodel.SociosViewModel
@@ -30,6 +32,7 @@ import com.example.sisvvapp.ui.viewmodel.VentasViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
+
 
 @Suppress("UNUSED_PARAMETER")
 @Composable
@@ -77,7 +80,6 @@ fun MainContainer(
                     val today = java.time.LocalDate.now().toString()
                     ventasViewModel.loadVentas(today)
                 }
-
                 VentasScreen(
                     onMenuClick = { scope.launch { drawerState.open() } },
                     ventas = ventas,
@@ -88,9 +90,44 @@ fun MainContainer(
                         ventasViewModel.loadVentas(today)
                     },
                     onVentaClick = { _ -> },
-                    onNuevaVentaClick = { }
+                    onNuevaVentaClick = {
+                        navController.navigate(ScreenRoutes.NUEVA_VENTA)
+                    }
                 )
             }
+
+            // --- PANTALLA DE NUEVA VENTA ---
+            composable(ScreenRoutes.NUEVA_VENTA) {
+                var tipoSeleccionado by remember { mutableStateOf("Público General") }
+                var searchQuery by remember { mutableStateOf("") }
+                var nombreCliente by remember { mutableStateOf("") }
+
+                NuevaVentaConfigScreen(
+                    tiposDeVenta = listOf(
+                        "Público General",
+                        "Socio",
+                        "Invitado del Socio",
+                        "Empleado"
+                    ),
+                    tipoSeleccionado = tipoSeleccionado,
+                    onTipoVentaChange = { tipoSeleccionado = it },
+
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { searchQuery = it },
+
+                    nombreCliente = nombreCliente,
+                    onNombreClienteChange = { nombreCliente = it },
+
+                    isOnline = viewModel?.isOnline ?: true,
+
+                    onMenuClick = { navController.popBackStack() },
+
+                    onContinuarClick = {
+                        // navController.navigate(ScreenRoutes.CARRITO_COMPRAS)
+                    }
+                )
+            }
+
 
             // --- PANTALLA DE SOCIOS (LISTA PRINCIPAL) ---
             composable(ScreenRoutes.SOCIOS) {
@@ -152,7 +189,7 @@ fun MainContainer(
                     )
                 } else {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        CircularProgressIndicator(color = VerdePrincipal)
                     }
                 }
             }

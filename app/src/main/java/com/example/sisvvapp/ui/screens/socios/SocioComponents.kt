@@ -43,7 +43,7 @@ fun VistaVerdeSocioCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "#${socio.id} - ${socio.nombre} ${socio.apellidoP}",
+                    text = "#${socio.id} - ${socio.nombre} ${socio.apellidoP} ${socio.apellidoM ?: ""}".trimEnd(),
                     fontFamily = Inter,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,

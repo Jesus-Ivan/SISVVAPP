@@ -1,36 +1,30 @@
 package com.example.sisvvapp
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.navigation.Screen
-import com.example.sisvvapp.ui.screens.caja.CajaScreen // Importamos tu CajaScreen
+import com.example.sisvvapp.ui.screens.caja.CajaScreen
 import com.example.sisvvapp.ui.screens.login.LoginScreen
 import com.example.sisvvapp.ui.screens.main.MainContainer
 import com.example.sisvvapp.ui.screens.splash.SplashScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
-import com.example.sisvvapp.ui.theme.VerdePrincipal
-import com.example.sisvvapp.ui.viewmodel.CajaViewModel // Importamos el CajaViewModel
+import com.example.sisvvapp.ui.viewmodel.CajaViewModel
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
@@ -40,7 +34,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         setContent {
             val sisvvViewModel: SisvvViewModel = viewModel(
                 factory = SisvvViewModelFactory(this)

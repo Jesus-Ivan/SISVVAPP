@@ -25,7 +25,7 @@ fun VistaVerdeSectionHeader(
         Text(
             text = text,
             style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(6.dp))
