@@ -1,0 +1,85 @@
+package com.example.sisvvapp.ui.viewmodel
+
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.sisvvapp.data.local.entity.SocioEntity
+import com.example.sisvvapp.data.repository.SocioRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+
+class NuevaVentaViewModel(
+    private val socioRepository: SocioRepository
+) : ViewModel() {
+
+    private val _tipoVenta = MutableStateFlow("Público General")
+    val tipoVenta: StateFlow<String> = _tipoVenta
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    private val _sociosEncontrados = MutableStateFlow<List<SocioEntity>>(emptyList())
+    val sociosEncontrados: StateFlow<List<SocioEntity>> = _sociosEncontrados
+
+    private val _socioSeleccionado = MutableStateFlow<SocioEntity?>(null)
+    val socioSeleccionado: StateFlow<SocioEntity?> = _socioSeleccionado
+
+    private val _nombreCliente = MutableStateFlow("")
+    val nombreCliente: StateFlow<String> = _nombreCliente
+
+    private val _socioId = MutableStateFlow<Int?>(null)
+    val socioId: StateFlow<Int?> = _socioId
+
+    private var searchJob: Job? = null
+
+    fun setTipoVenta(tipo: String) {
+        _tipoVenta.value = tipo
+        clearSocioSelection()
+    }
+
+    fun searchSocios(query: String) {
+        _searchQuery.value = query
+        searchJob?.cancel()
+        if (query.length < 2) {
+            _sociosEncontrados.value = emptyList()
+            return
+        }
+        searchJob = viewModelScope.launch {
+            delay(300)
+            socioRepository.searchSocios("%$query%").collect { lista ->
+                _sociosEncontrados.value = lista
+            }
+        }
+    }
+
+    fun selectSocio(socio: SocioEntity) {
+        _socioSeleccionado.value = socio
+        _socioId.value = socio.id
+        _nombreCliente.value = "${socio.nombre} ${socio.apellidoP} ${socio.apellidoM ?: ""}"
+        _sociosEncontrados.value = emptyList()
+        _searchQuery.value = ""
+    }
+
+    fun setNombreCliente(nombre: String) {
+        _nombreCliente.value = nombre
+    }
+
+    fun clearSocioSelection() {
+        _socioSeleccionado.value = null
+        _socioId.value = null
+        _nombreCliente.value = ""
+        _searchQuery.value = ""
+        _sociosEncontrados.value = emptyList()
+    }
+
+    fun isFormValid(): Boolean {
+        return when (_tipoVenta.value) {
+            "Socio" -> _socioId.value != null
+            "Invitado del Socio" -> _socioId.value != null && _nombreCliente.value.isNotBlank()
+            else -> _nombreCliente.value.isNotBlank()
+        }
+    }
+}

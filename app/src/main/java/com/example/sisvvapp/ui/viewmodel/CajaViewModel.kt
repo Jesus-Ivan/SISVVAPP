@@ -3,6 +3,7 @@ package com.example.sisvvapp.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.local.entity.CajaActivaEntity
 import com.example.sisvvapp.data.repository.CajaRepository
 import com.example.sisvvapp.data.repository.ProductoRepository
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
 class CajaViewModel(
     private val cajaRepository: CajaRepository,
     private val socioRepository: SocioRepository,
-    private val productoRepository: ProductoRepository
+    private val productoRepository: ProductoRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _cajas = MutableStateFlow<List<CajaActivaEntity>>(emptyList())
@@ -57,6 +59,9 @@ class CajaViewModel(
             result.onFailure { e ->
                 Log.e("CajaVM", "Sync falló", e)
                 _errorMessage.value = e.message ?: "Error al sincronizar cajas"
+            }
+            result.onSuccess {
+                sessionManager.saveLastSyncDate(System.currentTimeMillis())
             }
             _isLoading.value = false
         }

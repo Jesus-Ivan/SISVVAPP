@@ -8,8 +8,13 @@ object ScreenRoutes {
     const val SOCIOS = "socios"
     const val AJUSTES = "ajustes"
     const val NUEVA_VENTA = "nueva_venta"
+    const val BUSCAR_PRODUCTOS = "buscar_productos"
+    const val MODIFICADORES = "modificadores/{productoId}"
+    const val RESUMEN_CARRITO = "resumen_carrito"
+    const val SELECCIONAR_PAGO = "seleccionar_pago"
 
     const val PERFIL_SOCIO = "perfil_socio/{socioId}"
 
     fun crearRutaPerfilSocio(socioId: Int) = "perfil_socio/$socioId"
+    fun crearRutaModificadores(productoId: Int) = "modificadores/$productoId"
 }
