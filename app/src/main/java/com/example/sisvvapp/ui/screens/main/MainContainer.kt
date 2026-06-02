@@ -295,6 +295,10 @@ fun MainContainer(
                 val errorMessage by sociosViewModel.error.collectAsState()
                 var searchQuery by remember { mutableStateOf("") }
 
+                LaunchedEffect(Unit) {
+                    sociosViewModel.search(searchQuery)
+                }
+
                 SociosScreen(
                     socios = socios,
                     isLoading = isLoading,
@@ -309,8 +313,14 @@ fun MainContainer(
                     onSocioClick = { socioId ->
                         navController.navigate(ScreenRoutes.crearRutaPerfilSocio(socioId))
                     },
-                    onRetry = { sociosViewModel.sync() },
-                    onRefresh = { sociosViewModel.sync() }
+                    onRetry = {
+                        searchQuery = ""
+                        sociosViewModel.search("")
+                        sociosViewModel.sync() },
+                    onRefresh = { searchQuery = ""
+                        sociosViewModel.search("")
+                        sociosViewModel.sync()
+                    }
                 )
             }
 
