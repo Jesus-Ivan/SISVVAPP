@@ -31,7 +31,10 @@ class CajaViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
+    private val savedCajaId = sessionManager.getSelectedCajaId()
+
     init {
+        _selectedCajaId.value = savedCajaId
         observeCajas()
         sync()
     }
@@ -40,15 +43,16 @@ class CajaViewModel(
         viewModelScope.launch {
             cajaRepository.getCajasAbiertas().collect { lista ->
                 _cajas.value = lista
-                if (lista.isNotEmpty() && _selectedCajaId.value == null) {
+                if (_selectedCajaId.value == null && lista.isNotEmpty()) {
                     _selectedCajaId.value = lista.first().id
                 }
             }
         }
     }
 
-    fun selectCaja(id: Int) {
+    fun selectCaja(id: Int, nombre: String = "") {
         _selectedCajaId.value = id
+        sessionManager.saveSelectedCaja(id, nombre)
     }
 
     fun sync() {

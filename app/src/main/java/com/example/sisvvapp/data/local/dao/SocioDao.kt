@@ -30,6 +30,12 @@ interface SocioDao {
     @Query("SELECT * FROM socios ORDER BY apellido_p, apellido_m, nombre")
     fun getAllSocios(): Flow<List<SocioEntity>>
 
+    @Query("SELECT * FROM socios ORDER BY apellido_p, apellido_m, nombre")
+    suspend fun getAllSociosSync(): List<SocioEntity>
+
+    @Query("SELECT * FROM socios WHERE id = :id")
+    suspend fun getSocioById(id: Int): SocioEntity?
+
     @Query("DELETE FROM socios")
     suspend fun deleteAll()
 }

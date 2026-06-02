@@ -239,6 +239,21 @@ class CarritoViewModel(
         _pagos.value = emptyList()
         _sendResult.value = null
     }
+
+    fun clearState() {
+        _tipoVenta.value = ""
+        _socioId.value = null
+        _nombreCliente.value = ""
+        _corteCaja.value = 0
+        _clavePuntoVenta.value = ""
+        _items.value = emptyList()
+        _total.value = 0.0
+        _pagos.value = emptyList()
+        _sendResult.value = null
+        _searchQuery.value = ""
+        _productoSeleccionado.value = null
+        _isSending.value = false
+    }
 }
 
 sealed class SendResult {

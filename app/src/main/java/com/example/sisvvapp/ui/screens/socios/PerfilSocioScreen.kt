@@ -1,6 +1,7 @@
 package com.example.sisvvapp.ui.screens.socios
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,8 +9,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,6 +28,8 @@ import com.example.sisvvapp.data.local.entity.IntegranteEntity
 import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.ui.components.*
 import com.example.sisvvapp.ui.theme.*
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 
 @Composable
 fun PerfilSocioScreen(
@@ -30,131 +38,158 @@ fun PerfilSocioScreen(
     isOnline: Boolean = true,
     onBackClick: () -> Unit
 ) {
-    VistaVerdeScaffold(
-        title = stringResource(R.string.perfil_socio_title),
-        onMenuClick = onBackClick,
-        isBackButton = true,
-        isOnline = isOnline
-    ) {
-        ResponsiveContainer() {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
+    var photoToShow by remember { mutableStateOf<String?>(null) }
+    val hazeState = remember { HazeState() }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(hazeState)
+        ) {
+            VistaVerdeScaffold(
+                title = stringResource(R.string.perfil_socio_title),
+                onMenuClick = onBackClick,
+                isBackButton = true,
+                isOnline = isOnline
             ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    contentPadding = PaddingValues(bottom = 32.dp)
-                ) {
+                ResponsiveContainer() {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp),
+                            contentPadding = PaddingValues(bottom = 32.dp)
+                        ) {
 
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        VistaVerdeSectionHeader(text = stringResource(R.string.perfil_socio_section_details))
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
-                    item {
-                        VistaVerdeBaseCard(modifier = Modifier.fillMaxWidth()) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 24.dp, horizontal = 16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                VistaVerdeAvatar(fotoUrl = socio.fotoUrl, modifier = Modifier.size(114.dp))
-
+                            item {
                                 Spacer(modifier = Modifier.height(16.dp))
+                                VistaVerdeSectionHeader(text = stringResource(R.string.perfil_socio_section_details))
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
 
-                                Text(
-                                    text = listOfNotNull(
-                                        socio.nombre,
-                                        socio.apellidoP.takeIf { it.isNotBlank() },
-                                        socio.apellidoM.takeIf { it.isNotBlank() }
-                                    ).joinToString(" "),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    textAlign = TextAlign.Center
-                                )
+                            item {
+                                VistaVerdeBaseCard(modifier = Modifier.fillMaxWidth()) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 24.dp, horizontal = 16.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        VistaVerdeAvatar(
+                                            fotoUrl = socio.fotoUrl,
+                                            modifier = Modifier
+                                                .size(114.dp)
+                                                .clickable { photoToShow = socio.fotoUrl }
+                                        )
 
-                                Spacer(modifier = Modifier.height(12.dp))
+                                        Spacer(modifier = Modifier.height(16.dp))
 
-                                Text(
-                                    text = "Estado membresia: ${socio.estatus}",
-                                    fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                        Text(
+                                            text = listOfNotNull(
+                                                socio.nombre,
+                                                socio.apellidoP.takeIf { it.isNotBlank() },
+                                                socio.apellidoM.takeIf { it.isNotBlank() }
+                                            ).joinToString(" "),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 18.sp,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            textAlign = TextAlign.Center
+                                        )
 
-                                Spacer(modifier = Modifier.height(4.dp))
+                                        Spacer(modifier = Modifier.height(12.dp))
 
-                                Text(
-                                    text = "Tipo membresia: ${socio.membresiaTipo}",
-                                    fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                        Text(
+                                            text = "Estado membresia: ${socio.estatus}",
+                                            fontSize = 13.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
 
-                                Spacer(modifier = Modifier.height(4.dp))
+                                        Spacer(modifier = Modifier.height(4.dp))
 
-                                Text(
-                                    text = "No.Socio: ${socio.id}",
-                                    fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                        Text(
+                                            text = "Tipo membresia: ${socio.membresiaTipo}",
+                                            fontSize = 13.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
 
-                                Spacer(modifier = Modifier.height(12.dp))
+                                        Spacer(modifier = Modifier.height(4.dp))
 
-                                if (socio.estatus == "CAN") {
-                                    VistaVerdeStatusBadge(
-                                        text = stringResource(R.string.perfil_socio_acceso_denegado),
-                                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                                        textColor = MaterialTheme.colorScheme.onErrorContainer
-                                    )
-                                } else {
-                                    VistaVerdeStatusBadge(
-                                        text = stringResource(R.string.perfil_socio_acceso_permitido),
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        textColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
+                                        Text(
+                                            text = "No.Socio: ${socio.id}",
+                                            fontSize = 13.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+
+                                        Spacer(modifier = Modifier.height(12.dp))
+
+                                        if (socio.estatus == "CAN") {
+                                            VistaVerdeStatusBadge(
+                                                text = stringResource(R.string.perfil_socio_acceso_denegado),
+                                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                                textColor = MaterialTheme.colorScheme.onErrorContainer
+                                            )
+                                        } else {
+                                            VistaVerdeStatusBadge(
+                                                text = stringResource(R.string.perfil_socio_acceso_permitido),
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                                textColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = if (socio.firmaAutorizada)
+                                                stringResource(R.string.perfil_socio_firma_autorizada)
+                                            else
+                                                stringResource(R.string.perfil_socio_firma_no_autorizada),
+                                            fontSize = 13.sp,
+                                            color = if (socio.firmaAutorizada) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontWeight = if (socio.firmaAutorizada) FontWeight.Medium else FontWeight.Normal
+                                        )
+                                    }
                                 }
+                            }
 
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = if (socio.firmaAutorizada)
-                                        stringResource(R.string.perfil_socio_firma_autorizada)
-                                    else
-                                        stringResource(R.string.perfil_socio_firma_no_autorizada),
-                                    fontSize = 13.sp,
-                                    color = if (socio.firmaAutorizada) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontWeight = if (socio.firmaAutorizada) FontWeight.Medium else FontWeight.Normal
+                            item {
+                                Spacer(modifier = Modifier.height(24.dp))
+                                VistaVerdeSectionHeader(text = stringResource(R.string.perfil_socio_section_members))
+                                Spacer(modifier = Modifier.height(12.dp))
+                            }
+
+                            items(
+                                items = integrantes,
+                                key = { it.id }
+                            ) { integrante ->
+                                IntegranteCard(
+                                    integrante = integrante,
+                                    onPhotoClick = { url -> photoToShow = url }
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        VistaVerdeSectionHeader(text = stringResource(R.string.perfil_socio_section_members))
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
-
-                    items(
-                        items = integrantes,
-                        key = { it.id }
-                    ) { integrante ->
-                        IntegranteCard(integrante)
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }
         }
 
+        PhotoViewerOverlay(
+            fotoUrl = photoToShow,
+            hazeState = hazeState,
+            onDismiss = { photoToShow = null }
+        )
     }
 }
 
 @Composable
-fun IntegranteCard(integrante: IntegranteEntity) {
+fun IntegranteCard(
+    integrante: IntegranteEntity,
+    onPhotoClick: (String) -> Unit = {}
+) {
     VistaVerdeBaseCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -185,7 +220,10 @@ fun IntegranteCard(integrante: IntegranteEntity) {
                 )
             }
             if (!integrante.fotoUrl.isNullOrBlank()) {
-                VistaVerdeAvatar(fotoUrl = integrante.fotoUrl)
+                VistaVerdeAvatar(
+                    fotoUrl = integrante.fotoUrl,
+                    modifier = Modifier.clickable { onPhotoClick(integrante.fotoUrl) }
+                )
             }
         }
     }
@@ -201,7 +239,6 @@ fun PerfilSocioScreenPreview() {
     )
 
     val mockIntegrantes = listOf(
-        // 3. CORRECCIÓN: Agregamos fotoUrl = "" a los integrantes del Preview
         IntegranteEntity(id = 1833, socioId = 1832, nombre = "Alejandro Ramírez", apellidoP = null, apellidoM = null, parentesco = "Hijo", fotoUrl = ""),
         IntegranteEntity(id = 1834, socioId = 1832, nombre = "David López", apellidoP = null, apellidoM = null, parentesco = "Hijo", fotoUrl = "")
     )

@@ -3,9 +3,8 @@ package com.example.sisvvapp.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.sisvvapp.data.local.dao.TipoPagoDao
 import com.example.sisvvapp.data.local.entity.TipoPagoEntity
-import com.example.sisvvapp.network.ApiService
+import com.example.sisvvapp.data.repository.TipoPagoRepository
 import com.example.sisvvapp.network.dto.ventas.PagoRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,8 +17,7 @@ data class PagoItem(
 )
 
 class PagoViewModel(
-    private val tipoPagoDao: TipoPagoDao,
-    private val api: ApiService
+    private val tipoPagoRepository: TipoPagoRepository
 ) : ViewModel() {
 
     private val _tiposPago = MutableStateFlow<List<TipoPagoEntity>>(emptyList())
@@ -38,7 +36,7 @@ class PagoViewModel(
 
     private fun observeTiposPago() {
         viewModelScope.launch {
-            tipoPagoDao.getTiposPago().collect { lista ->
+            tipoPagoRepository.getTiposPago().collect { lista ->
                 _tiposPago.value = lista
             }
         }
@@ -46,22 +44,7 @@ class PagoViewModel(
 
     fun syncTiposPago() {
         viewModelScope.launch {
-            try {
-                val response = api.getTiposPago()
-                if (response.isSuccessful) {
-                    val tipos = response.body()?.map { dto ->
-                        TipoPagoEntity(
-                            id = dto.id,
-                            nombre = dto.nombre,
-                            requiereSocio = dto.requiereSocio,
-                            requiereFirma = dto.requiereFirma,
-                            activo = dto.activo
-                        )
-                    } ?: emptyList()
-                    tipoPagoDao.deleteAll()
-                    tipoPagoDao.insertAll(tipos)
-                }
-            } catch (e: Exception) {
+            tipoPagoRepository.sync().onFailure { e ->
                 Log.w("PagoVM", "Error al sincronizar tipos de pago", e)
             }
         }

@@ -26,7 +26,11 @@ class SplashViewModel(
             delay(3000)
 
             val route = if (sessionManager.isLoggedIn()) {
-                Screen.CajaInicial.route
+                if (sessionManager.hasSelectedCaja()) {
+                    Screen.Main.route
+                } else {
+                    Screen.CajaInicial.route
+                }
             } else {
                 Screen.Login.route
             }

@@ -62,7 +62,10 @@ class SessionManager private constructor(context: Context) {
 
     fun saveToken(token: String) {
         try {
-            prefs.edit().putString(KEY_TOKEN, token).apply()
+            prefs.edit()
+                .putString(KEY_TOKEN, token)
+                .putLong(KEY_SESSION_START, System.currentTimeMillis())
+                .apply()
         } catch (e: Exception) {
             Log.e("SessionManager", "Error al guardar token", e)
         }
@@ -116,7 +119,18 @@ class SessionManager private constructor(context: Context) {
         0
     }
 
-    fun isLoggedIn(): Boolean = getToken() != null
+    fun isLoggedIn(): Boolean {
+        val token = getToken() ?: return false
+        val sessionStart = prefs.getLong(KEY_SESSION_START, 0L)
+        val elapsed = System.currentTimeMillis() - sessionStart
+        return elapsed < SESSION_DURATION_MS
+    }
+
+    fun getSessionTimeRemainingMs(): Long {
+        val sessionStart = prefs.getLong(KEY_SESSION_START, 0L)
+        val elapsed = System.currentTimeMillis() - sessionStart
+        return (SESSION_DURATION_MS - elapsed).coerceAtLeast(0L)
+    }
 
     fun saveLastSyncDate(timestamp: Long) {
         try {
@@ -133,6 +147,31 @@ class SessionManager private constructor(context: Context) {
         0L
     }
 
+    fun saveSelectedCaja(id: Int, nombre: String) {
+        try {
+            prefs.edit()
+                .putInt(KEY_SELECTED_CAJA_ID, id)
+                .putString(KEY_SELECTED_CAJA_NOMBRE, nombre)
+                .apply()
+        } catch (e: Exception) {
+            Log.e("SessionManager", "Error al guardar caja seleccionada", e)
+        }
+    }
+
+    fun getSelectedCajaId(): Int = try {
+        prefs.getInt(KEY_SELECTED_CAJA_ID, -1)
+    } catch (e: Exception) {
+        -1
+    }
+
+    fun getSelectedCajaNombre(): String = try {
+        prefs.getString(KEY_SELECTED_CAJA_NOMBRE, "") ?: ""
+    } catch (e: Exception) {
+        ""
+    }
+
+    fun hasSelectedCaja(): Boolean = getSelectedCajaId() != -1
+
     companion object {
         @Volatile
         private var INSTANCE: SessionManager? = null
@@ -141,6 +180,11 @@ class SessionManager private constructor(context: Context) {
         private const val KEY_TOKEN = "token"
         private const val KEY_USER_ID = "user_id"
         private const val KEY_THEME_MODE = "theme_mode"
+        private const val KEY_SESSION_START = "session_start"
+        private const val SESSION_DURATION_MS = 12 * 60 * 60 * 1000L // 12 horas
+
+        private const val KEY_SELECTED_CAJA_ID = "selected_caja_id"
+        private const val KEY_SELECTED_CAJA_NOMBRE = "selected_caja_nombre"
 
         private const val KEY_LAST_SYNC_DATE = "last_sync_date"
 

@@ -7,6 +7,7 @@ import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.repository.CajaRepository
 import com.example.sisvvapp.data.repository.ProductoRepository
 import com.example.sisvvapp.data.repository.SocioRepository
+import com.example.sisvvapp.data.repository.TipoPagoRepository
 import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.network.RetrofitClient
 import java.util.concurrent.TimeUnit
@@ -17,15 +18,25 @@ class SyncWorker(
     override suspend fun doWork(): Result {
         val db = AppDatabase.getInstance(applicationContext)
         val api = RetrofitClient.create(applicationContext)
-        val socioRepo = SocioRepository(api, db.socioDao())
+        val socioRepo = SocioRepository(api, db.socioDao(), applicationContext)
         val productoRepo = ProductoRepository(api, db.productoDao(), db.grupoModificadorDao())
         val cajaRepo = CajaRepository(api, db.cajaActivaDao())
+        val tipoPagoRepo = TipoPagoRepository(api, db.tipoPagoDao())
         val ventaRepo = VentaRepository(api, db.ventaColaDao(), db.ventaRecibidaDao())
         return try {
             // Sync catálogos
             socioRepo.sync()
             productoRepo.sync()
             cajaRepo.sync()
+            tipoPagoRepo.sync()
+            // Descargar fotos de socios para uso offline
+            try {
+                val socios = db.socioDao().getAllSociosSync()
+                val fotoUrls = socios.mapNotNull { it.fotoUrl }.filter { it.isNotBlank() }
+                PhotoDownloader.downloadAll(applicationContext, fotoUrls)
+            } catch (e: Exception) {
+                Log.w("SyncWorker", "Error descargando fotos", e)
+            }
             // Enviar ventas offline pendientes
             val pendientes = ventaRepo.getPendientes()
             for (venta in pendientes) {
