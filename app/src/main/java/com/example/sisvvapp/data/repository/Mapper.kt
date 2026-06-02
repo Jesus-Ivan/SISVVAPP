@@ -2,6 +2,7 @@ package com.example.sisvvapp.data.repository
 
 import android.util.Log
 import com.example.sisvvapp.data.local.entity.CajaActivaEntity
+import com.example.sisvvapp.data.local.entity.GrupoModificadorEntity
 import com.example.sisvvapp.data.local.entity.IntegranteEntity
 import com.example.sisvvapp.data.local.entity.ModificadorEntity
 import com.example.sisvvapp.data.local.entity.ProductoEntity
@@ -60,12 +61,12 @@ fun ProductoDto.toProductoEntity() = ProductoEntity(
     id = clave,
     clave = clave.toString(),
     descripcion = descripcion,
-    precio = costoUnitario,
+    precio = if (precio > 0) precio else costoUnitario,
     categoria = grupo ?: "Sin categoría",
     imagenUrl = null,
     forzarCaptura = gruposModificadores.any { it.forzarCaptura },
-    modifIncluidos = gruposModificadores.firstOrNull()?.modifIncluidos ?: 0,
-    modifMaximos = gruposModificadores.firstOrNull()?.modifMaximos ?: 0
+    modifIncluidos = gruposModificadores.maxOfOrNull { it.modifIncluidos } ?: 0,
+    modifMaximos = gruposModificadores.maxOfOrNull { it.modifMaximos } ?: 0
 )
 
 fun ProductoDto.toModificadorEntities(): List<ModificadorEntity> = modificadoresOpciones.map { mod ->
@@ -91,3 +92,14 @@ fun CajaDto.toCajaActivaEntity() = CajaActivaEntity(
     cambioInicial = cambioInicial,
     clavePuntoVenta = clavePuntoVenta
 )
+
+fun ProductoDto.toGrupoModificadorEntities(): List<GrupoModificadorEntity> = gruposModificadores.map { gm ->
+    GrupoModificadorEntity(
+        idGrupo = gm.idGrupo,
+        claveProducto = clave,
+        descripcionGrupo = gm.descripcion,
+        modifIncluidos = gm.modifIncluidos,
+        modifMaximos = gm.modifMaximos,
+        forzarCaptura = gm.forzarCaptura
+    )
+}

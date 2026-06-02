@@ -5,7 +5,8 @@ import com.google.gson.annotations.SerializedName
 data class ProductoDto(
     val clave: Int,
     val descripcion: String,
-    @SerializedName("costo_unitario")     val costoUnitario: Double,
+    @SerializedName("costo_unitario")     val costoUnitario: Double = 0.0,
+    @SerializedName("precio")             val precio: Double = 0.0,
     @SerializedName("print_default")      val printDefault: Boolean = false,
     @SerializedName("id_grupo")           val idGrupo: Int?,
     val grupo: String?,

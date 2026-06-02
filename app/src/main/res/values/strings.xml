@@ -85,4 +85,48 @@
     <string name="error_inesperado">Ocurrió un error inesperado. Intenta de nuevo.</string>
     <string name="credenciales_incorrectas">Credenciales Incorrectas</string>
 
+    <!-- Nueva Venta - Configuración -->
+    <string name="nueva_venta_title">Nueva Venta</string>
+    <string name="nueva_venta_subtitle">Configura los datos de la venta</string>
+    <string name="nueva_venta_tipo_section">Seleccione tipo de venta</string>
+    <string name="nueva_venta_tipo_label">Tipo de Venta</string>
+    <string name="nueva_venta_buscar_socio">Buscar Socio</string>
+    <string name="nueva_venta_id_nombre_socio">ID / Nombre Socio</string>
+    <string name="nueva_venta_nombre_label">Nombre</string>
+    <string name="nueva_venta_socio_encontrado">Socio Encontrado</string>
+    <string name="nueva_venta_btn_continuar">Continuar \u2192</string>
+
+    <!-- Buscar Productos -->
+    <string name="buscar_productos_title">Productos</string>
+    <string name="buscar_productos_subtitle">Busca y agrega productos al carrito</string>
+    <string name="buscar_productos_placeholder">Buscar producto\u2026</string>
+    <string name="buscar_productos_empty">No se encontraron productos.</string>
+    <string name="buscar_productos_agregar">Agregar</string>
+    <string name="buscar_productos_carrito">Carrito (%1$d)</string>
+
+    <!-- Seleccionar Modificadores -->
+    <string name="modificadores_title">Modificadores</string>
+    <string name="modificadores_subtitle">Selecciona las opciones para este producto</string>
+    <string name="modificadores_agregar">Agregar al carrito</string>
+    <string name="modificadores_sin_opciones">Este producto no tiene modificadores disponibles.</string>
+
+    <!-- Resumen Carrito -->
+    <string name="resumen_title">Resumen de Venta</string>
+    <string name="resumen_subtitle">Revisa los productos antes de confirmar</string>
+    <string name="resumen_venta_tipo">Tipo: %1$s</string>
+    <string name="resumen_venta_cliente">Cliente: %1$s</string>
+    <string name="resumen_venta_caja">Caja: %1$s</string>
+    <string name="resumen_total">Total</string>
+    <string name="resumen_btn_confirmar">Confirmar Venta</string>
+    <string name="resumen_btn_enviando">Enviando\u2026</string>
+    <string name="resumen_venta_exitosa">Venta registrada exitosamente</string>
+    <string name="resumen_venta_offline">Venta encolada para envío cuando haya conexión</string>
+    <string name="resumen_venta_error">Error al registrar la venta</string>
+    <string name="resumen_volver">Volver a Ventas</string>
+
+    <!-- Carrito -->
+    <string name="carrito_vacio">El carrito está vacío</string>
+    <string name="carrito_agregar_producto">Agrega productos desde la pantalla de búsqueda</string>
+    <string name="carrito_ver_resumen">Ver Resumen</string>
+
 </resources>

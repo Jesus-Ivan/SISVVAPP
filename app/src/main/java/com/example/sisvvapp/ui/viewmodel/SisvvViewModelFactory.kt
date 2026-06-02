@@ -29,13 +29,14 @@ class SisvvViewModelFactory(
                 SociosViewModel(SocioRepository(api, db.socioDao())) as T
 
             modelClass.isAssignableFrom(ProductosViewModel::class.java) ->
-                ProductosViewModel(ProductoRepository(api, db.productoDao())) as T
+                ProductosViewModel(ProductoRepository(api, db.productoDao(), db.grupoModificadorDao())) as T
 
             modelClass.isAssignableFrom(CajaViewModel::class.java) ->
                 CajaViewModel(
                     CajaRepository(api, db.cajaActivaDao()),
                     SocioRepository(api, db.socioDao()),
-                    ProductoRepository(api, db.productoDao())
+                    ProductoRepository(api, db.productoDao(), db.grupoModificadorDao()),
+                    SessionManager.getInstance(context)
                 ) as T
 
             modelClass.isAssignableFrom(VentasViewModel::class.java) ->
@@ -43,6 +44,18 @@ class SisvvViewModelFactory(
 
             modelClass.isAssignableFrom(SplashViewModel::class.java) ->
                 SplashViewModel(SessionManager.getInstance(context)) as T
+
+            modelClass.isAssignableFrom(NuevaVentaViewModel::class.java) ->
+                NuevaVentaViewModel(SocioRepository(api, db.socioDao())) as T
+
+            modelClass.isAssignableFrom(CarritoViewModel::class.java) ->
+                CarritoViewModel(
+                    ProductoRepository(api, db.productoDao(), db.grupoModificadorDao()),
+                    VentaRepository(api, db.ventaColaDao(), db.ventaRecibidaDao())
+                ) as T
+
+            modelClass.isAssignableFrom(PagoViewModel::class.java) ->
+                PagoViewModel(db.tipoPagoDao(), api) as T
 
             else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }

@@ -73,6 +73,39 @@ class VentaRepository(
             Result.failure(e)
         }
     }
+    suspend fun crearVenta(request: VentaRequest): Result<com.example.sisvvapp.network.dto.ventas.VentaResponse> {
+        return try {
+            val response = api.crearVenta(request)
+            if (response.isSuccessful) {
+                val body = response.body()!!
+                Log.d("VentaRepo", "Venta creada: folio ${body.folio}")
+                Result.success(body)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.w("VentaRepo", "Error al crear venta: ${response.code()} - $errorBody")
+                Result.failure(Exception("Error ${response.code()}: $errorBody"))
+            }
+        } catch (e: Exception) {
+            Log.w("VentaRepo", "Sin conexión, encolando venta offline", e)
+            val idTemporal = java.util.UUID.randomUUID().toString()
+            val entity = VentaColaEntity(
+                idTemporal = idTemporal,
+                tipoVenta = request.tipoVenta,
+                idSocio = request.idSocio,
+                nombreCliente = request.nombre ?: "",
+                corteCaja = request.corteCaja,
+                clavePuntoVenta = request.clavePuntoVenta,
+                nombreCaja = "",
+                productosJson = gson.toJson(request.productos),
+                fechaCreacion = System.currentTimeMillis(),
+                totalVenta = 0.0,
+                estado = "PENDIENTE"
+            )
+            ventaColaDao.insert(entity)
+            Result.failure(Exception("offline"))
+        }
+    }
+
     suspend fun enviarVentaOffline(venta: VentaColaEntity): Result<Unit> = runCatching {
         val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
         val productos: List<ItemCarritoDto> = gson.fromJson(venta.productosJson, type)

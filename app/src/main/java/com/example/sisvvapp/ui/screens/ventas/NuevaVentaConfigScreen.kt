@@ -1,14 +1,20 @@
 package com.example.sisvvapp.ui.screens.ventas
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.ui.components.ResponsiveContainer
+import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeButton
 import com.example.sisvvapp.ui.components.VistaVerdeDropdown
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
@@ -22,24 +28,17 @@ fun NuevaVentaConfigScreen(
     tiposDeVenta: List<String>,
     tipoSeleccionado: String,
     onTipoVentaChange: (String) -> Unit,
-
-    // Variables del Buscador
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-
-    // Variables del Nombre (Ahora manejado por tu VistaVerdeTextField)
+    sociosEncontrados: List<SocioEntity>,
+    onSocioSeleccionado: (SocioEntity) -> Unit,
     nombreCliente: String,
     onNombreClienteChange: (String) -> Unit,
-
     onMenuClick: () -> Unit,
     onContinuarClick: () -> Unit,
     isOnline: Boolean = true
 ) {
-    // ---- LÓGICA DE NEGOCIO ----
-    // 1. ¿Cuándo mostramos el buscador con la lupa?
     val mostrarBuscador = tipoSeleccionado == "Socio" || tipoSeleccionado == "Invitado del Socio"
-
-    // 2. ¿Cuándo dejamos que el usuario escriba el nombre libremente?
     val nombreEditable = tipoSeleccionado != "Socio"
 
     VistaVerdeScaffold(
@@ -66,7 +65,6 @@ fun NuevaVentaConfigScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // -- SECCIÓN CONDICIONAL: BUSCADOR DE SOCIO --
                 if (mostrarBuscador) {
                     Text(
                         text = "ID/ Nombre Socio",
@@ -81,10 +79,31 @@ fun NuevaVentaConfigScreen(
                         onValueChange = onSearchQueryChange,
                         placeholder = "Buscar Socio"
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Lista de resultados de búsqueda
+                    if (sociosEncontrados.isNotEmpty()) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 200.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            items(
+                                items = sociosEncontrados,
+                                key = { it.id }
+                            ) { socio ->
+                                VistaVerdeSocioResultItem(
+                                    socio = socio,
+                                    onClick = { onSocioSeleccionado(socio) }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // -- SECCIÓN PERMANENTE: NOMBRE DEL CLIENTE --
                 VistaVerdeTextField(
                     value = nombreCliente,
                     onValueChange = onNombreClienteChange,
@@ -102,7 +121,35 @@ fun NuevaVentaConfigScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+    }
+}
 
+@Composable
+private fun VistaVerdeSocioResultItem(
+    socio: SocioEntity,
+    onClick: () -> Unit
+) {
+    VistaVerdeBaseCard(
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "${socio.nombre} ${socio.apellidoP} ${socio.apellidoM ?: ""}",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "ID: ${socio.id}",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }
 
@@ -112,10 +159,12 @@ fun NuevaVentaConfigScreenPreview() {
     SISVVAPPTheme {
         NuevaVentaConfigScreen(
             tiposDeVenta = listOf("Público General", "Socio", "Invitado del Socio", "Empleado"),
-            tipoSeleccionado = "Empleado",
+            tipoSeleccionado = "Socio",
             onTipoVentaChange = {},
             searchQuery = "",
             onSearchQueryChange = {},
+            sociosEncontrados = emptyList(),
+            onSocioSeleccionado = {},
             nombreCliente = "",
             onNombreClienteChange = {},
             onMenuClick = {},

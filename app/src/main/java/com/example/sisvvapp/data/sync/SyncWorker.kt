@@ -18,7 +18,7 @@ class SyncWorker(
         val db = AppDatabase.getInstance(applicationContext)
         val api = RetrofitClient.create(applicationContext)
         val socioRepo = SocioRepository(api, db.socioDao())
-        val productoRepo = ProductoRepository(api, db.productoDao())
+        val productoRepo = ProductoRepository(api, db.productoDao(), db.grupoModificadorDao())
         val cajaRepo = CajaRepository(api, db.cajaActivaDao())
         val ventaRepo = VentaRepository(api, db.ventaColaDao(), db.ventaRecibidaDao())
         return try {

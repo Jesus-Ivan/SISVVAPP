@@ -6,6 +6,7 @@ import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.network.dto.productos.GrupoModificadorDto
 import com.example.sisvvapp.network.dto.productos.ProductoDto
 import com.example.sisvvapp.network.dto.socios.SocioDto
+import com.example.sisvvapp.network.dto.ventas.TipoPagoDto
 import com.example.sisvvapp.network.dto.ventas.VentaRequest
 import com.example.sisvvapp.network.dto.ventas.VentaResponse
 import retrofit2.Response
@@ -51,4 +52,7 @@ interface ApiService {
 
     @POST("logout")
     suspend fun logout(): Response<Unit>
+
+    @GET("tipos-pago")
+    suspend fun getTiposPago(): Response<List<TipoPagoDto>>
 }
