@@ -12,7 +12,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.* // Agregado para remember y mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.ResponsiveContainer
+import com.example.sisvvapp.ui.components.VistaVerdeDatePicker // Tu nuevo componente
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
@@ -34,8 +35,11 @@ fun VentasScreen(
     isLoading: Boolean = false,
     onRefresh: () -> Unit = {},
     onVentaClick: (VentaDto) -> Unit = {},
-    onNuevaVentaClick: () -> Unit = {}
+    onNuevaVentaClick: () -> Unit = {},
+    onDateSelected: (String) -> Unit = {}
 ) {
+    var showDatePicker by remember { mutableStateOf(false) }
+
     VistaVerdeScaffold(
         title = stringResource(R.string.ventas_title),
         onMenuClick = onMenuClick,
@@ -44,7 +48,7 @@ fun VentasScreen(
             IconButton(onClick = { /* Lógica de búsqueda */ }) {
                 Icon(Icons.Default.Search, contentDescription = stringResource(R.string.ventas_search_desc))
             }
-            IconButton(onClick = { /* Filtro por fecha */ }) {
+            IconButton(onClick = { showDatePicker = true }) {
                 Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.ventas_filter_date_desc))
             }
             IconButton(onClick = onRefresh) {
@@ -119,6 +123,15 @@ fun VentasScreen(
             }
         }
     }
+
+    VistaVerdeDatePicker(
+        showDialog = showDatePicker,
+        onDismiss = { showDatePicker = false },
+        onDateSelected = { fecha ->
+            showDatePicker = false
+            onDateSelected(fecha)
+        }
+    )
 }
 
 @Preview(showBackground = true)
