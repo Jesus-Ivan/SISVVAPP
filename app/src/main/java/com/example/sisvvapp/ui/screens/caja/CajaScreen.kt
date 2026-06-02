@@ -33,7 +33,6 @@ fun CajaScreen(
 ) {
     VistaVerdeScaffold(
         title = stringResource(R.string.caja_title),
-        subtitle = stringResource(R.string.caja_subtitle),
         onMenuClick = if (isFromSettings) onMenuClick else onNavigationClick,
         isBackButton = isFromSettings,
         showNavigationIcon = isFromSettings,

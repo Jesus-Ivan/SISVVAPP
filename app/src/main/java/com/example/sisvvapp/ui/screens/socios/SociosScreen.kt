@@ -7,9 +7,6 @@ import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.*
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +23,6 @@ import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SociosScreen(
     socios: List<SocioEntity>,
@@ -44,85 +40,90 @@ fun SociosScreen(
         title = stringResource(R.string.title_socios),
         subtitle = stringResource(R.string.socios_subtitle),
         onMenuClick = onMenuClick,
-        isOnline = isOnline
+        isOnline = isOnline,
+        actions = {
+            IconButton(onClick = onRefresh) {
+                Icon(Icons.Default.Refresh, contentDescription = "Recargar socios")
+            }
+        }
     ) {
         ResponsiveContainer {
-            val pullState = rememberPullToRefreshState()
-            PullToRefreshBox(
-                isRefreshing = isLoading,
-                onRefresh = onRefresh,
-                state = pullState,
-                modifier = Modifier.fillMaxSize(),
-                indicator = {
-                    PullToRefreshDefaults.Indicator(
-                        state = pullState,
-                        isRefreshing = isLoading,
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    )
-                }
-            ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Spacer(modifier = Modifier.height(16.dp))
+            Column(modifier = Modifier.fillMaxSize()) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     VistaVerdeSectionHeader(text = stringResource(R.string.socios_section_search))
-                    Spacer(modifier = Modifier.height(16.dp))
 
-                    VistaVerdeSearchBar(
-                        value = searchQuery,
-                        onValueChange = onSearchQueryChange,
-                        placeholder = stringResource(R.string.socios_search_placeholder)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    if (isLoading && socios.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                        }
-                    } else if (errorMessage != null && socios.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    Icons.Default.CloudOff,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(64.dp),
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                                Spacer(Modifier.height(16.dp))
-                                Text(
-                                    text = errorMessage,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(Modifier.height(24.dp))
-                                OutlinedButton(
-                                    onClick = onRetry,
-                                    shape = RoundedCornerShape(12.dp)
-                                ) {
-                                    Icon(Icons.Default.Refresh, contentDescription = null)
-                                    Spacer(Modifier.width(8.dp))
-                                    Text("Reintentar")
-                                }
-                            }
-                        }
-                    } else if (socios.isEmpty()) {
-                        VistaVerdeEmptyState(
-                            icon = Icons.Default.SearchOff,
-                            message = if (searchQuery.isEmpty())
-                                stringResource(R.string.socios_empty_state)
-                            else
-                                stringResource(R.string.socios_empty_search_results, searchQuery),
-                            modifier = Modifier.weight(1f)
-                        )
-                    } else {
-                        SociosList(
-                            socios = socios,
-                            onSocioClick = { socio ->
-                                onSocioClick(socio.id)
-                            }
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.dp
                         )
                     }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                VistaVerdeSearchBar(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    placeholder = stringResource(R.string.socios_search_placeholder)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // LÓGICA DE ESTADOS
+                if (isLoading && socios.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
+                } else if (errorMessage != null && socios.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                Icons.Default.CloudOff,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                text = errorMessage,
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(24.dp))
+                            OutlinedButton(
+                                onClick = onRetry,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Icon(Icons.Default.Refresh, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Reintentar")
+                            }
+                        }
+                    }
+                } else if (socios.isEmpty()) {
+                    VistaVerdeEmptyState(
+                        icon = Icons.Default.SearchOff,
+                        message = if (searchQuery.isEmpty())
+                            stringResource(R.string.socios_empty_state)
+                        else
+                            stringResource(R.string.socios_empty_search_results, searchQuery),
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    SociosList(
+                        socios = socios,
+                        onSocioClick = { socio ->
+                            onSocioClick(socio.id)
+                        }
+                    )
                 }
             }
         }

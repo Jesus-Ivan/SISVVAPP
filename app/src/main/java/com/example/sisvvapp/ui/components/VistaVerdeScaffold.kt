@@ -27,7 +27,6 @@ fun VistaVerdeScaffold(
                 actions = actions,
                 isBackButton = isBackButton,
                 showNavigationIcon = showNavigationIcon,
-                subtitle = subtitle
             )
         }
     ) { innerPadding ->

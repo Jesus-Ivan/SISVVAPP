@@ -31,9 +31,8 @@ fun VistaVerdeTopBar(
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
     isBackButton: Boolean = false,
-    subtitle: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
-    showNavigationIcon: Boolean = true // 1. Agregamos "= true" para no romper las otras pantallas
+    showNavigationIcon: Boolean = true
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -44,17 +43,10 @@ fun VistaVerdeTopBar(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                if (subtitle != null) {
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+
             }
         },
         navigationIcon = {
-            // 2. Envolvemos el botón en el IF
             if (showNavigationIcon) {
                 IconButton(onClick = onMenuClick) {
                     Icon(
@@ -90,7 +82,6 @@ fun TopBarPreviewSinIconos() {
         VistaVerdeTopBar(
             title = "Ajustes",
             onMenuClick = {},
-            subtitle = "Configuración y sincronización",
         )
     }
 }
@@ -103,7 +94,6 @@ fun TopBarPreviewConBotonRegreso() {
             title = "Perfil del socio",
             onMenuClick = {},
             isBackButton = true,
-            subtitle = "Información detallada",
         )
     }
 }
@@ -115,7 +105,6 @@ fun TopBarPreviewDosIconos() {
         VistaVerdeTopBar(
             title = "Ventas",
             onMenuClick = {},
-            subtitle = "Gestiona las comandas del día",
             actions = {
                 IconButton(onClick = { }) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar")
