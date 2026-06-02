@@ -8,6 +8,7 @@ import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.repository.CajaRepository
 import com.example.sisvvapp.data.repository.ProductoRepository
 import com.example.sisvvapp.data.repository.SocioRepository
+import com.example.sisvvapp.data.repository.TipoPagoRepository
 import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.network.RetrofitClient
@@ -26,7 +27,7 @@ class SisvvViewModelFactory(
                 SisvvViewModel(context) as T
 
             modelClass.isAssignableFrom(SociosViewModel::class.java) ->
-                SociosViewModel(SocioRepository(api, db.socioDao())) as T
+                SociosViewModel(SocioRepository(api, db.socioDao(), context)) as T
 
             modelClass.isAssignableFrom(ProductosViewModel::class.java) ->
                 ProductosViewModel(ProductoRepository(api, db.productoDao(), db.grupoModificadorDao())) as T
@@ -34,7 +35,7 @@ class SisvvViewModelFactory(
             modelClass.isAssignableFrom(CajaViewModel::class.java) ->
                 CajaViewModel(
                     CajaRepository(api, db.cajaActivaDao()),
-                    SocioRepository(api, db.socioDao()),
+                    SocioRepository(api, db.socioDao(), context),
                     ProductoRepository(api, db.productoDao(), db.grupoModificadorDao()),
                     SessionManager.getInstance(context)
                 ) as T
@@ -46,7 +47,7 @@ class SisvvViewModelFactory(
                 SplashViewModel(SessionManager.getInstance(context)) as T
 
             modelClass.isAssignableFrom(NuevaVentaViewModel::class.java) ->
-                NuevaVentaViewModel(SocioRepository(api, db.socioDao())) as T
+                NuevaVentaViewModel(SocioRepository(api, db.socioDao(), context)) as T
 
             modelClass.isAssignableFrom(CarritoViewModel::class.java) ->
                 CarritoViewModel(
@@ -55,7 +56,10 @@ class SisvvViewModelFactory(
                 ) as T
 
             modelClass.isAssignableFrom(PagoViewModel::class.java) ->
-                PagoViewModel(db.tipoPagoDao(), api) as T
+                PagoViewModel(TipoPagoRepository(api, db.tipoPagoDao())) as T
+
+            modelClass.isAssignableFrom(ModificadoresViewModel::class.java) ->
+                ModificadoresViewModel(ProductoRepository(api, db.productoDao(), db.grupoModificadorDao())) as T
 
             else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }

@@ -15,14 +15,26 @@ class SociosViewModel(
     private val socioRepository: SocioRepository
 ) : ViewModel() {
 
+    companion object {
+        private const val INITIAL_LIST_LIMIT = 20
+    }
+
+    private val _allSocios = MutableStateFlow<List<SocioEntity>>(emptyList())
+
     private val _socios = MutableStateFlow<List<SocioEntity>>(emptyList())
     val socios: StateFlow<List<SocioEntity>> = _socios
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _integrantes = MutableStateFlow<List<IntegranteEntity>>(emptyList())
     val integrantes: StateFlow<List<IntegranteEntity>> = _integrantes.asStateFlow()
+
+    private val _selectedSocio = MutableStateFlow<SocioEntity?>(null)
+    val selectedSocio: StateFlow<SocioEntity?> = _selectedSocio.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
@@ -35,18 +47,32 @@ class SociosViewModel(
     private fun observeSocios() {
         viewModelScope.launch {
             socioRepository.getSocios().collect { lista ->
-                _socios.value = lista
+                _allSocios.value = lista
+                applyFilter()
+            }
+        }
+    }
+
+    private fun applyFilter() {
+        val query = _searchQuery.value
+        val all = _allSocios.value
+        _socios.value = if (query.isBlank()) {
+            all.take(INITIAL_LIST_LIMIT)
+        } else {
+            val q = query.lowercase()
+            all.filter { socio ->
+                socio.id.toString().contains(q) ||
+                    socio.nombre.lowercase().contains(q) ||
+                    socio.apellidoP.lowercase().contains(q) ||
+                    socio.apellidoM.lowercase().contains(q)
             }
         }
     }
 
     fun search(query: String) {
         _error.value = null
-        viewModelScope.launch {
-            socioRepository.searchSocios("%$query%").collect { lista ->
-                _socios.value = lista
-            }
-        }
+        _searchQuery.value = query
+        applyFilter()
     }
 
     fun getIntegrantesPorSocio(socioId: Int) {
@@ -54,7 +80,13 @@ class SociosViewModel(
             val result = socioRepository.getSocioConIntegrantes(socioId)
             Log.d("SociosVM", "getIntegrantesPorSocio($socioId) → ${result?.integrantes?.size} integrantes, socio=${result?.socio?.nombre}")
             if (result != null) {
+                _selectedSocio.value = result.socio
                 _integrantes.value = result.integrantes
+            } else {
+                val socio = socioRepository.getSocioById(socioId)
+                if (socio != null) {
+                    _selectedSocio.value = socio
+                }
             }
         }
     }

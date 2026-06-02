@@ -1,15 +1,18 @@
 package com.example.sisvvapp.data.repository
 
+import android.content.Context
 import android.util.Log
 import com.example.sisvvapp.data.local.dao.SocioDao
 import com.example.sisvvapp.data.local.dao.SocioWithIntegrantes
 import com.example.sisvvapp.data.local.entity.SocioEntity
+import com.example.sisvvapp.data.sync.PhotoDownloader
 import com.example.sisvvapp.network.ApiService
 import kotlinx.coroutines.flow.Flow
 
 class SocioRepository(
     private val api: ApiService,
-    private val socioDao: SocioDao
+    private val socioDao: SocioDao,
+    private val context: Context? = null
 ) {
 
     fun getSocios(): Flow<List<SocioEntity>> = socioDao.getAllSocios()
@@ -18,6 +21,8 @@ class SocioRepository(
 
     suspend fun getSocioConIntegrantes(socioId: Int): SocioWithIntegrantes? =
         socioDao.getSocioConIntegrantes(socioId)
+
+    suspend fun getSocioById(id: Int): SocioEntity? = socioDao.getSocioById(id)
 
     suspend fun sync(): Result<Unit> {
         return try {
@@ -30,6 +35,13 @@ class SocioRepository(
                 socioDao.insertAllSocios(sociosEnt)
                 socioDao.insertAllIntegrantes(integrantesEnt)
                 Log.d("SocioRepo", "Sincronizados ${sociosEnt.size} socios")
+
+                if (context != null) {
+                    val allFotoUrls = sociosEnt.mapNotNull { it.fotoUrl } +
+                            integrantesEnt.mapNotNull { it.fotoUrl }
+                    PhotoDownloader.downloadAll(context, allFotoUrls)
+                }
+
                 Result.success(Unit)
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Sin detalle"

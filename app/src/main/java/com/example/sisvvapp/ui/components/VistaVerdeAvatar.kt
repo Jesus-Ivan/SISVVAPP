@@ -1,5 +1,6 @@
 package com.example.sisvvapp.ui.components
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.sisvvapp.ui.utils.ImageUtils
@@ -23,11 +25,19 @@ fun VistaVerdeAvatar(
     fotoUrl: String? = null,
     modifier: Modifier = Modifier.size(57.dp)
 ) {
-    val urlFinal = remember(fotoUrl) { ImageUtils.sanitizarUrlFoto(fotoUrl) }
+    val context = LocalContext.current
+    val model = remember(fotoUrl) {
+        val localFile = ImageUtils.getLocalPhotoFile(context, fotoUrl)
+        if (localFile != null) {
+            Uri.fromFile(localFile)
+        } else {
+            ImageUtils.sanitizarUrlFoto(fotoUrl)
+        }
+    }
 
-    if (urlFinal != null) {
+    if (model != null) {
         AsyncImage(
-            model = urlFinal,
+            model = model,
             contentDescription = "Avatar",
             contentScale = ContentScale.Crop,
             modifier = modifier

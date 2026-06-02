@@ -18,3 +18,9 @@ object ScreenRoutes {
     fun crearRutaPerfilSocio(socioId: Int) = "perfil_socio/$socioId"
     fun crearRutaModificadores(productoId: Int) = "modificadores/$productoId"
 }
+
+object NavGraphs {
+    const val VENTAS_GRAPH = "ventas_graph"
+    const val SOCIOS_GRAPH = "socios_graph"
+    const val AJUSTES_GRAPH = "ajustes_graph"
+}

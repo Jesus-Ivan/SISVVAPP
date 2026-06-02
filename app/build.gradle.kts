@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.coil.compose)
     implementation(libs.androidx.compose.material3.window.size)
+    implementation(libs.haze)
     implementation("androidx.compose.material:material-icons-extended")
 
     // Retrofit
