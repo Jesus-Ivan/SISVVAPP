@@ -30,7 +30,7 @@
 
     <!-- Pantalla de Ventas -->
     <string name="ventas_title">Ventas</string>
-    <string name="ventas_subtitle">Gestiona las comandas del día</string>
+    <string name="ventas_search_placeholder">Buscar No. Socio o Nombre</string>
     <string name="ventas_section_recent">Ventas Recientes</string>
     <string name="ventas_search_desc">Buscar</string>
     <string name="ventas_filter_date_desc">Filtrar por fecha</string>
