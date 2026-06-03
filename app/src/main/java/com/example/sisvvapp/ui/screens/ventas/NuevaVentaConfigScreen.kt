@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,7 +33,8 @@ fun NuevaVentaConfigScreen(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     sociosEncontrados: List<SocioEntity>,
-    onSocioSeleccionado: (SocioEntity) -> Unit,
+    onSocioSeleccionado: (SocioEntity?) -> Unit,
+    socioSeleccionado: SocioEntity? = null,
     nombreCliente: String,
     onNombreClienteChange: (String) -> Unit,
     onMenuClick: () -> Unit,
@@ -40,8 +42,9 @@ fun NuevaVentaConfigScreen(
     isOnline: Boolean = true,
     cajasDisponibles: Boolean = true
 ) {
-    val mostrarBuscador = tipoSeleccionado == "Socio" || tipoSeleccionado == "Invitado del Socio"
-    val nombreEditable = tipoSeleccionado != "Socio"
+    val requiereSocio = tipoSeleccionado == "Socio" || tipoSeleccionado == "Invitado del Socio"
+    val requiereNombreManual = tipoSeleccionado != "Socio"
+    val focusManager = LocalFocusManager.current
 
     VistaVerdeScaffold(
         title = "Nueva Venta",
@@ -62,12 +65,19 @@ fun NuevaVentaConfigScreen(
                     label = "Tipo de Venta",
                     options = tiposDeVenta,
                     selectedOption = tipoSeleccionado,
-                    onOptionSelected = onTipoVentaChange
+                    onOptionSelected = { nuevoTipo ->
+                        onTipoVentaChange(nuevoTipo)
+                        onNombreClienteChange("")
+                        if (nuevoTipo != "Socio" && nuevoTipo != "Invitado del Socio") {
+                            onSearchQueryChange("")
+                            onSocioSeleccionado(null)
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if (mostrarBuscador) {
+                if (requiereSocio) {
                     Text(
                         text = "ID/ Nombre Socio",
                         fontSize = 14.sp,
@@ -78,12 +88,16 @@ fun NuevaVentaConfigScreen(
 
                     VistaVerdeSearchBar(
                         value = searchQuery,
-                        onValueChange = onSearchQueryChange,
+                        onValueChange = { nuevaBusqueda ->
+                            onSearchQueryChange(nuevaBusqueda)
+                            if (nuevaBusqueda.isBlank()) {
+                                onSocioSeleccionado(null)
+                            }
+                        },
                         placeholder = "Buscar Socio"
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Lista de resultados de búsqueda
                     if (sociosEncontrados.isNotEmpty()) {
                         LazyColumn(
                             modifier = Modifier
@@ -97,22 +111,46 @@ fun NuevaVentaConfigScreen(
                             ) { socio ->
                                 VistaVerdeSocioResultItem(
                                     socio = socio,
-                                    onClick = { onSocioSeleccionado(socio) }
+                                    onClick = {
+                                        onSocioSeleccionado(socio)
+                                        onSearchQueryChange("${socio.nombre} ${socio.apellidoP}".trim())
+                                        focusManager.clearFocus()
+                                    }
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
+
+                    val nombreSocioText = if (socioSeleccionado != null) {
+                        "${socioSeleccionado.nombre} ${socioSeleccionado.apellidoP} ${socioSeleccionado.apellidoM ?: ""}".trim()
+                    } else {
+                        ""
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    VistaVerdeTextField(
+                        value = nombreSocioText,
+                        onValueChange = {},
+                        label = "Socio Encontrado",
+                        readOnly = true,
+                        enabled = false
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                VistaVerdeTextField(
-                    value = nombreCliente,
-                    onValueChange = onNombreClienteChange,
-                    label = if (tipoSeleccionado == "Socio") "Socio Encontrado" else "Nombre",
-                    readOnly = !nombreEditable,
-                    enabled = nombreEditable
-                )
+                if (requiereNombreManual) {
+                    val labelText = if (tipoSeleccionado == "Invitado del Socio") "Nombre del Invitado" else "Nombre del Cliente"
+
+                    VistaVerdeTextField(
+                        value = nombreCliente,
+                        onValueChange = onNombreClienteChange,
+                        label = labelText,
+                        readOnly = false,
+                        enabled = true
+                    )
+                }
 
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -127,10 +165,15 @@ fun NuevaVentaConfigScreen(
                             .padding(bottom = 8.dp)
                     )
                 }
+
+                val botonHabilitado = cajasDisponibles &&
+                        (!requiereSocio || socioSeleccionado != null) &&
+                        (!requiereNombreManual || nombreCliente.isNotBlank())
+
                 VistaVerdeButton(
                     text = "Continuar \u2192",
                     onClick = onContinuarClick,
-                    enabled = cajasDisponibles
+                    enabled = botonHabilitado
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -152,7 +195,7 @@ private fun VistaVerdeSocioResultItem(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "${socio.nombre} ${socio.apellidoP} ${socio.apellidoM ?: ""}",
+                    text = "${socio.nombre} ${socio.apellidoP} ${socio.apellidoM ?: ""}".trim(),
                     fontWeight = FontWeight.Medium,
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface
@@ -173,12 +216,13 @@ fun NuevaVentaConfigScreenPreview() {
     SISVVAPPTheme {
         NuevaVentaConfigScreen(
             tiposDeVenta = listOf("Público General", "Socio", "Invitado del Socio", "Empleado"),
-            tipoSeleccionado = "Socio",
+            tipoSeleccionado = "Invitado del Socio",
             onTipoVentaChange = {},
             searchQuery = "",
             onSearchQueryChange = {},
             sociosEncontrados = emptyList(),
             onSocioSeleccionado = {},
+            socioSeleccionado = SocioEntity(1, "Juan", "Perez", "Sanchez", null, null, true, "Activo", "", null, "Gold"),
             nombreCliente = "",
             onNombreClienteChange = {},
             onMenuClick = {},

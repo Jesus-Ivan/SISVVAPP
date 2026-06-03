@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.sisvvapp.ui.theme.Inter
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,6 +40,7 @@ fun VistaVerdeTopBar(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = title,
+                    fontFamily = Inter,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface

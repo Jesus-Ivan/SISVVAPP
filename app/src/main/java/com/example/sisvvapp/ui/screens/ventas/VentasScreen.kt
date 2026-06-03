@@ -10,7 +10,7 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
+import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +25,7 @@ import com.example.sisvvapp.ui.components.VistaVerdeDatePicker
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
-import com.example.sisvvapp.ui.components.VistaVerdeSkeletonCard // NUEVA IMPORTACIÓN
+import com.example.sisvvapp.ui.components.VistaVerdeSkeletonCard
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 @Composable
@@ -34,6 +34,8 @@ fun VentasScreen(
     ventas: List<VentaDto> = emptyList(),
     isOnline: Boolean = true,
     isLoading: Boolean = false,
+    searchQuery: String = "",
+    onSearchQueryChange: (String) -> Unit = {},
     onRefresh: () -> Unit = {},
     onVentaClick: (VentaDto) -> Unit = {},
     onNuevaVentaClick: () -> Unit = {},
@@ -46,9 +48,6 @@ fun VentasScreen(
         onMenuClick = onMenuClick,
         isOnline = isOnline,
         actions = {
-            IconButton(onClick = { /* Lógica de búsqueda */ }) {
-                Icon(Icons.Default.Search, contentDescription = stringResource(R.string.ventas_search_desc))
-            }
             IconButton(onClick = { showDatePicker = true }) {
                 Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.ventas_filter_date_desc))
             }
@@ -69,14 +68,17 @@ fun VentasScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         VistaVerdeSectionHeader(text = stringResource(R.string.ventas_section_recent))
-                        // Se eliminó el CircularProgressIndicator de aquí porque ya tenemos mejor UX abajo
                     }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    VistaVerdeSearchBar(
+                        value = searchQuery,
+                        onValueChange = onSearchQueryChange,
+                        placeholder = stringResource(R.string.ventas_search_placeholder),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // LÓGICA DE ESTADOS DE CARGA (SKELETONS)
-                    if (isLoading && ventas.isEmpty()) {
-                        // ESTADO 1: Cargando por primera vez (Mostramos 6 tarjetas fantasma)
+                    if (isLoading) {
+                        // ESTADO 1: Cargando
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
@@ -86,27 +88,15 @@ fun VentasScreen(
                                 VistaVerdeSkeletonCard()
                             }
                         }
-                    } else if (ventas.isEmpty() && !isLoading) {
-                        // ESTADO 2: No hay ventas registradas
+                    } else if (ventas.isEmpty()) {
+                        // ESTADO 2: Ya no está cargando y la lista vino vacía
                         VistaVerdeEmptyState(
                             icon = Icons.AutoMirrored.Filled.ReceiptLong,
                             message = stringResource(R.string.ventas_empty_state),
                             modifier = Modifier.weight(1f)
                         )
                     } else {
-                        // ESTADO 3: Ya hay ventas cargadas
-
-                        // Si presionaron recargar y ya hay ventas, mostramos una barra sutil arriba
-                        if (isLoading) {
-                            LinearProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-
-                        // Lista real de ventas
+                        // ESTADO 3: Ya no está cargando y SÍ hay ventas
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
