@@ -25,7 +25,6 @@ fun VistaVerdeDatePicker(
 
         DatePickerDialog(
             onDismissRequest = onDismiss,
-            // 1. Usamos 'surface' en lugar de White. Así se adapta a Claro/Oscuro automáticamente.
             colors = DatePickerDefaults.colors(
                 containerColor = MaterialTheme.colorScheme.surface,
             ),
@@ -50,17 +49,15 @@ fun VistaVerdeDatePicker(
             DatePicker(
                 state = datePickerState,
                 colors = DatePickerDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surface, // Fondo dinámico
-                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant, // Textos secundarios
-                    headlineContentColor = MaterialTheme.colorScheme.onSurface, // Textos principales
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    headlineContentColor = MaterialTheme.colorScheme.onSurface,
                     weekdayContentColor = MaterialTheme.colorScheme.onSurface,
                     dayContentColor = MaterialTheme.colorScheme.onSurface,
 
-                    // Colores de selección (se mantienen con tu color primario, ej. verde)
                     selectedDayContainerColor = MaterialTheme.colorScheme.primary,
                     selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
 
-                    // Día actual (Hoy)
                     todayDateBorderColor = MaterialTheme.colorScheme.primary,
                     todayContentColor = MaterialTheme.colorScheme.primary
                 )
