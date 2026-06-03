@@ -6,6 +6,8 @@ import com.example.sisvvapp.data.local.entity.VentaColaEntity
 import com.example.sisvvapp.data.local.entity.VentaRecibidaEntity
 import com.example.sisvvapp.network.ApiService
 import com.example.sisvvapp.network.dto.productos.ItemCarritoDto
+import com.example.sisvvapp.network.dto.ventas.PagoDto
+import com.example.sisvvapp.network.dto.ventas.ProductoVentaDto
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.network.dto.ventas.VentaRequest
 import com.google.gson.Gson
@@ -33,33 +35,14 @@ class VentaRepository(
             entities.map { it.toVentaDto() }
         }
     }
-    suspend fun getVentas(fecha: String, corteCaja: Int? = null): List<VentaDto> {
-        return try {
-            val response = api.getVentas(fecha, corteCaja)
-            if (response.isSuccessful) {
-                val ventas = response.body()?.map { it.toVentaDto() } ?: emptyList()
-                // Guardar en Room para offline
-                val entities = response.body()?.map { it.toVentaRecibidaEntity() } ?: emptyList()
-                if (entities.isNotEmpty()) {
-                    ventaRecibidaDao.insertAll(entities)
-                }
-                ventas
-            } else {
-                Log.w("VentaRepo", "Error al obtener ventas: ${response.code()}")
-                emptyList()
-            }
-        } catch (e: Exception) {
-            Log.w("VentaRepo", "Sin conexión, cargando ventas de Room", e)
-            // Fallback: leer de Room
-            emptyList()
-        }
+    suspend fun getVentaPorFolio(folio: Int): VentaDto? {
+        return ventaRecibidaDao.getVentaPorFolio(folio)?.toVentaDto()
     }
     suspend fun syncVentas(fecha: String, corteCaja: Int? = null): Result<Unit> {
         return try {
             val response = api.getVentas(fecha, corteCaja)
             if (response.isSuccessful) {
                 val entities = response.body()?.map { it.toVentaRecibidaEntity() } ?: emptyList()
-                ventaRecibidaDao.deleteAll()
                 if (entities.isNotEmpty()) {
                     ventaRecibidaDao.insertAll(entities)
                 }
@@ -87,23 +70,47 @@ class VentaRepository(
             }
         } catch (e: Exception) {
             Log.w("VentaRepo", "Sin conexión, encolando venta offline", e)
-            val idTemporal = java.util.UUID.randomUUID().toString()
-            val entity = VentaColaEntity(
-                idTemporal = idTemporal,
-                tipoVenta = request.tipoVenta,
-                idSocio = request.idSocio,
-                nombreCliente = request.nombre ?: "",
-                corteCaja = request.corteCaja,
-                clavePuntoVenta = request.clavePuntoVenta,
-                nombreCaja = "",
-                productosJson = gson.toJson(request.productos),
-                fechaCreacion = System.currentTimeMillis(),
-                totalVenta = 0.0,
-                estado = "PENDIENTE"
-            )
-            ventaColaDao.insert(entity)
+            encolarVentaOffline(request, null)
             Result.failure(Exception("offline"))
         }
+    }
+
+    suspend fun appendProductos(folio: Int, request: VentaRequest): Result<Unit> {
+        return try {
+            val response = api.appendProductos(folio, request)
+            if (response.isSuccessful) {
+                Log.d("VentaRepo", "Productos agregados a venta $folio")
+                Result.success(Unit)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.w("VentaRepo", "Error al agregar productos: ${response.code()} - $errorBody")
+                Result.failure(Exception("Error ${response.code()}: $errorBody"))
+            }
+        } catch (e: Exception) {
+            Log.w("VentaRepo", "Sin conexión, encolando append offline", e)
+            encolarVentaOffline(request, folio)
+            Result.failure(Exception("offline"))
+        }
+    }
+
+    private suspend fun encolarVentaOffline(request: VentaRequest, folioExistente: Int?) {
+        val idTemporal = java.util.UUID.randomUUID().toString()
+        val entity = VentaColaEntity(
+            idTemporal = idTemporal,
+            tipoVenta = request.tipoVenta,
+            idSocio = request.idSocio,
+            nombreCliente = request.nombre ?: "",
+            corteCaja = request.corteCaja,
+            clavePuntoVenta = request.clavePuntoVenta,
+            nombreCaja = "",
+            productosJson = gson.toJson(request.productos),
+            fechaCreacion = System.currentTimeMillis(),
+            totalVenta = 0.0,
+            estado = "PENDIENTE",
+            folioExistente = folioExistente,
+            pagosJson = if (request.pagos != null) gson.toJson(request.pagos) else null
+        )
+        ventaColaDao.insert(entity)
     }
 
     suspend fun enviarVentaOffline(venta: VentaColaEntity): Result<Unit> = runCatching {
@@ -117,7 +124,11 @@ class VentaRepository(
             clavePuntoVenta = venta.clavePuntoVenta,
             productos = productos
         )
-        val response = api.crearVenta(request)
+        val response = if (venta.folioExistente != null) {
+            api.appendProductos(venta.folioExistente, request)
+        } else {
+            api.crearVenta(request)
+        }
         if (response.isSuccessful) {
             ventaColaDao.deleteById(venta.idTemporal)
             Log.d("VentaRepo", "Venta ${venta.idTemporal} sincronizada con éxito")
@@ -125,6 +136,10 @@ class VentaRepository(
             val errorBody = response.errorBody()?.string() ?: "Error desconocido"
             throw Exception("Error ${response.code()}: $errorBody")
         }
+    }
+
+    suspend fun getVentaRecibidaPorFolio(folio: Int): VentaRecibidaEntity? {
+        return ventaRecibidaDao.getVentaPorFolio(folio)
     }
 }
 private fun com.example.sisvvapp.network.dto.ventas.VentaResponse.toVentaRecibidaEntity(): VentaRecibidaEntity {
@@ -144,12 +159,24 @@ private fun com.example.sisvvapp.network.dto.ventas.VentaResponse.toVentaRecibid
         socioId = idSocio,
         clavePuntoVenta = clavePuntoVenta ?: "",
         corteCaja = corteCaja ?: 0,
-        productosJson = "[]"
+        productosJson = "[]",
+        pagosJson = "[]"
     )
 }
 private fun VentaRecibidaEntity.toVentaDto(): VentaDto {
     val (date, time) = fecha.split(" ").let {
         Pair(it.getOrElse(0) { "" }, it.getOrElse(1) { "" }.take(5))
+    }
+    val gson = Gson()
+    val productos: List<ProductoVentaDto> = try {
+        gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type)
+    } catch (e: Exception) {
+        emptyList()
+    }
+    val pagos: List<PagoDto> = try {
+        gson.fromJson(pagosJson, object : TypeToken<List<PagoDto>>() {}.type)
+    } catch (e: Exception) {
+        emptyList()
     }
     return VentaDto(
         folio = folio,
@@ -160,6 +187,8 @@ private fun VentaRecibidaEntity.toVentaDto(): VentaDto {
         cajaId = corteCaja,
         socioId = socioId,
         tipoCliente = null,
-        fecha = date
+        fecha = date,
+        productos = productos,
+        pagos = pagos
     )
 }
