@@ -43,19 +43,31 @@ class NuevaVentaViewModel(
     fun searchSocios(query: String) {
         _searchQuery.value = query
         searchJob?.cancel()
+
         if (query.length < 2) {
             _sociosEncontrados.value = emptyList()
             return
         }
+
         searchJob = viewModelScope.launch {
             delay(300)
+            Log.d("NuevaVentaVM", "Buscando socios con query: $query")
+
             socioRepository.searchSocios("%$query%").collect { lista ->
-                _sociosEncontrados.value = lista
+
+                val sociosActivos = lista.filter { socio ->
+                    socio.estatus?.equals("Activo", ignoreCase = true) == true
+
+                }
+
+                Log.d("NuevaVentaVM", "Resultados brutos: ${lista.size} | Resultados activos (filtrados): ${sociosActivos.size}")
+                _sociosEncontrados.value = sociosActivos
             }
         }
     }
 
     fun selectSocio(socio: SocioEntity) {
+        Log.d("NuevaVentaVM", "Socio seleccionado: ID ${socio.id} - ${socio.nombre}")
         _socioSeleccionado.value = socio
         _socioId.value = socio.id
 
@@ -76,6 +88,7 @@ class NuevaVentaViewModel(
     }
 
     fun clearSocioSelection() {
+        Log.d("NuevaVentaVM", "Limpiando selección de socio")
         _socioSeleccionado.value = null
         _socioId.value = null
         _nombreCliente.value = ""
