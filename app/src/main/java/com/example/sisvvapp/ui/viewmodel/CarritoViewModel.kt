@@ -70,9 +70,22 @@ class CarritoViewModel(
     private val _productoSeleccionado = MutableStateFlow<ProductoEntity?>(null)
     val productoSeleccionado: StateFlow<ProductoEntity?> = _productoSeleccionado
 
+    private val _appendMode = MutableStateFlow(false)
+    val appendMode: StateFlow<Boolean> = _appendMode
+
+    private val _folioExistente = MutableStateFlow<Int?>(null)
+    val folioExistente: StateFlow<Int?> = _folioExistente
+
     init {
         observeProductos()
     }
+
+    fun configurarAppendMode(folio: Int) {
+        _appendMode.value = true
+        _folioExistente.value = folio
+    }
+
+    fun esModoAppend(): Boolean = _appendMode.value
 
     private fun observeProductos() {
         viewModelScope.launch {
@@ -214,21 +227,40 @@ class CarritoViewModel(
                 pagos = _pagos.value.ifEmpty { null }
             )
 
-            val result = ventaRepository.crearVenta(request)
-            result.fold(
-                onSuccess = { response ->
-                    Log.d("CarritoVM", "Venta creada: folio ${response.folio}")
-                    _sendResult.value = SendResult.Success(response.folio)
-                },
-                onFailure = { e ->
-                    if (e.message?.contains("offline") == true) {
-                        _sendResult.value = SendResult.Offline
-                    } else {
-                        Log.e("CarritoVM", "Error al crear venta", e)
-                        _sendResult.value = SendResult.Error(e.message ?: "Error desconocido")
+            if (_appendMode.value && _folioExistente.value != null) {
+                val folio = _folioExistente.value!!
+                val result = ventaRepository.appendProductos(folio, request)
+                result.fold(
+                    onSuccess = {
+                        Log.d("CarritoVM", "Productos agregados a venta $folio")
+                        _sendResult.value = SendResult.Success(folio)
+                    },
+                    onFailure = { e ->
+                        if (e.message?.contains("offline") == true) {
+                            _sendResult.value = SendResult.Offline
+                        } else {
+                            Log.e("CarritoVM", "Error al agregar productos", e)
+                            _sendResult.value = SendResult.Error(e.message ?: "Error desconocido")
+                        }
                     }
-                }
-            )
+                )
+            } else {
+                val result = ventaRepository.crearVenta(request)
+                result.fold(
+                    onSuccess = { response ->
+                        Log.d("CarritoVM", "Venta creada: folio ${response.folio}")
+                        _sendResult.value = SendResult.Success(response.folio)
+                    },
+                    onFailure = { e ->
+                        if (e.message?.contains("offline") == true) {
+                            _sendResult.value = SendResult.Offline
+                        } else {
+                            Log.e("CarritoVM", "Error al crear venta", e)
+                            _sendResult.value = SendResult.Error(e.message ?: "Error desconocido")
+                        }
+                    }
+                )
+            }
             _isSending.value = false
         }
     }
@@ -253,6 +285,8 @@ class CarritoViewModel(
         _searchQuery.value = ""
         _productoSeleccionado.value = null
         _isSending.value = false
+        _appendMode.value = false
+        _folioExistente.value = null
     }
 }
 

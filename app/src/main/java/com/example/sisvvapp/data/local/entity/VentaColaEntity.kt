@@ -15,5 +15,7 @@ data class VentaColaEntity(
     val productosJson: String,
     val fechaCreacion: Long,
     val totalVenta: Double,
-    val estado: String
+    val estado: String,
+    val folioExistente: Int? = null,
+    val pagosJson: String? = null
 )

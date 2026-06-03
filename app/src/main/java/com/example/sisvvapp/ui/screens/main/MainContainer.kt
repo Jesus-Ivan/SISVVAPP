@@ -19,6 +19,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.network.dto.cajas.CajaDto
+import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.AppNavigationDrawerContent
 import com.example.sisvvapp.ui.navigation.NavGraphs
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
@@ -26,6 +27,7 @@ import com.example.sisvvapp.ui.screens.ajustes.AjustesScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
 import com.example.sisvvapp.ui.screens.socios.SociosScreen
 import com.example.sisvvapp.ui.screens.ventas.BuscarProductosScreen
+import com.example.sisvvapp.ui.screens.ventas.DetalleVentaScreen
 import com.example.sisvvapp.ui.screens.ventas.NuevaVentaConfigScreen
 import com.example.sisvvapp.ui.screens.ventas.ResumenCarritoScreen
 import com.example.sisvvapp.ui.screens.ventas.SeleccionarModificadoresScreen
@@ -52,6 +54,10 @@ fun MainContainer(
     windowWidthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
     onLogout: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val factory = SisvvViewModelFactory(context)
+    val sharedCajaViewModel: CajaViewModel = viewModel(factory = factory)
+
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -89,14 +95,17 @@ fun MainContainer(
 
                 // --- PANTALLA DE VENTAS ---
                 composable(ScreenRoutes.VENTAS) {
-                    val context = LocalContext.current
-                    val ventasViewModel: VentasViewModel = viewModel(factory = SisvvViewModelFactory(context))
+                    val ventasViewModel: VentasViewModel = viewModel(factory = factory)
                     val ventas by ventasViewModel.ventas.collectAsState()
                     val isLoading by ventasViewModel.isLoading.collectAsState()
+                    val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
+                    val cajas by sharedCajaViewModel.cajas.collectAsState()
+                    val cajaActiva = cajas.find { it.id == selectedCajaId }
+                    val corteCajaActivo = cajaActiva?.corte
 
-                    LaunchedEffect(Unit) {
+                    LaunchedEffect(selectedCajaId, cajas) {
                         val today = java.time.LocalDate.now().toString()
-                        ventasViewModel.loadVentas(today)
+                        ventasViewModel.loadVentas(today, corteCajaActivo)
                     }
                     VentasScreen(
                         onMenuClick = { scope.launch { drawerState.open() } },
@@ -105,19 +114,22 @@ fun MainContainer(
                         isLoading = isLoading,
                         onRefresh = {
                             val today = java.time.LocalDate.now().toString()
-                            ventasViewModel.loadVentas(today)
+                            ventasViewModel.loadVentas(today, corteCajaActivo)
                         },
-                        onVentaClick = { _ -> },
+                        onVentaClick = { venta ->
+                            navController.navigate(ScreenRoutes.crearRutaDetalleVenta(venta.folio))
+                        },
                         onNuevaVentaClick = {
                             navController.navigate(ScreenRoutes.NUEVA_VENTA)
+                        },
+                        onDateSelected = { fecha ->
+                            ventasViewModel.loadVentas(fecha, corteCajaActivo)
                         }
                     )
                 }
 
                 // --- PANTALLA DE NUEVA VENTA (CONFIGURACIÓN) ---
                 composable(ScreenRoutes.NUEVA_VENTA) {
-                    val context = LocalContext.current
-                    val factory = SisvvViewModelFactory(context)
                     val nuevaVentaViewModel: NuevaVentaViewModel = viewModel(factory = factory)
 
                     val saleGraphEntry = remember(navController.currentBackStackEntry) {
@@ -130,10 +142,12 @@ fun MainContainer(
                     val sociosEncontrados by nuevaVentaViewModel.sociosEncontrados.collectAsState()
                     val nombreCliente by nuevaVentaViewModel.nombreCliente.collectAsState()
 
-                    val sessionManager = SessionManager.getInstance(context)
-                    val cajas by viewModel<CajaViewModel>(factory = factory).cajas.collectAsState()
-                    val corteCaja = cajas.firstOrNull()?.corte ?: 0
-                    val clavePuntoVenta = cajas.firstOrNull()?.clavePuntoVenta ?: ""
+                    val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
+                    val cajas by sharedCajaViewModel.cajas.collectAsState()
+                    val cajasDisponibles = cajas.isNotEmpty()
+                    val cajaActiva = cajas.find { it.id == selectedCajaId }
+                    val corteCaja = cajaActiva?.corte ?: 0
+                    val clavePuntoVenta = cajaActiva?.clavePuntoVenta ?: ""
 
                     LaunchedEffect(tipoVenta, nombreCliente, corteCaja) {
                         carritoViewModel.configurarVenta(
@@ -164,15 +178,13 @@ fun MainContainer(
                         onMenuClick = { navController.popBackStack() },
                         onContinuarClick = {
                             navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
-                        }
+                        },
+                        cajasDisponibles = cajasDisponibles
                     )
                 }
 
                 // --- PANTALLA DE BUSCAR PRODUCTOS ---
                 composable(ScreenRoutes.BUSCAR_PRODUCTOS) {
-                    val context = LocalContext.current
-                    val factory = SisvvViewModelFactory(context)
-
                     val saleGraphEntry = remember(navController.currentBackStackEntry) {
                         navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
                     }
@@ -208,8 +220,6 @@ fun MainContainer(
                     arguments = listOf(navArgument("productoId") { type = NavType.IntType })
                 ) { backStackEntry ->
                     val productoId = backStackEntry.arguments?.getInt("productoId") ?: 0
-                    val context = LocalContext.current
-                    val factory = SisvvViewModelFactory(context)
 
                     val saleGraphEntry = remember(navController.currentBackStackEntry) {
                         navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
@@ -243,9 +253,6 @@ fun MainContainer(
 
                 // --- PANTALLA DE RESUMEN CARRITO ---
                 composable(ScreenRoutes.RESUMEN_CARRITO) {
-                    val context = LocalContext.current
-                    val factory = SisvvViewModelFactory(context)
-
                     val saleGraphEntry = remember(navController.currentBackStackEntry) {
                         navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
                     }
@@ -259,16 +266,31 @@ fun MainContainer(
                     val isSending by carritoViewModel.isSending.collectAsState()
                     val sendResult by carritoViewModel.sendResult.collectAsState()
 
+                    val isAppend = carritoViewModel.esModoAppend()
+
+                    LaunchedEffect(sendResult) {
+                        if (sendResult is SendResult.Success && isAppend) {
+                            carritoViewModel.clearState()
+                            navController.navigate(ScreenRoutes.VENTAS) {
+                                popUpTo(ScreenRoutes.VENTAS) { inclusive = true }
+                            }
+                        }
+                    }
+
                     ResumenCarritoScreen(
                         items = items,
-                        tipoVenta = tipoVenta,
+                        tipoVenta = if (isAppend) "Agregar productos" else tipoVenta,
                         nombreCliente = nombreCliente,
                         corteCaja = corteCaja,
                         total = total,
                         isSending = isSending,
                         sendResult = sendResult,
                         onConfirmar = {
-                            navController.navigate(ScreenRoutes.SELECCIONAR_PAGO)
+                            if (isAppend) {
+                                carritoViewModel.confirmarVenta()
+                            } else {
+                                navController.navigate(ScreenRoutes.SELECCIONAR_PAGO)
+                            }
                         },
                         onVolver = {
                             carritoViewModel.clearState()
@@ -283,9 +305,6 @@ fun MainContainer(
 
                 // --- PANTALLA DE SELECCIONAR PAGO ---
                 composable(ScreenRoutes.SELECCIONAR_PAGO) {
-                    val context = LocalContext.current
-                    val factory = SisvvViewModelFactory(context)
-
                     val saleGraphEntry = remember(navController.currentBackStackEntry) {
                         navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
                     }
@@ -328,6 +347,43 @@ fun MainContainer(
                         isOnline = viewModel?.isOnline ?: true
                     )
                 }
+
+                // --- PANTALLA DE DETALLE DE VENTA ---
+                composable(
+                    route = ScreenRoutes.DETALLE_VENTA,
+                    arguments = listOf(navArgument("folio") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val folio = backStackEntry.arguments?.getInt("folio") ?: 0
+                    val ventasViewModel: VentasViewModel = viewModel(factory = factory)
+
+                    val saleGraphEntry = remember(navController.currentBackStackEntry) {
+                        navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
+                    }
+                    val carritoViewModel: CarritoViewModel = viewModel<CarritoViewModel>(
+                        viewModelStoreOwner = saleGraphEntry,
+                        factory = factory
+                    )
+
+                    var ventaDetalle by remember { mutableStateOf<VentaDto?>(null) }
+                    var isLoadingDetalle by remember { mutableStateOf(true) }
+
+                    LaunchedEffect(folio) {
+                        isLoadingDetalle = true
+                        ventaDetalle = ventasViewModel.cargarDetalle(folio)
+                        isLoadingDetalle = false
+                    }
+
+                    DetalleVentaScreen(
+                        venta = ventaDetalle,
+                        isLoading = isLoadingDetalle,
+                        isOnline = viewModel?.isOnline ?: true,
+                        onBackClick = { navController.popBackStack() },
+                        onAgregarProductos = {
+                            carritoViewModel.configurarAppendMode(folio)
+                            navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
+                        }
+                    )
+                }
             }
 
             // ================================================================
@@ -340,9 +396,6 @@ fun MainContainer(
 
                 // --- PANTALLA DE SOCIOS ---
                 composable(ScreenRoutes.SOCIOS) {
-                    val context = LocalContext.current
-                    val factory = SisvvViewModelFactory(context)
-
                     val sociosGraphEntry = remember(navController.currentBackStackEntry) {
                         navController.getBackStackEntry(NavGraphs.SOCIOS_GRAPH)
                     }
@@ -380,8 +433,6 @@ fun MainContainer(
                     arguments = listOf(navArgument("socioId") { type = NavType.IntType })
                 ) { backStackEntry ->
                     val socioId = backStackEntry.arguments?.getInt("socioId") ?: 0
-                    val context = LocalContext.current
-                    val factory = SisvvViewModelFactory(context)
 
                     val sociosGraphEntry = remember(navController.currentBackStackEntry) {
                         navController.getBackStackEntry(NavGraphs.SOCIOS_GRAPH)
@@ -420,17 +471,15 @@ fun MainContainer(
 
                 // --- PANTALLA DE AJUSTES ---
                 composable(ScreenRoutes.AJUSTES) {
-                    val context = LocalContext.current
-                    val factory = SisvvViewModelFactory(context)
-
-                    val ajustesGraphEntry = remember(navController.currentBackStackEntry) {
-                        navController.getBackStackEntry(NavGraphs.AJUSTES_GRAPH)
+                    LaunchedEffect(currentRoute) {
+                        if (currentRoute == ScreenRoutes.AJUSTES) {
+                            sharedCajaViewModel.refreshCajas()
+                        }
                     }
-                    val cajaViewModel: CajaViewModel = viewModel<CajaViewModel>(viewModelStoreOwner = ajustesGraphEntry, factory = factory)
 
-                    val cajas by cajaViewModel.cajas.collectAsState()
-                    val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
-                    val isLoading by cajaViewModel.isLoading.collectAsState()
+                    val cajas by sharedCajaViewModel.cajas.collectAsState()
+                    val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
+                    val isLoading by sharedCajaViewModel.isLoading.collectAsState()
                     val cajasDto = cajas.map { entity ->
                         CajaDto(entity.id, entity.nombre, entity.fechaApertura, entity.fechaCierre, entity.activo, entity.meseroId)
                     }
@@ -448,11 +497,11 @@ fun MainContainer(
                         lastSyncDate = lastSyncText,
                         isLoading = isLoading,
                         isOnline = viewModel?.isOnline ?: true,
-                        onCajaClick = { caja -> cajaViewModel.selectCaja(caja.id, caja.nombre) },
-                        onSyncClick = { cajaViewModel.sync() },
+                        onCajaClick = { caja -> sharedCajaViewModel.selectCaja(caja.id, caja.nombre) },
+                        onSyncClick = { scope.launch { sharedCajaViewModel.refreshCajas() } },
                         onLogoutClick = { onLogout() },
                         onMenuClick = { scope.launch { drawerState.open() } },
-                        onRefresh = { cajaViewModel.sync() }
+                        onRefresh = { scope.launch { sharedCajaViewModel.refreshCajas() } }
                     )
                 }
             }

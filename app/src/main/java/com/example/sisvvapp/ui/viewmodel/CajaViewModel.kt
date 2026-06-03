@@ -43,8 +43,14 @@ class CajaViewModel(
         viewModelScope.launch {
             cajaRepository.getCajasAbiertas().collect { lista ->
                 _cajas.value = lista
-                if (_selectedCajaId.value == null && lista.isNotEmpty()) {
-                    _selectedCajaId.value = lista.first().id
+                if (lista.isNotEmpty()) {
+                    val seleccionValida = _selectedCajaId.value?.let { id ->
+                        lista.any { it.id == id }
+                    } ?: false
+                    if (!seleccionValida) {
+                        _selectedCajaId.value = lista.first().id
+                        sessionManager.saveSelectedCaja(lista.first().id, lista.first().nombre)
+                    }
                 }
             }
         }
@@ -53,6 +59,17 @@ class CajaViewModel(
     fun selectCaja(id: Int, nombre: String = "") {
         _selectedCajaId.value = id
         sessionManager.saveSelectedCaja(id, nombre)
+    }
+
+    suspend fun refreshCajas(): Boolean {
+        _isLoading.value = true
+        _errorMessage.value = null
+        val result = cajaRepository.sync()
+        result.onSuccess {
+            sessionManager.saveLastSyncDate(System.currentTimeMillis())
+        }
+        _isLoading.value = false
+        return result.isSuccess
     }
 
     fun sync() {

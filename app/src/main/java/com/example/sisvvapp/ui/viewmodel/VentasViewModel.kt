@@ -32,12 +32,10 @@ class VentasViewModel(
             _isLoading.value = true
             _error.value = null
             try {
-                // Intentar sync con servidor
                 ventaRepository.syncVentas(fecha, corteCaja)
             } catch (e: Exception) {
                 Log.w("VentasVM", "No se pudo sync, usando datos locales", e)
             }
-            // Cargar desde Room (siempre, funciona online y offline)
             try {
                 if (corteCaja != null) {
                     ventaRepository.getVentasRecibidas(corteCaja).collectLatest { lista ->
@@ -62,5 +60,9 @@ class VentasViewModel(
                 _pendientesCount.value = count
             }
         }
+    }
+
+    suspend fun cargarDetalle(folio: Int): VentaDto? {
+        return ventaRepository.getVentaPorFolio(folio)
     }
 }

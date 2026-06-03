@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,7 +37,8 @@ fun NuevaVentaConfigScreen(
     onNombreClienteChange: (String) -> Unit,
     onMenuClick: () -> Unit,
     onContinuarClick: () -> Unit,
-    isOnline: Boolean = true
+    isOnline: Boolean = true,
+    cajasDisponibles: Boolean = true
 ) {
     val mostrarBuscador = tipoSeleccionado == "Socio" || tipoSeleccionado == "Invitado del Socio"
     val nombreEditable = tipoSeleccionado != "Socio"
@@ -114,9 +116,21 @@ fun NuevaVentaConfigScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
+                if (!cajasDisponibles) {
+                    Text(
+                        text = "No hay cajas abiertas. Ve a Ajustes y selecciona una caja.",
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                }
                 VistaVerdeButton(
                     text = "Continuar \u2192",
-                    onClick = onContinuarClick
+                    onClick = onContinuarClick,
+                    enabled = cajasDisponibles
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }

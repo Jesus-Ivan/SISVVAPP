@@ -12,11 +12,13 @@ object ScreenRoutes {
     const val MODIFICADORES = "modificadores/{productoId}"
     const val RESUMEN_CARRITO = "resumen_carrito"
     const val SELECCIONAR_PAGO = "seleccionar_pago"
+    const val DETALLE_VENTA = "detalle_venta/{folio}"
 
     const val PERFIL_SOCIO = "perfil_socio/{socioId}"
 
     fun crearRutaPerfilSocio(socioId: Int) = "perfil_socio/$socioId"
     fun crearRutaModificadores(productoId: Int) = "modificadores/$productoId"
+    fun crearRutaDetalleVenta(folio: Int) = "detalle_venta/$folio"
 }
 
 object NavGraphs {
