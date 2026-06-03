@@ -12,7 +12,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.* // Agregado para remember y mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,10 +21,11 @@ import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.ResponsiveContainer
-import com.example.sisvvapp.ui.components.VistaVerdeDatePicker // Tu nuevo componente
+import com.example.sisvvapp.ui.components.VistaVerdeDatePicker
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
+import com.example.sisvvapp.ui.components.VistaVerdeSkeletonCard // NUEVA IMPORTACIÓN
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 @Composable
@@ -68,25 +69,44 @@ fun VentasScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         VistaVerdeSectionHeader(text = stringResource(R.string.ventas_section_recent))
-
-                        if (isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                color = MaterialTheme.colorScheme.primary,
-                                strokeWidth = 2.dp
-                            )
-                        }
+                        // Se eliminó el CircularProgressIndicator de aquí porque ya tenemos mejor UX abajo
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    if (ventas.isEmpty() && !isLoading) {
+                    // LÓGICA DE ESTADOS DE CARGA (SKELETONS)
+                    if (isLoading && ventas.isEmpty()) {
+                        // ESTADO 1: Cargando por primera vez (Mostramos 6 tarjetas fantasma)
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(6) {
+                                VistaVerdeSkeletonCard()
+                            }
+                        }
+                    } else if (ventas.isEmpty() && !isLoading) {
+                        // ESTADO 2: No hay ventas registradas
                         VistaVerdeEmptyState(
                             icon = Icons.AutoMirrored.Filled.ReceiptLong,
                             message = stringResource(R.string.ventas_empty_state),
                             modifier = Modifier.weight(1f)
                         )
                     } else {
+                        // ESTADO 3: Ya hay ventas cargadas
+
+                        // Si presionaron recargar y ya hay ventas, mostramos una barra sutil arriba
+                        if (isLoading) {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        // Lista real de ventas
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
