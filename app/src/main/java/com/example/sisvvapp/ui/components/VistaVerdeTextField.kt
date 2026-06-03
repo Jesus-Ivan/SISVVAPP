@@ -42,7 +42,7 @@ fun VistaVerdeTextField(
     enabled: Boolean = true,
     bgColor: Color = MaterialTheme.colorScheme.surfaceVariant
 ) {
-    var passwordVisible by remember{mutableStateOf(false)}
+    var passwordVisible by remember { mutableStateOf(false) }
 
     TextField(
         value = value,
@@ -54,16 +54,29 @@ fun VistaVerdeTextField(
         label = {
             Text(
                 text = label,
-                fontFamily = Inter,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                fontFamily = Inter
             )
         },
         shape = RoundedCornerShape(12.dp),
         colors = TextFieldDefaults.colors(
+            // Fondos
             focusedContainerColor = bgColor,
             unfocusedContainerColor = bgColor,
+            disabledContainerColor = bgColor.copy(alpha = 0.4f),
+
+            // Rayitas de abajo (transparentes como en tu diseño)
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+
+            // Colores del texto y etiquetas
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
         ),
         singleLine = singleLine,
         minLines = minLines,
@@ -77,15 +90,14 @@ fun VistaVerdeTextField(
         trailingIcon = {
             if (isPassword) {
                 val image =
-                    if(passwordVisible) {Icons.Filled.Visibility}
-                    else {Icons.Filled.VisibilityOff}
-                IconButton(onClick = {passwordVisible = !passwordVisible}){
+                    if(passwordVisible) { Icons.Filled.Visibility }
+                    else { Icons.Filled.VisibilityOff }
+                IconButton(onClick = { passwordVisible = !passwordVisible }){
                     Icon(imageVector = image, contentDescription = "Ver contraseña")
                 }
             }
         },
         textStyle = MaterialTheme.typography.bodyLarge.copy(
-            color = MaterialTheme.colorScheme.onSurface,
             fontFamily = Inter
         )
     )
@@ -112,6 +124,14 @@ fun TextFieldPreview() {
                 onValueChange = {},
                 label = "Contraseña",
                 isPassword = true
+            )
+
+            // 3. Input Bloqueado
+            VistaVerdeTextField(
+                value = "Juan Pérez",
+                onValueChange = {},
+                label = "Socio Encontrado",
+                enabled = false
             )
         }
     }

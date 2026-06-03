@@ -109,15 +109,36 @@ fun MainContainer(
                     val cajaActiva = cajas.find { it.id == selectedCajaId }
                     val corteCajaActivo = cajaActiva?.corte
 
+                    // 1. Memoria local para el buscador
+                    var searchQuery by remember { mutableStateOf("") }
+
+                    // 2. Filtro en tiempo real para las ventas
+                    val ventasFiltradas = if (searchQuery.isBlank()) {
+                        ventas
+                    } else {
+                        ventas.filter { venta ->
+                            venta.folio.toString().contains(searchQuery, ignoreCase = true) ||
+                                    (venta.nombreCliente?.contains(searchQuery, ignoreCase = true) == true)
+                        }
+                    }
+
                     LaunchedEffect(selectedCajaId, cajas) {
                         val today = java.time.LocalDate.now().toString()
                         ventasViewModel.refreshVentas(today, corteCajaActivo)
                     }
+
                     VentasScreen(
                         onMenuClick = { scope.launch { drawerState.open() } },
-                        ventas = ventas,
+                        ventas = ventasFiltradas, // Pasamos la lista filtrada
                         isOnline = viewModel?.isOnline ?: true,
                         isLoading = isLoading,
+
+                        // 3. Conectamos los parámetros de la búsqueda
+                        searchQuery = searchQuery,
+                        onSearchQueryChange = { nuevoTexto ->
+                            searchQuery = nuevoTexto
+                        },
+
                         onRefresh = {
                             val today = java.time.LocalDate.now().toString()
                             ventasViewModel.refreshVentas(today, corteCajaActivo)
@@ -147,6 +168,7 @@ fun MainContainer(
                     val searchQuery by nuevaVentaViewModel.searchQuery.collectAsState()
                     val sociosEncontrados by nuevaVentaViewModel.sociosEncontrados.collectAsState()
                     val nombreCliente by nuevaVentaViewModel.nombreCliente.collectAsState()
+                    val socioSeleccionado by nuevaVentaViewModel.socioSeleccionado.collectAsState()
 
                     val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
                     val cajas by sharedCajaViewModel.cajas.collectAsState()
@@ -185,7 +207,11 @@ fun MainContainer(
                         searchQuery = searchQuery,
                         onSearchQueryChange = { nuevaVentaViewModel.searchSocios(it) },
                         sociosEncontrados = sociosEncontrados,
-                        onSocioSeleccionado = { nuevaVentaViewModel.selectSocio(it) },
+                        onSocioSeleccionado = { socio ->
+                            if (socio != null) nuevaVentaViewModel.selectSocio(socio)
+                            else nuevaVentaViewModel.clearSocioSelection()
+                        },
+                        socioSeleccionado = socioSeleccionado,
                         nombreCliente = nombreCliente,
                         onNombreClienteChange = { nuevaVentaViewModel.setNombreCliente(it) },
                         isOnline = viewModel?.isOnline ?: true,

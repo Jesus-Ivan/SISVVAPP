@@ -25,6 +25,7 @@ import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
+import com.example.sisvvapp.ui.components.VistaVerdeSkeletonCard
 import com.example.sisvvapp.ui.screens.caja.VistaVerdeCajaCard
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
@@ -70,18 +71,17 @@ fun AjustesScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         VistaVerdeSectionHeader(text = stringResource(id = R.string.ajustes_cajas_abiertas))
-
-                        if (isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                color = MaterialTheme.colorScheme.primary,
-                                strokeWidth = 2.dp
-                            )
-                        }
                     }
                 }
 
-                if (cajas.isEmpty()) {
+                // LÓGICA DE ESTADOS MODIFICADA
+                if (isLoading) {
+                    // ESTADO 1: Cargando
+                    items(3) {
+                        VistaVerdeSkeletonCard()
+                    }
+                } else if (cajas.isEmpty()) {
+                    // ESTADO 2: Lista vacía
                     item {
                         VistaVerdeEmptyState(
                             icon = Icons.Default.Inbox,
@@ -90,6 +90,7 @@ fun AjustesScreen(
                         )
                     }
                 } else {
+                    // ESTADO 3: Lista real de cajas
                     items(items = cajas, key = { it.id }) { caja ->
                         VistaVerdeCajaCard(
                             caja = caja,

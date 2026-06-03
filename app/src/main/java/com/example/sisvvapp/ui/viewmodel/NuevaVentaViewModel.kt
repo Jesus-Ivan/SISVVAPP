@@ -58,7 +58,15 @@ class NuevaVentaViewModel(
     fun selectSocio(socio: SocioEntity) {
         _socioSeleccionado.value = socio
         _socioId.value = socio.id
-        _nombreCliente.value = "${socio.nombre} ${socio.apellidoP} ${socio.apellidoM ?: ""}"
+
+        if (_tipoVenta.value == "Socio") {
+            // Es el socio directamente -> autocompletamos su nombre
+            _nombreCliente.value = "${socio.nombre} ${socio.apellidoP} ${socio.apellidoM ?: ""}".trim()
+        } else if (_tipoVenta.value == "Invitado del Socio") {
+            // Es un invitado -> dejamos el campo limpio para que lo escriban a mano
+            _nombreCliente.value = ""
+        }
+
         _sociosEncontrados.value = emptyList()
         _searchQuery.value = ""
     }

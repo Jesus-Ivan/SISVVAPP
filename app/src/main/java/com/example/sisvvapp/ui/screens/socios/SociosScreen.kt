@@ -1,6 +1,7 @@
 package com.example.sisvvapp.ui.screens.socios
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
@@ -21,6 +22,7 @@ import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
+import com.example.sisvvapp.ui.components.VistaVerdeSkeletonCard
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 @Composable
@@ -57,31 +59,29 @@ fun SociosScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     VistaVerdeSectionHeader(text = stringResource(R.string.socios_section_search))
-
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 2.dp
-                        )
-                    }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 VistaVerdeSearchBar(
                     value = searchQuery,
                     onValueChange = onSearchQueryChange,
                     placeholder = stringResource(R.string.socios_search_placeholder)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                // LÓGICA DE ESTADOS
-                if (isLoading && socios.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                if (isLoading) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 88.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(6) {
+                            VistaVerdeSkeletonCard()
+                        }
                     }
                 } else if (errorMessage != null && socios.isEmpty()) {
+                    // ESTADO 2: Error de conexión
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
@@ -109,6 +109,7 @@ fun SociosScreen(
                         }
                     }
                 } else if (socios.isEmpty()) {
+                    // ESTADO 3: Lista vacía
                     VistaVerdeEmptyState(
                         icon = Icons.Default.SearchOff,
                         message = if (searchQuery.isEmpty())
