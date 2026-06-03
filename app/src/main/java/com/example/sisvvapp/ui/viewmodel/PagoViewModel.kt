@@ -7,7 +7,9 @@ import com.example.sisvvapp.data.local.entity.TipoPagoEntity
 import com.example.sisvvapp.data.repository.TipoPagoRepository
 import com.example.sisvvapp.network.dto.ventas.PagoRequest
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class PagoItem(
@@ -20,8 +22,8 @@ class PagoViewModel(
     private val tipoPagoRepository: TipoPagoRepository
 ) : ViewModel() {
 
-    private val _tiposPago = MutableStateFlow<List<TipoPagoEntity>>(emptyList())
-    val tiposPago: StateFlow<List<TipoPagoEntity>> = _tiposPago
+    val tiposPago: StateFlow<List<TipoPagoEntity>> = tipoPagoRepository.getTiposPago()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _pagos = MutableStateFlow<List<PagoItem>>(emptyList())
     val pagos: StateFlow<List<PagoItem>> = _pagos
@@ -30,16 +32,7 @@ class PagoViewModel(
     val montoTotal: StateFlow<Double> = _montoTotal
 
     init {
-        observeTiposPago()
         syncTiposPago()
-    }
-
-    private fun observeTiposPago() {
-        viewModelScope.launch {
-            tipoPagoRepository.getTiposPago().collect { lista ->
-                _tiposPago.value = lista
-            }
-        }
     }
 
     fun syncTiposPago() {

@@ -11,11 +11,12 @@ import com.example.sisvvapp.network.dto.productos.ItemCarritoDto
 import com.example.sisvvapp.network.dto.productos.ModificadorSeleccionadoDto
 import com.example.sisvvapp.network.dto.ventas.PagoRequest
 import com.example.sisvvapp.network.dto.ventas.VentaRequest
-import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 data class CarritoItem(
     val producto: ProductoEntity,
@@ -52,11 +53,16 @@ class CarritoViewModel(
     private val _total = MutableStateFlow(0.0)
     val total: StateFlow<Double> = _total
 
-    private val _productos = MutableStateFlow<List<ProductoEntity>>(emptyList())
-    val productos: StateFlow<List<ProductoEntity>> = _productos
-
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
+
+    val productos: StateFlow<List<ProductoEntity>> = combine(
+        productoRepository.getProductos(),
+        _searchQuery
+    ) { all, query ->
+        if (query.isBlank()) all
+        else all.filter { it.descripcion.contains(query, ignoreCase = true) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _isSending = MutableStateFlow(false)
     val isSending: StateFlow<Boolean> = _isSending
@@ -76,24 +82,12 @@ class CarritoViewModel(
     private val _folioExistente = MutableStateFlow<Int?>(null)
     val folioExistente: StateFlow<Int?> = _folioExistente
 
-    init {
-        observeProductos()
-    }
-
     fun configurarAppendMode(folio: Int) {
         _appendMode.value = true
         _folioExistente.value = folio
     }
 
     fun esModoAppend(): Boolean = _appendMode.value
-
-    private fun observeProductos() {
-        viewModelScope.launch {
-            productoRepository.getProductos().collect { lista ->
-                _productos.value = lista
-            }
-        }
-    }
 
     fun configurarVenta(
         tipoVenta: String,
@@ -111,15 +105,6 @@ class CarritoViewModel(
 
     fun searchProductos(query: String) {
         _searchQuery.value = query
-        if (query.isBlank()) {
-            observeProductos()
-            return
-        }
-        viewModelScope.launch {
-            productoRepository.searchProductos("%$query%").collect { lista ->
-                _productos.value = lista
-            }
-        }
     }
 
     fun seleccionarProducto(producto: ProductoEntity) {

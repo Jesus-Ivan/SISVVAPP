@@ -105,7 +105,7 @@ fun MainContainer(
 
                     LaunchedEffect(selectedCajaId, cajas) {
                         val today = java.time.LocalDate.now().toString()
-                        ventasViewModel.loadVentas(today, corteCajaActivo)
+                        ventasViewModel.refreshVentas(today, corteCajaActivo)
                     }
                     VentasScreen(
                         onMenuClick = { scope.launch { drawerState.open() } },
@@ -114,7 +114,7 @@ fun MainContainer(
                         isLoading = isLoading,
                         onRefresh = {
                             val today = java.time.LocalDate.now().toString()
-                            ventasViewModel.loadVentas(today, corteCajaActivo)
+                            ventasViewModel.refreshVentas(today, corteCajaActivo)
                         },
                         onVentaClick = { venta ->
                             navController.navigate(ScreenRoutes.crearRutaDetalleVenta(venta.folio))
@@ -123,7 +123,7 @@ fun MainContainer(
                             navController.navigate(ScreenRoutes.NUEVA_VENTA)
                         },
                         onDateSelected = { fecha ->
-                            ventasViewModel.loadVentas(fecha, corteCajaActivo)
+                            ventasViewModel.refreshVentas(fecha, corteCajaActivo)
                         }
                     )
                 }
