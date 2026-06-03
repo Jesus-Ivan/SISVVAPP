@@ -54,6 +54,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "sisvv_db"
                 )
+                    // TODO: Reemplazar con migraciones explícitas antes de subir a stores
                     .fallbackToDestructiveMigration(true)
                     .build()
                     .also { INSTANCE = it }

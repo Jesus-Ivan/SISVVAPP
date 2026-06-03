@@ -6,8 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.Inbox
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.ResponsiveContainer
+import com.example.sisvvapp.ui.components.ThemeOptionSmall
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
@@ -35,6 +35,8 @@ fun AjustesScreen(
     lastSyncDate: String,
     isLoading: Boolean = false,
     isOnline: Boolean = true,
+    themeMode: Int = 0,
+    onThemeModeChange: (Int) -> Unit = {},
     onCajaClick: (CajaDto) -> Unit,
     onSyncClick: () -> Unit,
     onLogoutClick: () -> Unit,
@@ -152,7 +154,43 @@ fun AjustesScreen(
                     }
                 }
 
-                // --- 3. SECCIÓN: CERRAR SESIÓN ---
+                // --- 3. SECCIÓN: APARIENCIA ---
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    VistaVerdeSectionHeader(text = "Apariencia")
+                }
+
+                item {
+                    VistaVerdeBaseCard(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            ThemeOptionSmall(
+                                icon = Icons.Default.AutoMode,
+                                selected = themeMode == 0,
+                                onClick = { onThemeModeChange(0) },
+                                modifier = Modifier.weight(1f)
+                            )
+                            ThemeOptionSmall(
+                                icon = Icons.Default.LightMode,
+                                selected = themeMode == 1,
+                                onClick = { onThemeModeChange(1) },
+                                modifier = Modifier.weight(1f)
+                            )
+                            ThemeOptionSmall(
+                                icon = Icons.Default.DarkMode,
+                                selected = themeMode == 2,
+                                onClick = { onThemeModeChange(2) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+
+                // --- 4. SECCIÓN: CERRAR SESIÓN ---
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     VistaVerdeBaseCard(modifier = Modifier.fillMaxWidth()) {

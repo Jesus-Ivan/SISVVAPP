@@ -17,7 +17,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.SessionManager
+import com.example.sisvvapp.data.sync.SyncWorker
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.AppNavigationDrawerContent
@@ -45,6 +47,7 @@ import com.example.sisvvapp.ui.viewmodel.SendResult
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.viewmodel.SociosViewModel
 import com.example.sisvvapp.ui.viewmodel.VentasViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Suppress("UNUSED_PARAMETER")
@@ -57,6 +60,8 @@ fun MainContainer(
     val context = LocalContext.current
     val factory = SisvvViewModelFactory(context)
     val sharedCajaViewModel: CajaViewModel = viewModel(factory = factory)
+    val db = AppDatabase.getInstance(context)
+    val pendientesCount by db.ventaColaDao().countPendientesFlow().collectAsState(initial = 0)
 
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -79,7 +84,8 @@ fun MainContainer(
                     }
                 },
                 onCloseDrawer = { scope.launch { drawerState.close() } },
-                viewModel = viewModel
+                viewModel = viewModel,
+                pendientesCount = pendientesCount
             )
         }
     ) {
@@ -149,6 +155,14 @@ fun MainContainer(
                     val corteCaja = cajaActiva?.corte ?: 0
                     val clavePuntoVenta = cajaActiva?.clavePuntoVenta ?: ""
 
+                    val isFormValid by remember { derivedStateOf { nuevaVentaViewModel.isFormValid() } }
+
+                    DisposableEffect(Unit) {
+                        onDispose {
+                            carritoViewModel.clearState()
+                        }
+                    }
+
                     LaunchedEffect(tipoVenta, nombreCliente, corteCaja) {
                         carritoViewModel.configurarVenta(
                             tipoVenta = tipoVenta,
@@ -175,6 +189,7 @@ fun MainContainer(
                         nombreCliente = nombreCliente,
                         onNombreClienteChange = { nuevaVentaViewModel.setNombreCliente(it) },
                         isOnline = viewModel?.isOnline ?: true,
+                        isFormValid = isFormValid,
                         onMenuClick = { navController.popBackStack() },
                         onContinuarClick = {
                             navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
@@ -270,6 +285,7 @@ fun MainContainer(
 
                     LaunchedEffect(sendResult) {
                         if (sendResult is SendResult.Success && isAppend) {
+                            delay(1500L)
                             carritoViewModel.clearState()
                             navController.navigate(ScreenRoutes.VENTAS) {
                                 popUpTo(ScreenRoutes.VENTAS) { inclusive = true }
@@ -379,7 +395,11 @@ fun MainContainer(
                         isOnline = viewModel?.isOnline ?: true,
                         onBackClick = { navController.popBackStack() },
                         onAgregarProductos = {
-                            carritoViewModel.configurarAppendMode(folio)
+                            carritoViewModel.configurarAppendMode(
+                                folio = folio,
+                                nombreCliente = ventaDetalle?.nombreCliente ?: "",
+                                clavePuntoVenta = ventaDetalle?.clavePuntoVenta ?: ""
+                            )
                             navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
                         }
                     )
@@ -497,8 +517,13 @@ fun MainContainer(
                         lastSyncDate = lastSyncText,
                         isLoading = isLoading,
                         isOnline = viewModel?.isOnline ?: true,
+                        themeMode = viewModel?.themeMode ?: 0,
+                        onThemeModeChange = { viewModel?.updateThemeMode(it) },
                         onCajaClick = { caja -> sharedCajaViewModel.selectCaja(caja.id, caja.nombre) },
-                        onSyncClick = { scope.launch { sharedCajaViewModel.refreshCajas() } },
+                        onSyncClick = {
+                            SyncWorker.enqueueOneTime(context)
+                            android.widget.Toast.makeText(context, "Sincronización iniciada en segundo plano", android.widget.Toast.LENGTH_SHORT).show()
+                        },
                         onLogoutClick = { onLogout() },
                         onMenuClick = { scope.launch { drawerState.open() } },
                         onRefresh = { scope.launch { sharedCajaViewModel.refreshCajas() } }

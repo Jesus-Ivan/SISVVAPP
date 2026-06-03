@@ -38,6 +38,7 @@ fun NuevaVentaConfigScreen(
     onMenuClick: () -> Unit,
     onContinuarClick: () -> Unit,
     isOnline: Boolean = true,
+    isFormValid: Boolean = true,
     cajasDisponibles: Boolean = true
 ) {
     val mostrarBuscador = tipoSeleccionado == "Socio" || tipoSeleccionado == "Invitado del Socio"
@@ -130,7 +131,7 @@ fun NuevaVentaConfigScreen(
                 VistaVerdeButton(
                     text = "Continuar \u2192",
                     onClick = onContinuarClick,
-                    enabled = cajasDisponibles
+                    enabled = isFormValid && cajasDisponibles
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }

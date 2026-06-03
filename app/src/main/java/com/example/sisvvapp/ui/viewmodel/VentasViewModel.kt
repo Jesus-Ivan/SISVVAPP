@@ -58,6 +58,6 @@ class VentasViewModel(
     }
 
     suspend fun cargarDetalle(folio: Int): VentaDto? {
-        return ventaRepository.getVentaPorFolio(folio)
+        return ventaRepository.getVentaDetalle(folio)
     }
 }

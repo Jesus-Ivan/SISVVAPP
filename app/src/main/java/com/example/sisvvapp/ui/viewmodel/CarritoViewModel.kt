@@ -82,9 +82,11 @@ class CarritoViewModel(
     private val _folioExistente = MutableStateFlow<Int?>(null)
     val folioExistente: StateFlow<Int?> = _folioExistente
 
-    fun configurarAppendMode(folio: Int) {
+    fun configurarAppendMode(folio: Int, nombreCliente: String, clavePuntoVenta: String) {
         _appendMode.value = true
         _folioExistente.value = folio
+        _nombreCliente.value = nombreCliente
+        _clavePuntoVenta.value = clavePuntoVenta
     }
 
     fun esModoAppend(): Boolean = _appendMode.value

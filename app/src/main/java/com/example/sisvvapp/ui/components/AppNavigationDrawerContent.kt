@@ -29,7 +29,8 @@ fun AppNavigationDrawerContent(
     currentRoute: String,
     onNavigate: (String) -> Unit,
     onCloseDrawer: () -> Unit,
-    viewModel: SisvvViewModel? = null
+    viewModel: SisvvViewModel? = null,
+    pendientesCount: Int = 0
 ) {
     val items = listOf(
         DrawerItem(ScreenRoutes.VENTAS, stringResource(R.string.menu_ventas), Icons.Default.ShoppingCart),
@@ -69,14 +70,20 @@ fun AppNavigationDrawerContent(
                             )
                         },
                         label = {
-                            Text(
-                                text = item.title,
-                                style = TextStyle(
-                                    fontFamily = Inter,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 15.sp
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = item.title,
+                                    style = TextStyle(
+                                        fontFamily = Inter,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 15.sp
+                                    )
                                 )
-                            )
+                                if (pendientesCount > 0 && item.route == ScreenRoutes.VENTAS) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Badge { Text("$pendientesCount") }
+                                }
+                            }
                         },
                         selected = currentRoute == item.route,
                         onClick = { onNavigate(item.route); onCloseDrawer() },
