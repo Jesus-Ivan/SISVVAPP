@@ -76,7 +76,7 @@ fun VentasScreen(
                         placeholder = stringResource(R.string.ventas_search_placeholder),
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
-
+                    Spacer(modifier = Modifier.height(6.dp))
                     if (isLoading) {
                         // ESTADO 1: Cargando
                         LazyColumn(

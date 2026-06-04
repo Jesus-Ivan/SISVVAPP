@@ -44,7 +44,6 @@ fun NuevaVentaConfigScreen(
     isFormValid: Boolean = true
 ) {
     val requiereSocio = tipoSeleccionado == "socio" || tipoSeleccionado == "invitado"
-    val requiereNombreManual = tipoSeleccionado != "socio"
     val focusManager = LocalFocusManager.current
 
     val getDisplayType = { type: String ->
@@ -138,35 +137,40 @@ fun NuevaVentaConfigScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    val nombreSocioText = if (socioSeleccionado != null) {
-                        "${socioSeleccionado.nombre} ${socioSeleccionado.apellidoP} ${socioSeleccionado.apellidoM ?: ""}".trim()
-                    } else {
-                        ""
+                    if (tipoSeleccionado == "invitado") {
+                        val nombreSocioText = if (socioSeleccionado != null) {
+                            "${socioSeleccionado.nombre} ${socioSeleccionado.apellidoP} ${socioSeleccionado.apellidoM ?: ""}".trim()
+                        } else {
+                            ""
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        VistaVerdeTextField(
+                            value = nombreSocioText,
+                            onValueChange = {},
+                            label = "Socio",
+                            readOnly = true,
+                            enabled = false
+                        )
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    VistaVerdeTextField(
-                        value = nombreSocioText,
-                        onValueChange = {},
-                        label = "Socio Encontrado",
-                        readOnly = true,
-                        enabled = false
-                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                if (requiereNombreManual) {
-                    val labelText = if (tipoSeleccionado == "Invitado del Socio") "Nombre del Invitado" else "Nombre del Cliente"
-
-                    VistaVerdeTextField(
-                        value = nombreCliente,
-                        onValueChange = onNombreClienteChange,
-                        label = labelText,
-                        readOnly = false,
-                        enabled = true
-                    )
+                val labelText = when (tipoSeleccionado) {
+                    "socio" -> "Socio Seleccionado"
+                    "invitado" -> "Nombre del Invitado"
+                    else -> "Nombre del Cliente"
                 }
+                val isEditable = tipoSeleccionado != "socio"
+
+                VistaVerdeTextField(
+                    value = nombreCliente,
+                    onValueChange = onNombreClienteChange,
+                    label = labelText,
+                    readOnly = !isEditable,
+                    enabled = isEditable
+                )
 
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -184,7 +188,7 @@ fun NuevaVentaConfigScreen(
 
                 val botonHabilitado = cajasDisponibles &&
                         (!requiereSocio || socioSeleccionado != null) &&
-                        (!requiereNombreManual || nombreCliente.isNotBlank())
+                        (tipoSeleccionado == "socio" || nombreCliente.isNotBlank())
 
                 VistaVerdeButton(
                     text = "Continuar \u2192",
