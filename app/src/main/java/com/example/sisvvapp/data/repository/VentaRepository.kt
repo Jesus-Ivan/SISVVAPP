@@ -35,6 +35,18 @@ class VentaRepository(
             entities.map { it.toVentaDto() }
         }
     }
+    // Devuelve ventas filtradas por fecha (formato "yyyy-MM-dd")
+    fun getVentasPorFecha(fecha: String): Flow<List<VentaDto>> {
+        return ventaRecibidaDao.getVentasPorFecha(fecha).map { entities ->
+            entities.map { it.toVentaDto() }
+        }
+    }
+    // Devuelve ventas filtradas por corte Y fecha
+    fun getVentasPorCorteYFecha(corteCaja: Int, fecha: String): Flow<List<VentaDto>> {
+        return ventaRecibidaDao.getVentasPorCorteYFecha(corteCaja, fecha).map { entities ->
+            entities.map { it.toVentaDto() }
+        }
+    }
     suspend fun getVentaDetalle(folio: Int): VentaDto? {
         return try {
             val response = api.getVentaDetalle(folio)
@@ -54,10 +66,13 @@ class VentaRepository(
             val response = api.getVentas(fecha, corteCaja)
             if (response.isSuccessful) {
                 val entities = response.body()?.map { it.toVentaRecibidaEntity() } ?: emptyList()
+                // Borramos las ventas de ESA fecha antes de re-insertar para evitar
+                // que datos de diferentes fechas se mezclen en Room.
+                ventaRecibidaDao.deleteByFecha(fecha)
                 if (entities.isNotEmpty()) {
                     ventaRecibidaDao.insertAll(entities)
                 }
-                Log.d("VentaRepo", "Ventas sincronizadas: ${entities.size}")
+                Log.d("VentaRepo", "Ventas sincronizadas para $fecha: ${entities.size}")
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("Error ${response.code()}"))

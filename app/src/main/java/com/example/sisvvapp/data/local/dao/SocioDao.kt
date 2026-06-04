@@ -33,6 +33,9 @@ interface SocioDao {
     @Query("SELECT * FROM socios ORDER BY apellido_p, apellido_m, nombre")
     suspend fun getAllSociosSync(): List<SocioEntity>
 
+    @Query("SELECT * FROM integrantes")
+    suspend fun getAllIntegrantesSync(): List<IntegranteEntity>
+
     @Query("SELECT * FROM socios WHERE id = :id")
     suspend fun getSocioById(id: Int): SocioEntity?
 

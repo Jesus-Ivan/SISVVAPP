@@ -31,10 +31,12 @@ class SyncWorker(
             cajaRepo.sync()
             tipoPagoRepo.sync()
             tipoVentaRepo.sync()
-            // Descargar fotos de socios para uso offline
+            // Descargar fotos de socios e integrantes para uso offline
             try {
                 val socios = db.socioDao().getAllSociosSync()
-                val fotoUrls = socios.mapNotNull { it.fotoUrl }.filter { it.isNotBlank() }
+                val integrantes = db.socioDao().getAllIntegrantesSync()
+                val fotoUrls = (socios.mapNotNull { it.fotoUrl } + integrantes.mapNotNull { it.fotoUrl })
+                    .filter { it.isNotBlank() }
                 PhotoDownloader.downloadAll(applicationContext, fotoUrls)
             } catch (e: Exception) {
                 Log.w("SyncWorker", "Error descargando fotos", e)
