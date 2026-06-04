@@ -59,8 +59,11 @@ class CarritoViewModel(
         productoRepository.getProductos(),
         _searchQuery
     ) { all, query ->
-        if (query.isBlank()) all
-        else all.filter { it.descripcion.contains(query, ignoreCase = true) }
+        if (query.isBlank()) {
+            all.take(15)
+        } else {
+            all.filter { it.descripcion.contains(query, ignoreCase = true) }.take(15)
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _isSending = MutableStateFlow(false)
