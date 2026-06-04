@@ -122,6 +122,13 @@ class NuevaVentaViewModel(
     }
 
     fun isFormValid(): Boolean {
+        val requiereSocio = _tipoVenta.value == "socio" || _tipoVenta.value == "invitado"
+        if (requiereSocio) {
+            val socio = _socioSeleccionado.value
+            if (socio == null || socio.estatus == "CAN") {
+                return false
+            }
+        }
         return when (_tipoVenta.value) {
             "socio" -> _socioId.value != null
             "invitado" -> _socioId.value != null && _nombreCliente.value.isNotBlank()
