@@ -139,14 +139,29 @@ class CarritoViewModel(
     fun addProductoConModificadores(
         producto: ProductoEntity,
         modificadores: List<ModificadorEntity>,
+        grupos: List<com.example.sisvvapp.data.local.entity.GrupoModificadorEntity>,
         cantidad: Int = 1
     ) {
-        val precioModificadores = modificadores.sumOf { it.precio }
+        val finalModificadores = mutableListOf<ModificadorEntity>()
+        val modificadoresPorGrupo = modificadores.groupBy { it.grupo }
+
+        modificadoresPorGrupo.forEach { (grupoId, mods) ->
+            val grupo = grupos.find { it.idGrupo.toString() == grupoId }
+            val limiteIncluidos = grupo?.modifIncluidos ?: 0
+
+            val modsOrdenados = mods.sortedBy { it.precio }
+            modsOrdenados.forEachIndexed { index, mod ->
+                val isIncluido = index < limiteIncluidos
+                finalModificadores.add(mod.copy(incluido = isIncluido))
+            }
+        }
+
+        val precioModificadores = finalModificadores.sumOf { if (it.incluido) 0.0 else it.precio }
         val precioUnitario = producto.precio + precioModificadores
         val item = CarritoItem(
             producto = producto,
             cantidad = cantidad,
-            modificadores = modificadores,
+            modificadores = finalModificadores,
             precioUnitario = precioUnitario,
             subtotal = precioUnitario * cantidad
         )
@@ -188,9 +203,9 @@ class CarritoViewModel(
             val productos = _items.value.map { item ->
                 val modificadores = item.modificadores.map { mod ->
                     ModificadorSeleccionadoDto(
-                        claveProducto = mod.id,
+                        claveProducto = mod.claveModificador,
                         cantidad = 1,
-                        precio = mod.precio
+                        precio = if (mod.incluido) 0.0 else mod.precio
                     )
                 }
                 ItemCarritoDto(

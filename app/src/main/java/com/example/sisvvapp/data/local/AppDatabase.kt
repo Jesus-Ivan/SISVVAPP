@@ -36,7 +36,7 @@ import com.example.sisvvapp.data.local.entity.TipoVentaEntity
         TipoPagoEntity::class,
         TipoVentaEntity::class
     ],
-    version = 12,
+    version = 13,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

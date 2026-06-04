@@ -21,6 +21,7 @@ import androidx.room.PrimaryKey
 data class ModificadorEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: Int,
     @ColumnInfo(name = "producto_id") val productoId: Int,
+    @ColumnInfo(name = "clave_modificador") val claveModificador: Int,
     @ColumnInfo(name = "nombre") val nombre: String,
     @ColumnInfo(name = "tipo") val tipo: String,
     @ColumnInfo(name = "precio") val precio: Double,

@@ -273,7 +273,7 @@ fun MainContainer(
                             gruposModificadores = grupos,
                             modificadoresDisponibles = modificadores,
                             onAddToCart = { mods ->
-                                carritoViewModel.addProductoConModificadores(producto, mods, carritoViewModel.cantidadSeleccionada)
+                                carritoViewModel.addProductoConModificadores(producto, mods, grupos, carritoViewModel.cantidadSeleccionada)
                                 navController.popBackStack()
                             },
                             onBackClick = { navController.popBackStack() },
