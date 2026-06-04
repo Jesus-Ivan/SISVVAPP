@@ -73,6 +73,7 @@ fun ProductoDto.toModificadorEntities(): List<ModificadorEntity> = modificadores
     ModificadorEntity(
         id = mod.id,
         productoId = clave,
+        claveModificador = mod.claveModificador,
         nombre = mod.descripcion,
         tipo = "",
         precio = mod.precioOverride,
