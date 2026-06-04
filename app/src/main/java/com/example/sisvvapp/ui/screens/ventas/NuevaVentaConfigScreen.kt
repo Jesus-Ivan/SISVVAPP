@@ -128,7 +128,11 @@ fun NuevaVentaConfigScreen(
                                     socio = socio,
                                     onClick = {
                                         onSocioSeleccionado(socio)
-                                        onSearchQueryChange("${socio.nombre} ${socio.apellidoP}".trim())
+                                        if (socio.estatus == "CAN") {
+                                            onSearchQueryChange("")
+                                        } else {
+                                            onSearchQueryChange("${socio.nombre} ${socio.apellidoP}".trim())
+                                        }
                                         focusManager.clearFocus()
                                     }
                                 )
@@ -151,6 +155,20 @@ fun NuevaVentaConfigScreen(
                             label = "Socio",
                             readOnly = true,
                             enabled = false
+                        )
+                    }
+
+                    if (socioSeleccionado?.estatus == "CAN") {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Membresia de socio ${socioSeleccionado.id} cancelada",
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
                         )
                     }
 
@@ -186,9 +204,7 @@ fun NuevaVentaConfigScreen(
                     )
                 }
 
-                val botonHabilitado = cajasDisponibles &&
-                        (!requiereSocio || socioSeleccionado != null) &&
-                        (tipoSeleccionado == "socio" || nombreCliente.isNotBlank())
+                val botonHabilitado = cajasDisponibles && isFormValid
 
                 VistaVerdeButton(
                     text = "Continuar \u2192",
