@@ -52,8 +52,14 @@ object PhotoDownloader {
 
     private fun downloadOne(client: OkHttpClient, sessionManager: SessionManager, photosDir: File, url: String) {
         try {
-            val baseUrl = "https://clever-foxes-stop.loca.lt/"
-            val fullUrl = if (url.startsWith("http")) url else "$baseUrl$url"
+            val rawBaseUrl = com.example.sisvvapp.network.RetrofitClient.BASE_URL
+            val baseUrl = rawBaseUrl
+                .trimEnd('/')
+                .removeSuffix("/api")
+                .removeSuffix("/api/")
+            val baseUrlWithSlash = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
+            val relativeUrl = url.trimStart('/')
+            val fullUrl = if (url.startsWith("http")) url else "$baseUrlWithSlash$relativeUrl"
 
             val requestBuilder = Request.Builder().url(fullUrl)
             requestBuilder.addHeader("Bypass-Tunnel-Reminder", "true")

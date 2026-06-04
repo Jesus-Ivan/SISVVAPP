@@ -11,8 +11,6 @@ import com.example.sisvvapp.data.repository.SocioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -36,35 +34,51 @@ class CajaViewModel(
     val errorMessage: StateFlow<String?> = _errorMessage
 
     init {
-        _selectedCajaId.value = sessionManager.getSelectedCajaId()
-        cajas.onEach { lista ->
-            if (lista.isNotEmpty()) {
-                val seleccionValida = _selectedCajaId.value?.let { id ->
-                    lista.any { it.id == id }
-                } ?: false
-                if (!seleccionValida) {
-                    _selectedCajaId.value = lista.first().id
-                    sessionManager.saveSelectedCaja(lista.first().id, lista.first().nombre)
-                }
-            }
-        }.launchIn(viewModelScope)
+        // Restauramos la selección guardada. -1 = "nunca guardado" → null
+        _selectedCajaId.value = sessionManager.getSelectedCajaId().takeIf { it != -1 }
         sync()
     }
 
-    fun selectCaja(id: Int, nombre: String = "") {
-        _selectedCajaId.value = id
-        sessionManager.saveSelectedCaja(id, nombre)
-    }
-
+    /**
+     * Llama al API, actualiza Room, y luego hace una lectura one-shot de la BD
+     * para auto-seleccionar la primera caja solo si la selección actual ya no existe.
+     * Al usar getCajasSnapshot() DESPUÉS del sync, leemos datos ya estables y evitamos
+     * la race condition entre deleteAll() y re-insert del repositorio.
+     */
     suspend fun refreshCajas(): Boolean {
         _isLoading.value = true
         _errorMessage.value = null
         val result = cajaRepository.sync()
         result.onSuccess {
             sessionManager.saveLastSyncDate(System.currentTimeMillis())
+            // Leemos la lista estabilizada directamente de Room (one-shot, no Flow)
+            val lista = cajaRepository.getCajasSnapshot()
+            aplicarAutoSeleccion(lista)
         }
         _isLoading.value = false
         return result.isSuccess
+    }
+
+    /**
+     * Solo sobreescribe la selección si la actual no existe en la lista recibida.
+     * Si el usuario ya eligió una caja válida, no hace nada.
+     */
+    private fun aplicarAutoSeleccion(lista: List<CajaActivaEntity>) {
+        if (lista.isEmpty()) return
+        val currentId = _selectedCajaId.value
+        val seleccionValida = currentId != null && lista.any { it.id == currentId }
+        if (!seleccionValida) {
+            val primera = lista.first()
+            _selectedCajaId.value = primera.id
+            sessionManager.saveSelectedCaja(primera.id, primera.nombre)
+            Log.d("CajaVM", "Auto-seleccionando caja: ${primera.nombre} (id=${primera.id})")
+        }
+    }
+
+    fun selectCaja(id: Int, nombre: String = "") {
+        _selectedCajaId.value = id
+        sessionManager.saveSelectedCaja(id, nombre)
+        Log.d("CajaVM", "Caja seleccionada manualmente: $nombre (id=$id)")
     }
 
     fun sync() {
@@ -74,7 +88,12 @@ class CajaViewModel(
             try {
                 val result = cajaRepository.sync()
                 result.fold(
-                    onSuccess = { sessionManager.saveLastSyncDate(System.currentTimeMillis()) },
+                    onSuccess = {
+                        sessionManager.saveLastSyncDate(System.currentTimeMillis())
+                        // También aplicamos auto-selección en el sync inicial del init
+                        val lista = cajaRepository.getCajasSnapshot()
+                        aplicarAutoSeleccion(lista)
+                    },
                     onFailure = { e ->
                         Log.e("CajaVM", "Sync falló", e)
                         _errorMessage.value = e.message ?: "Error al sincronizar cajas"

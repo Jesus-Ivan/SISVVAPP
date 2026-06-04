@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Refresh
 import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.ResponsiveContainer
@@ -35,11 +37,13 @@ fun VentasScreen(
     isOnline: Boolean = true,
     isLoading: Boolean = false,
     searchQuery: String = "",
+    selectedDate: String = "",
     onSearchQueryChange: (String) -> Unit = {},
     onRefresh: () -> Unit = {},
     onVentaClick: (VentaDto) -> Unit = {},
     onNuevaVentaClick: () -> Unit = {},
-    onDateSelected: (String) -> Unit = {}
+    onDateSelected: (String) -> Unit = {},
+    onClearDate: () -> Unit = {}
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -70,6 +74,39 @@ fun VentasScreen(
                         VistaVerdeSectionHeader(text = stringResource(R.string.ventas_section_recent))
                     }
                     Spacer(modifier = Modifier.height(6.dp))
+
+                    // Chip indicador de fecha cuando no es hoy
+                    val today = java.time.LocalDate.now().toString()
+                    if (selectedDate.isNotBlank() && selectedDate != today) {
+                        val displayDate = try {
+                            val parts = selectedDate.split("-")
+                            "${parts[2]}/${parts[1]}/${parts[0]}"
+                        } catch (e: Exception) { selectedDate }
+                        SuggestionChip(
+                            onClick = onClearDate,
+                            label = {
+                                Text(
+                                    text = "Viendo: $displayDate",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontSize = 13.sp
+                                )
+                            },
+                            icon = {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = "Volver a hoy",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            },
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                iconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
                     VistaVerdeSearchBar(
                         value = searchQuery,
                         onValueChange = onSearchQueryChange,

@@ -12,6 +12,8 @@ class CajaRepository(
 ) {
     fun getCajaActiva(): Flow<CajaActivaEntity?> = cajaActivaDao.getCajaActiva()
     fun getCajasAbiertas(): Flow<List<CajaActivaEntity>> = cajaActivaDao.getCajasAbiertas()
+    // One-shot: devuelve la lista actual de Room justo después de un sync
+    suspend fun getCajasSnapshot(): List<CajaActivaEntity> = cajaActivaDao.getCajasSnapshot()
     suspend fun sync(): Result<Unit> = runCatching {
         val response = api.getCajasActivas()
         if (response.isSuccessful) {

@@ -9,6 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -24,24 +25,25 @@ class VentasViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    // Ambos valores (corte + fecha) controlan qué ventas se muestran en Room
     private val _corteCaja = MutableStateFlow<Int?>(null)
+    private val _fecha = MutableStateFlow(java.time.LocalDate.now().toString())
 
-    val ventas: StateFlow<List<VentaDto>> = _corteCaja.flatMapLatest { corte ->
-        if (corte != null) ventaRepository.getVentasRecibidas(corte)
-        else ventaRepository.getAllVentasRecibidas()
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val ventas: StateFlow<List<VentaDto>> =
+        combine(_corteCaja, _fecha) { corte, fecha -> Pair(corte, fecha) }
+            .flatMapLatest { (corte, fecha) ->
+                if (corte != null) {
+                    ventaRepository.getVentasPorCorteYFecha(corte, fecha)
+                } else {
+                    ventaRepository.getVentasPorFecha(fecha)
+                }
+            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val pendientesCount: StateFlow<Int> = ventaRepository.getPendientesCountFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    var fechaActual: String = ""
-        private set
-    var cajaId: Int? = null
-        private set
-
     fun refreshVentas(fecha: String, corteCaja: Int? = null) {
-        fechaActual = fecha
-        cajaId = corteCaja
+        _fecha.value = fecha
         _corteCaja.value = corteCaja
         viewModelScope.launch {
             _isLoading.value = true

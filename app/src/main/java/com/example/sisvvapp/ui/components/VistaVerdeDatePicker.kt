@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +32,10 @@ fun VistaVerdeDatePicker(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
+                        // El timestamp es UTC midnight: se debe formatear en UTC
+                        // para que en zonas UTC-6 no retroceda al día anterior.
                         val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        formatter.timeZone = TimeZone.getTimeZone("UTC")
                         val formattedDate = formatter.format(Date(millis))
                         onDateSelected(formattedDate)
                     }

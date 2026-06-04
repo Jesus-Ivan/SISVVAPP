@@ -19,6 +19,10 @@ interface CajaActivaDao {
     @Query("SELECT * FROM cajas_activas WHERE activo = 1")
     fun getCajasAbiertas(): Flow<List<CajaActivaEntity>>
 
+    // One-shot query: devuelve la lista actual sin Flow (para usar después de sync)
+    @Query("SELECT * FROM cajas_activas WHERE activo = 1")
+    suspend fun getCajasSnapshot(): List<CajaActivaEntity>
+
     @Query("DELETE FROM cajas_activas")
     suspend fun deleteAll()
 }

@@ -112,7 +112,10 @@ fun MainContainer(
                     // 1. Memoria local para el buscador
                     var searchQuery by remember { mutableStateOf("") }
 
-                    // 2. Filtro en tiempo real para las ventas
+                    // 2. Fecha activa (se actualiza cuando el VM la cambia)
+                    var fechaActiva by remember { mutableStateOf("") }
+
+                    // 3. Filtro en tiempo real para las ventas
                     val ventasFiltradas = if (searchQuery.isBlank()) {
                         ventas
                     } else {
@@ -124,16 +127,18 @@ fun MainContainer(
 
                     LaunchedEffect(selectedCajaId, cajas) {
                         val today = java.time.LocalDate.now().toString()
+                        fechaActiva = today
                         ventasViewModel.refreshVentas(today, corteCajaActivo)
                     }
 
                     VentasScreen(
                         onMenuClick = { scope.launch { drawerState.open() } },
-                        ventas = ventasFiltradas, // Pasamos la lista filtrada
+                        ventas = ventasFiltradas,
                         isOnline = viewModel?.isOnline ?: true,
                         isLoading = isLoading,
+                        selectedDate = fechaActiva,
 
-                        // 3. Conectamos los parámetros de la búsqueda
+                        // 4. Conectamos los parámetros de la búsqueda
                         searchQuery = searchQuery,
                         onSearchQueryChange = { nuevoTexto ->
                             searchQuery = nuevoTexto
@@ -141,6 +146,7 @@ fun MainContainer(
 
                         onRefresh = {
                             val today = java.time.LocalDate.now().toString()
+                            fechaActiva = today
                             ventasViewModel.refreshVentas(today, corteCajaActivo)
                         },
                         onVentaClick = { venta ->
@@ -150,7 +156,15 @@ fun MainContainer(
                             navController.navigate(ScreenRoutes.NUEVA_VENTA)
                         },
                         onDateSelected = { fecha ->
+                            fechaActiva = fecha
+                            searchQuery = ""
                             ventasViewModel.refreshVentas(fecha, corteCajaActivo)
+                        },
+                        onClearDate = {
+                            val today = java.time.LocalDate.now().toString()
+                            fechaActiva = today
+                            searchQuery = ""
+                            ventasViewModel.refreshVentas(today, corteCajaActivo)
                         }
                     )
                 }
@@ -462,13 +476,15 @@ fun MainContainer(
 
                 // --- PANTALLA DE AJUSTES ---
                 composable(ScreenRoutes.AJUSTES) {
+                    val cajas by sharedCajaViewModel.cajas.collectAsState()
+
                     LaunchedEffect(currentRoute) {
                         if (currentRoute == ScreenRoutes.AJUSTES) {
+                            // refreshCajas() ya incluye la auto-selección internamente
+                            // usando getCajasSnapshot() (one-shot) para evitar race conditions.
                             sharedCajaViewModel.refreshCajas()
                         }
                     }
-
-                    val cajas by sharedCajaViewModel.cajas.collectAsState()
                     val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
                     val isLoading by sharedCajaViewModel.isLoading.collectAsState()
                     val cajasDto = cajas.map { entity ->
