@@ -71,13 +71,8 @@ class NuevaVentaViewModel(
 
             socioRepository.searchSocios("%$query%").collect { lista ->
 
-                val sociosActivos = lista.filter { socio ->
-                    socio.estatus?.equals("Activo", ignoreCase = true) == true
-
-                }
-
-                Log.d("NuevaVentaVM", "Resultados brutos: ${lista.size} | Resultados activos (filtrados): ${sociosActivos.size}")
-                _sociosEncontrados.value = sociosActivos
+                Log.d("NuevaVentaVM", "Resultados de búsqueda de socios: ${lista.size}")
+                _sociosEncontrados.value = lista
             }
         }
     }

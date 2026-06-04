@@ -149,7 +149,7 @@ private fun GrupoModificadoresSection(
                 isSelected = isSelected,
                 isEnabled = canSelect,
                 isIncluded = incluidos > 0 && seleccionados.indexOf(mod) < incluidos,
-                onToggle = { onToggle(mod, isSelected) }
+                onToggle = { onToggle(mod, !isSelected) }
             )
         }
     }

@@ -58,7 +58,7 @@ fun BuscarProductosScreen(
     onSearchQueryChange: (String) -> Unit,
     carritoCount: Int,
     onAddProducto: (ProductoEntity, Int) -> Unit,
-    onProductoClick: (ProductoEntity) -> Unit,
+    onProductoConModificadores: (ProductoEntity, Int) -> Unit,
     onVerCarrito: () -> Unit,
     onBackClick: () -> Unit,
     isOnline: Boolean = true
@@ -107,8 +107,9 @@ fun BuscarProductosScreen(
                             ) { producto ->
                                 VistaVerdeProductoCard(
                                     producto = producto,
+                                    hasModificadores = producto.modifMaximos > 0,
                                     onAdd = { cantidad -> onAddProducto(producto, cantidad) },
-                                    onClick = { onProductoClick(producto) }
+                                    onAddConModif = { cantidad -> onProductoConModificadores(producto, cantidad) }
                                 )
                             }
                         }
@@ -151,14 +152,13 @@ fun BuscarProductosScreen(
 @Composable
 private fun VistaVerdeProductoCard(
     producto: ProductoEntity,
+    hasModificadores: Boolean,
     onAdd: (Int) -> Unit,
-    onClick: () -> Unit
+    onAddConModif: (Int) -> Unit
 ) {
     var cantidad by remember { mutableStateOf(1) }
 
-    VistaVerdeBaseCard(
-        modifier = Modifier.clickable { onClick() }
-    ) {
+    VistaVerdeBaseCard {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -222,7 +222,13 @@ private fun VistaVerdeProductoCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 FilledTonalButton(
-                    onClick = { onAdd(cantidad) },
+                    onClick = {
+                        if (hasModificadores) {
+                            onAddConModif(cantidad)
+                        } else {
+                            onAdd(cantidad)
+                        }
+                    },
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                     shape = MaterialTheme.shapes.small
                 ) {
@@ -252,7 +258,7 @@ fun BuscarProductosScreenPreview() {
             onSearchQueryChange = {},
             carritoCount = 0,
             onAddProducto = { _, _ -> },
-            onProductoClick = {},
+            onProductoConModificadores = { _, _ -> },
             onVerCarrito = {},
             onBackClick = {}
         )
