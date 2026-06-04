@@ -33,7 +33,7 @@ import com.example.sisvvapp.ui.screens.ventas.DetalleVentaScreen
 import com.example.sisvvapp.ui.screens.ventas.NuevaVentaConfigScreen
 import com.example.sisvvapp.ui.screens.ventas.ResumenCarritoScreen
 import com.example.sisvvapp.ui.screens.ventas.SeleccionarModificadoresScreen
-import com.example.sisvvapp.ui.screens.ventas.SeleccionarPagoScreen
+
 import com.example.sisvvapp.ui.screens.ventas.VentasScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
@@ -42,7 +42,7 @@ import com.example.sisvvapp.ui.viewmodel.CarritoViewModel
 import com.example.sisvvapp.ui.viewmodel.CajaViewModel
 import com.example.sisvvapp.ui.viewmodel.ModificadoresViewModel
 import com.example.sisvvapp.ui.viewmodel.NuevaVentaViewModel
-import com.example.sisvvapp.ui.viewmodel.PagoViewModel
+
 import com.example.sisvvapp.ui.viewmodel.SendResult
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.viewmodel.SociosViewModel
@@ -118,7 +118,7 @@ fun MainContainer(
                     } else {
                         ventas.filter { venta ->
                             venta.folio.toString().contains(searchQuery, ignoreCase = true) ||
-                                    (venta.nombreCliente?.contains(searchQuery, ignoreCase = true) == true)
+                                    venta.nombreCliente.contains(searchQuery, ignoreCase = true)
                         }
                     }
 
@@ -156,10 +156,10 @@ fun MainContainer(
                 }
 
                 // --- PANTALLA DE NUEVA VENTA (CONFIGURACIÓN) ---
-                composable(ScreenRoutes.NUEVA_VENTA) {
+                composable(ScreenRoutes.NUEVA_VENTA) { backStackEntry ->
                     val nuevaVentaViewModel: NuevaVentaViewModel = viewModel(factory = factory)
 
-                    val saleGraphEntry = remember(navController.currentBackStackEntry) {
+                    val saleGraphEntry = remember(backStackEntry) {
                         navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
                     }
                     val carritoViewModel: CarritoViewModel = viewModel<CarritoViewModel>(viewModelStoreOwner = saleGraphEntry, factory = factory)
@@ -177,8 +177,6 @@ fun MainContainer(
                     val corteCaja = cajaActiva?.corte ?: 0
                     val clavePuntoVenta = cajaActiva?.clavePuntoVenta ?: ""
 
-                    val isFormValid by remember { derivedStateOf { nuevaVentaViewModel.isFormValid() } }
-
                     DisposableEffect(Unit) {
                         onDispose {
                             carritoViewModel.clearState()
@@ -195,13 +193,10 @@ fun MainContainer(
                         )
                     }
 
+                    val tiposVenta by nuevaVentaViewModel.tiposVenta.collectAsState()
+
                     NuevaVentaConfigScreen(
-                        tiposDeVenta = listOf(
-                            "Público General",
-                            "Socio",
-                            "Invitado del Socio",
-                            "Empleado"
-                        ),
+                        tiposDeVenta = tiposVenta,
                         tipoSeleccionado = tipoVenta,
                         onTipoVentaChange = { nuevaVentaViewModel.setTipoVenta(it) },
                         searchQuery = searchQuery,
@@ -215,18 +210,19 @@ fun MainContainer(
                         nombreCliente = nombreCliente,
                         onNombreClienteChange = { nuevaVentaViewModel.setNombreCliente(it) },
                         isOnline = viewModel?.isOnline ?: true,
-                        isFormValid = isFormValid,
                         onMenuClick = { navController.popBackStack() },
                         onContinuarClick = {
                             navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
                         },
-                        cajasDisponibles = cajasDisponibles
+                        cajasDisponibles = cajasDisponibles,
+                        isFormValid = nuevaVentaViewModel.isFormValid()
                     )
+
                 }
 
                 // --- PANTALLA DE BUSCAR PRODUCTOS ---
-                composable(ScreenRoutes.BUSCAR_PRODUCTOS) {
-                    val saleGraphEntry = remember(navController.currentBackStackEntry) {
+                composable(ScreenRoutes.BUSCAR_PRODUCTOS) { backStackEntry ->
+                    val saleGraphEntry = remember(backStackEntry) {
                         navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
                     }
                     val carritoViewModel: CarritoViewModel = viewModel<CarritoViewModel>(viewModelStoreOwner = saleGraphEntry, factory = factory)
@@ -293,8 +289,8 @@ fun MainContainer(
                 }
 
                 // --- PANTALLA DE RESUMEN CARRITO ---
-                composable(ScreenRoutes.RESUMEN_CARRITO) {
-                    val saleGraphEntry = remember(navController.currentBackStackEntry) {
+                composable(ScreenRoutes.RESUMEN_CARRITO) { backStackEntry ->
+                    val saleGraphEntry = remember(backStackEntry) {
                         navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
                     }
                     val carritoViewModel: CarritoViewModel = viewModel<CarritoViewModel>(viewModelStoreOwner = saleGraphEntry, factory = factory)
@@ -327,12 +323,10 @@ fun MainContainer(
                         total = total,
                         isSending = isSending,
                         sendResult = sendResult,
+                        onUpdateCantidad = { index, cant -> carritoViewModel.updateCantidad(index, cant) },
+                        onRemoveItem = { index -> carritoViewModel.removeProducto(index) },
                         onConfirmar = {
-                            if (isAppend) {
-                                carritoViewModel.confirmarVenta()
-                            } else {
-                                navController.navigate(ScreenRoutes.SELECCIONAR_PAGO)
-                            }
+                            carritoViewModel.confirmarVenta()
                         },
                         onVolver = {
                             carritoViewModel.clearState()
@@ -345,50 +339,7 @@ fun MainContainer(
                     )
                 }
 
-                // --- PANTALLA DE SELECCIONAR PAGO ---
-                composable(ScreenRoutes.SELECCIONAR_PAGO) {
-                    val saleGraphEntry = remember(navController.currentBackStackEntry) {
-                        navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
-                    }
-                    val carritoViewModel: CarritoViewModel = viewModel<CarritoViewModel>(viewModelStoreOwner = saleGraphEntry, factory = factory)
-                    val pagoViewModel: PagoViewModel = viewModel(factory = factory)
 
-                    val total by carritoViewModel.total.collectAsState()
-                    val tiposPago by pagoViewModel.tiposPago.collectAsState()
-                    val pagos by pagoViewModel.pagos.collectAsState()
-                    val totalPagos by pagoViewModel.montoTotal.collectAsState()
-                    val isSending by carritoViewModel.isSending.collectAsState()
-                    val sendResult by carritoViewModel.sendResult.collectAsState()
-
-                    LaunchedEffect(sendResult) {
-                        if (sendResult is SendResult.Success) {
-                            carritoViewModel.clearState()
-                            pagoViewModel.limpiarPagos()
-                            navController.navigate(ScreenRoutes.VENTAS) {
-                                popUpTo(ScreenRoutes.VENTAS) { inclusive = true }
-                            }
-                        }
-                    }
-
-                    SeleccionarPagoScreen(
-                        tiposPago = tiposPago,
-                        pagos = pagos,
-                        totalVenta = total,
-                        totalPagos = totalPagos,
-                        onAgregarPago = { tipo, monto, propina ->
-                            pagoViewModel.agregarPago(tipo, monto, propina)
-                        },
-                        onEliminarPago = { index ->
-                            pagoViewModel.eliminarPago(index)
-                        },
-                        onConfirmar = {
-                            carritoViewModel.setPagos(pagoViewModel.toPagoRequests())
-                            carritoViewModel.confirmarVenta()
-                        },
-                        onBackClick = { navController.popBackStack() },
-                        isOnline = viewModel?.isOnline ?: true
-                    )
-                }
 
                 // --- PANTALLA DE DETALLE DE VENTA ---
                 composable(
@@ -398,7 +349,7 @@ fun MainContainer(
                     val folio = backStackEntry.arguments?.getInt("folio") ?: 0
                     val ventasViewModel: VentasViewModel = viewModel(factory = factory)
 
-                    val saleGraphEntry = remember(navController.currentBackStackEntry) {
+                    val saleGraphEntry = remember(backStackEntry) {
                         navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
                     }
                     val carritoViewModel: CarritoViewModel = viewModel<CarritoViewModel>(
@@ -441,8 +392,8 @@ fun MainContainer(
             ) {
 
                 // --- PANTALLA DE SOCIOS ---
-                composable(ScreenRoutes.SOCIOS) {
-                    val sociosGraphEntry = remember(navController.currentBackStackEntry) {
+                composable(ScreenRoutes.SOCIOS) { backStackEntry ->
+                    val sociosGraphEntry = remember(backStackEntry) {
                         navController.getBackStackEntry(NavGraphs.SOCIOS_GRAPH)
                     }
                     val sociosViewModel: SociosViewModel = viewModel<SociosViewModel>(viewModelStoreOwner = sociosGraphEntry, factory = factory)
@@ -480,7 +431,7 @@ fun MainContainer(
                 ) { backStackEntry ->
                     val socioId = backStackEntry.arguments?.getInt("socioId") ?: 0
 
-                    val sociosGraphEntry = remember(navController.currentBackStackEntry) {
+                    val sociosGraphEntry = remember(backStackEntry) {
                         navController.getBackStackEntry(NavGraphs.SOCIOS_GRAPH)
                     }
                     val sociosViewModel: SociosViewModel = viewModel<SociosViewModel>(viewModelStoreOwner = sociosGraphEntry, factory = factory)

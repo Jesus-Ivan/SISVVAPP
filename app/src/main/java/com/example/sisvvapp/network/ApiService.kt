@@ -54,4 +54,7 @@ interface ApiService {
 
     @GET("tipos-pago")
     suspend fun getTiposPago(): Response<List<TipoPagoDto>>
+
+    @GET("sync/tipos-venta")
+    suspend fun getTiposVenta(): Response<List<String>>
 }

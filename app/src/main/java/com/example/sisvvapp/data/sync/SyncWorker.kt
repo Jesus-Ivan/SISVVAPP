@@ -22,6 +22,7 @@ class SyncWorker(
         val productoRepo = ProductoRepository(api, db.productoDao(), db.grupoModificadorDao())
         val cajaRepo = CajaRepository(api, db.cajaActivaDao())
         val tipoPagoRepo = TipoPagoRepository(api, db.tipoPagoDao())
+        val tipoVentaRepo = com.example.sisvvapp.data.repository.TipoVentaRepository(api, db.tipoVentaDao())
         val ventaRepo = VentaRepository(api, db.ventaColaDao(), db.ventaRecibidaDao())
         return try {
             // Sync catálogos
@@ -29,6 +30,7 @@ class SyncWorker(
             productoRepo.sync()
             cajaRepo.sync()
             tipoPagoRepo.sync()
+            tipoVentaRepo.sync()
             // Descargar fotos de socios para uso offline
             try {
                 val socios = db.socioDao().getAllSociosSync()

@@ -39,6 +39,8 @@ fun ResumenCarritoScreen(
     total: Double,
     isSending: Boolean,
     sendResult: SendResult?,
+    onUpdateCantidad: (Int, Int) -> Unit,
+    onRemoveItem: (Int) -> Unit,
     onConfirmar: () -> Unit,
     onVolver: () -> Unit,
     onBackClick: () -> Unit,
@@ -123,8 +125,8 @@ fun ResumenCarritoScreen(
                                     precioUnitario = item.precioUnitario,
                                     subtotal = item.subtotal,
                                     modificadores = item.modificadores.map { it.nombre },
-                                    onCantidadChange = {},
-                                    onRemove = {}
+                                    onCantidadChange = { cant -> onUpdateCantidad(index, cant) },
+                                    onRemove = { onRemoveItem(index) }
                                 )
                             }
                         }
@@ -289,6 +291,8 @@ fun ResumenCarritoScreenPreview() {
             total = 370.0,
             isSending = false,
             sendResult = null,
+            onUpdateCantidad = { _, _ -> },
+            onRemoveItem = {},
             onConfirmar = {},
             onVolver = {},
             onBackClick = {}

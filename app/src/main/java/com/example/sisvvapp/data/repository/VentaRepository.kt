@@ -119,7 +119,7 @@ class VentaRepository(
             totalVenta = 0.0,
             estado = "PENDIENTE",
             folioExistente = folioExistente,
-            pagosJson = if (request.pagos != null) gson.toJson(request.pagos) else null
+            pagosJson = null
         )
         ventaColaDao.insert(entity)
     }

@@ -11,6 +11,7 @@ import com.example.sisvvapp.data.local.dao.SocioDao
 import com.example.sisvvapp.data.local.dao.TipoPagoDao
 import com.example.sisvvapp.data.local.dao.VentaColaDao
 import com.example.sisvvapp.data.local.dao.VentaRecibidaDao
+import com.example.sisvvapp.data.local.dao.TipoVentaDao
 import com.example.sisvvapp.data.local.entity.CajaActivaEntity
 import com.example.sisvvapp.data.local.entity.GrupoModificadorEntity
 import com.example.sisvvapp.data.local.entity.IntegranteEntity
@@ -20,6 +21,7 @@ import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.data.local.entity.TipoPagoEntity
 import com.example.sisvvapp.data.local.entity.VentaColaEntity
 import com.example.sisvvapp.data.local.entity.VentaRecibidaEntity
+import com.example.sisvvapp.data.local.entity.TipoVentaEntity
 
 @Database(
     entities = [
@@ -31,9 +33,10 @@ import com.example.sisvvapp.data.local.entity.VentaRecibidaEntity
         CajaActivaEntity::class,
         VentaColaEntity::class,
         VentaRecibidaEntity::class,
-        TipoPagoEntity::class
+        TipoPagoEntity::class,
+        TipoVentaEntity::class
     ],
-    version = 11,
+    version = 12,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -44,6 +47,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun ventaColaDao(): VentaColaDao
     abstract fun ventaRecibidaDao(): VentaRecibidaDao
     abstract fun tipoPagoDao(): TipoPagoDao
+    abstract fun tipoVentaDao(): TipoVentaDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null

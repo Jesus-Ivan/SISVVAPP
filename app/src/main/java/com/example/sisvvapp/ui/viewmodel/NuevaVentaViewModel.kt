@@ -12,11 +12,27 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class NuevaVentaViewModel(
-    private val socioRepository: SocioRepository
+    private val socioRepository: SocioRepository,
+    private val tipoVentaRepository: com.example.sisvvapp.data.repository.TipoVentaRepository
 ) : ViewModel() {
 
-    private val _tipoVenta = MutableStateFlow("Público General")
+    private val _tiposVenta = MutableStateFlow<List<String>>(emptyList())
+    val tiposVenta: StateFlow<List<String>> = _tiposVenta
+
+    private val _tipoVenta = MutableStateFlow("general")
     val tipoVenta: StateFlow<String> = _tipoVenta
+
+    init {
+        viewModelScope.launch {
+            tipoVentaRepository.getTiposVentaFlow().collect { entities ->
+                val nombres = entities.map { it.nombre }
+                _tiposVenta.value = if (nombres.isNotEmpty()) nombres else listOf("socio", "invitado", "general", "empleado")
+                if (!_tiposVenta.value.contains(_tipoVenta.value)) {
+                    _tipoVenta.value = _tiposVenta.value.firstOrNull() ?: "general"
+                }
+            }
+        }
+    }
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
@@ -59,10 +75,10 @@ class NuevaVentaViewModel(
         _socioSeleccionado.value = socio
         _socioId.value = socio.id
 
-        if (_tipoVenta.value == "Socio") {
+        if (_tipoVenta.value == "socio") {
             // Es el socio directamente -> autocompletamos su nombre
             _nombreCliente.value = "${socio.nombre} ${socio.apellidoP} ${socio.apellidoM ?: ""}".trim()
-        } else if (_tipoVenta.value == "Invitado del Socio") {
+        } else if (_tipoVenta.value == "invitado") {
             // Es un invitado -> dejamos el campo limpio para que lo escriban a mano
             _nombreCliente.value = ""
         }
@@ -85,8 +101,8 @@ class NuevaVentaViewModel(
 
     fun isFormValid(): Boolean {
         return when (_tipoVenta.value) {
-            "Socio" -> _socioId.value != null
-            "Invitado del Socio" -> _socioId.value != null && _nombreCliente.value.isNotBlank()
+            "socio" -> _socioId.value != null
+            "invitado" -> _socioId.value != null && _nombreCliente.value.isNotBlank()
             else -> _nombreCliente.value.isNotBlank()
         }
     }

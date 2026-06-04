@@ -9,7 +9,6 @@ import com.example.sisvvapp.data.repository.ProductoRepository
 import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.network.dto.productos.ItemCarritoDto
 import com.example.sisvvapp.network.dto.productos.ModificadorSeleccionadoDto
-import com.example.sisvvapp.network.dto.ventas.PagoRequest
 import com.example.sisvvapp.network.dto.ventas.VentaRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -69,9 +68,6 @@ class CarritoViewModel(
 
     private val _sendResult = MutableStateFlow<SendResult?>(null)
     val sendResult: StateFlow<SendResult?> = _sendResult
-
-    private val _pagos = MutableStateFlow<List<PagoRequest>>(emptyList())
-    val pagos: StateFlow<List<PagoRequest>> = _pagos
 
     private val _productoSeleccionado = MutableStateFlow<ProductoEntity?>(null)
     val productoSeleccionado: StateFlow<ProductoEntity?> = _productoSeleccionado
@@ -177,9 +173,6 @@ class CarritoViewModel(
         _total.value = _items.value.sumOf { it.subtotal }
     }
 
-    fun setPagos(pagos: List<PagoRequest>) {
-        _pagos.value = pagos
-    }
 
     fun confirmarVenta() {
         if (_items.value.isEmpty()) return
@@ -210,8 +203,7 @@ class CarritoViewModel(
                 idSocio = _socioId.value,
                 nombre = _nombreCliente.value,
                 clavePuntoVenta = _clavePuntoVenta.value,
-                productos = productos,
-                pagos = _pagos.value.ifEmpty { null }
+                productos = productos
             )
 
             if (_appendMode.value && _folioExistente.value != null) {
@@ -255,7 +247,6 @@ class CarritoViewModel(
     fun limpiarCarrito() {
         _items.value = emptyList()
         _total.value = 0.0
-        _pagos.value = emptyList()
         _sendResult.value = null
     }
 
@@ -267,7 +258,6 @@ class CarritoViewModel(
         _clavePuntoVenta.value = ""
         _items.value = emptyList()
         _total.value = 0.0
-        _pagos.value = emptyList()
         _sendResult.value = null
         _searchQuery.value = ""
         _productoSeleccionado.value = null

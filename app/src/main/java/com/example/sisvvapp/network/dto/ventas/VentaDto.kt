@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class VentaDto(
     val folio: Int,
-    @SerializedName("nombre_cliente") val nombreCliente: String,
+    @SerializedName("nombre") val nombreCliente: String,
     val hora: String,
     val total: Double,
     val estatus: String,
