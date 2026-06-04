@@ -239,8 +239,8 @@ fun MainContainer(
                         onAddProducto = { producto, cantidad ->
                             carritoViewModel.addProducto(producto, cantidad)
                         },
-                        onProductoClick = { producto ->
-                            carritoViewModel.seleccionarProducto(producto)
+                        onProductoConModificadores = { producto, cantidad ->
+                            carritoViewModel.seleccionarProducto(producto, cantidad)
                             navController.navigate(ScreenRoutes.crearRutaModificadores(producto.id))
                         },
                         onVerCarrito = {
@@ -279,7 +279,7 @@ fun MainContainer(
                             gruposModificadores = grupos,
                             modificadoresDisponibles = modificadores,
                             onAddToCart = { mods ->
-                                carritoViewModel.addProductoConModificadores(producto, mods)
+                                carritoViewModel.addProductoConModificadores(producto, mods, carritoViewModel.cantidadSeleccionada)
                                 navController.popBackStack()
                             },
                             onBackClick = { navController.popBackStack() },
@@ -306,7 +306,7 @@ fun MainContainer(
                     val isAppend = carritoViewModel.esModoAppend()
 
                     LaunchedEffect(sendResult) {
-                        if (sendResult is SendResult.Success && isAppend) {
+                        if (sendResult is SendResult.Success) {
                             delay(1500L)
                             carritoViewModel.clearState()
                             navController.navigate(ScreenRoutes.VENTAS) {

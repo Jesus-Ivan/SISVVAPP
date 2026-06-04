@@ -80,9 +80,20 @@ class VentaRepository(
                 Result.failure(Exception("Error ${response.code()}: $errorBody"))
             }
         } catch (e: Exception) {
-            Log.w("VentaRepo", "Sin conexión, encolando venta offline", e)
-            encolarVentaOffline(request, null)
-            Result.failure(Exception("offline"))
+            val msg = e.message?.lowercase() ?: ""
+            val isNetworkError = msg.contains("unable to resolve host") ||
+                    msg.contains("timeout") ||
+                    msg.contains("failed to connect") ||
+                    msg.contains("network is unreachable") ||
+                    msg.contains("route to host")
+            if (isNetworkError) {
+                Log.w("VentaRepo", "Sin conexión, encolando venta offline", e)
+                encolarVentaOffline(request, null)
+                Result.failure(Exception("offline"))
+            } else {
+                Log.e("VentaRepo", "Error no recuperable al crear venta, no se encola", e)
+                Result.failure(Exception("Error de comunicación: ${e.message}"))
+            }
         }
     }
 
@@ -98,9 +109,20 @@ class VentaRepository(
                 Result.failure(Exception("Error ${response.code()}: $errorBody"))
             }
         } catch (e: Exception) {
-            Log.w("VentaRepo", "Sin conexión, encolando append offline", e)
-            encolarVentaOffline(request, folio)
-            Result.failure(Exception("offline"))
+            val msg = e.message?.lowercase() ?: ""
+            val isNetworkError = msg.contains("unable to resolve host") ||
+                    msg.contains("timeout") ||
+                    msg.contains("failed to connect") ||
+                    msg.contains("network is unreachable") ||
+                    msg.contains("route to host")
+            if (isNetworkError) {
+                Log.w("VentaRepo", "Sin conexión, encolando append offline", e)
+                encolarVentaOffline(request, folio)
+                Result.failure(Exception("offline"))
+            } else {
+                Log.e("VentaRepo", "Error no recuperable al agregar productos, no se encola", e)
+                Result.failure(Exception("Error de comunicación: ${e.message}"))
+            }
         }
     }
 

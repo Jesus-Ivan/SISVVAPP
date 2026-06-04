@@ -105,8 +105,12 @@ class CarritoViewModel(
         _searchQuery.value = query
     }
 
-    fun seleccionarProducto(producto: ProductoEntity) {
+    var cantidadSeleccionada: Int = 1
+        private set
+
+    fun seleccionarProducto(producto: ProductoEntity, cantidad: Int = 1) {
         _productoSeleccionado.value = producto
+        cantidadSeleccionada = cantidad
     }
 
     fun addProducto(producto: ProductoEntity, cantidad: Int = 1) {
