@@ -177,12 +177,6 @@ fun MainContainer(
                     val corteCaja = cajaActiva?.corte ?: 0
                     val clavePuntoVenta = cajaActiva?.clavePuntoVenta ?: ""
 
-                    DisposableEffect(Unit) {
-                        onDispose {
-                            carritoViewModel.clearState()
-                        }
-                    }
-
                     LaunchedEffect(tipoVenta, nombreCliente, corteCaja) {
                         carritoViewModel.configurarVenta(
                             tipoVenta = tipoVenta,

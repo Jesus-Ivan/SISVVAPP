@@ -77,22 +77,7 @@ fun DetalleVentaScreen(
             item {
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            item {
-                VistaVerdeSectionHeader(text = "Pagos (${venta.pagos.size})")
-            }
-            if (venta.pagos.isEmpty()) {
-                item {
-                    Text(
-                        text = "Sin pagos registrados",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-            } else {
-                items(venta.pagos) { pago ->
-                    PagoItemCard(pago = pago)
-                }
-            }
+
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 VistaVerdeBaseCard {
@@ -226,32 +211,3 @@ private fun ProductoItemCard(producto: ProductoVentaDto) {
     }
 }
 
-@Composable
-private fun PagoItemCard(pago: PagoDto) {
-    VistaVerdeBaseCard {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Filled.Payment,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = pago.nombreTipoPago ?: "Tipo pago #${pago.tipoPagoId}",
-                modifier = Modifier.weight(1f),
-                fontSize = 14.sp
-            )
-            Text(
-                text = "$${String.format(Locale.US, "%.2f", pago.monto)}",
-                fontFamily = Poppins,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
