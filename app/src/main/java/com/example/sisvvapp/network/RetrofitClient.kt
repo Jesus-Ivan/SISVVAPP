@@ -2,6 +2,7 @@ package com.example.sisvvapp.network
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import com.example.sisvvapp.SisvvApplication
 import com.example.sisvvapp.data.local.SessionManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -49,6 +50,7 @@ object RetrofitClient {
             val response = chain.proceed(chain.request())
             if (response.code == 401) {
                 sessionManager.clearSession()
+                (context.applicationContext as? SisvvApplication)?.emitUnauthorized()
             }
             response
         }

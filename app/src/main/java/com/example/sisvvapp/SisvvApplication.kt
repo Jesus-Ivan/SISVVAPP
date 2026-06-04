@@ -5,9 +5,18 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import com.example.sisvvapp.data.local.SessionManager
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import okhttp3.OkHttpClient
 
 class SisvvApplication : Application(), ImageLoaderFactory {
+
+    private val _unauthorizedEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val unauthorizedEvent: SharedFlow<Unit> = _unauthorizedEvent
+
+    fun emitUnauthorized() {
+        _unauthorizedEvent.tryEmit(Unit)
+    }
     override fun newImageLoader(): ImageLoader {
         val sessionManager = SessionManager.getInstance(this)
 

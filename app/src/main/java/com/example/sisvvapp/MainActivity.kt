@@ -29,6 +29,7 @@ import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
 import com.example.sisvvapp.data.sync.SyncWorker
+import kotlinx.coroutines.flow.collect
 
 class MainActivity : ComponentActivity() {
 
@@ -40,6 +41,8 @@ class MainActivity : ComponentActivity() {
 
         // Programar sync periódico
         SyncWorker.enqueuePeriodic(this)
+
+        val app = application as SisvvApplication
 
         setContent {
             val sisvvViewModel: SisvvViewModel = viewModel(
@@ -54,6 +57,14 @@ class MainActivity : ComponentActivity() {
 
             SISVVAPPTheme(darkTheme = isDarkTheme) {
                 val navController = rememberNavController()
+
+                LaunchedEffect(Unit) {
+                    app.unauthorizedEvent.collect {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                }
                 val windowSizeClass = calculateWindowSizeClass(this)
 
                 val deviceType =

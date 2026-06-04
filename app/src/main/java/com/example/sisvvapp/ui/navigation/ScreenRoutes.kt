@@ -11,7 +11,6 @@ object ScreenRoutes {
     const val BUSCAR_PRODUCTOS = "buscar_productos"
     const val MODIFICADORES = "modificadores/{productoId}"
     const val RESUMEN_CARRITO = "resumen_carrito"
-    const val SELECCIONAR_PAGO = "seleccionar_pago"
     const val DETALLE_VENTA = "detalle_venta/{folio}"
 
     const val PERFIL_SOCIO = "perfil_socio/{socioId}"

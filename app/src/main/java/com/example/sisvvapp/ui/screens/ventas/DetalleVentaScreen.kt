@@ -21,12 +21,12 @@ import com.example.sisvvapp.network.dto.ventas.ProductoVentaDto
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
+import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.components.VistaVerdeStatusBadge
 import com.example.sisvvapp.ui.theme.Poppins
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetalleVentaScreen(
     venta: VentaDto?,
@@ -35,39 +35,33 @@ fun DetalleVentaScreen(
     onBackClick: () -> Unit,
     onAgregarProductos: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Detalle de Venta") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    VistaVerdeScaffold(
+        title = "Detalle de Venta",
+        onMenuClick = onBackClick,
+        isBackButton = true,
+        isOnline = isOnline
+    ) {
         if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            return@Scaffold
+            return@VistaVerdeScaffold
         }
 
         if (venta == null) {
-            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 VistaVerdeEmptyState(
                     icon = Icons.Filled.ShoppingCart,
                     message = "Venta no encontrada"
                 )
             }
-            return@Scaffold
+            return@VistaVerdeScaffold
         }
 
         val esAbierta = venta.estatus.equals("Abierta", ignoreCase = true)
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
             contentPadding = PaddingValues(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -125,19 +119,11 @@ fun DetalleVentaScreen(
                         onClick = onAgregarProductos,
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        enabled = isOnline
+                        enabled = true
                     ) {
                         Icon(Icons.Filled.AddShoppingCart, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Agregar productos a esta venta", fontSize = 16.sp)
-                    }
-                    if (!isOnline) {
-                        Text(
-                            text = "Se necesita conexión para agregar productos",
-                            color = MaterialTheme.colorScheme.error,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
                     }
                 }
             }
@@ -255,7 +241,7 @@ private fun PagoItemCard(pago: PagoDto) {
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "Tipo pago #${pago.tipoPagoId}",
+                text = pago.nombreTipoPago ?: "Tipo pago #${pago.tipoPagoId}",
                 modifier = Modifier.weight(1f),
                 fontSize = 14.sp
             )

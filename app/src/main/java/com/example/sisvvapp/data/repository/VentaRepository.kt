@@ -35,8 +35,19 @@ class VentaRepository(
             entities.map { it.toVentaDto() }
         }
     }
-    suspend fun getVentaPorFolio(folio: Int): VentaDto? {
-        return ventaRecibidaDao.getVentaPorFolio(folio)?.toVentaDto()
+    suspend fun getVentaDetalle(folio: Int): VentaDto? {
+        return try {
+            val response = api.getVentaDetalle(folio)
+            if (response.isSuccessful) {
+                response.body()?.toVentaDto()
+            } else {
+                Log.w("VentaRepo", "Error ${response.code()} al obtener detalle, usando local")
+                ventaRecibidaDao.getVentaPorFolio(folio)?.toVentaDto()
+            }
+        } catch (e: Exception) {
+            Log.w("VentaRepo", "Offline, usando datos locales para detalle", e)
+            ventaRecibidaDao.getVentaPorFolio(folio)?.toVentaDto()
+        }
     }
     suspend fun syncVentas(fecha: String, corteCaja: Int? = null): Result<Unit> {
         return try {
@@ -108,7 +119,7 @@ class VentaRepository(
             totalVenta = 0.0,
             estado = "PENDIENTE",
             folioExistente = folioExistente,
-            pagosJson = if (request.pagos != null) gson.toJson(request.pagos) else null
+            pagosJson = null
         )
         ventaColaDao.insert(entity)
     }

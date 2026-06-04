@@ -47,7 +47,10 @@ class SisvvViewModelFactory(
                 SplashViewModel(SessionManager.getInstance(context)) as T
 
             modelClass.isAssignableFrom(NuevaVentaViewModel::class.java) ->
-                NuevaVentaViewModel(SocioRepository(api, db.socioDao(), context)) as T
+                NuevaVentaViewModel(
+                    SocioRepository(api, db.socioDao(), context),
+                    com.example.sisvvapp.data.repository.TipoVentaRepository(api, db.tipoVentaDao())
+                ) as T
 
             modelClass.isAssignableFrom(CarritoViewModel::class.java) ->
                 CarritoViewModel(
@@ -55,8 +58,6 @@ class SisvvViewModelFactory(
                     VentaRepository(api, db.ventaColaDao(), db.ventaRecibidaDao())
                 ) as T
 
-            modelClass.isAssignableFrom(PagoViewModel::class.java) ->
-                PagoViewModel(TipoPagoRepository(api, db.tipoPagoDao())) as T
 
             modelClass.isAssignableFrom(ModificadoresViewModel::class.java) ->
                 ModificadoresViewModel(ProductoRepository(api, db.productoDao(), db.grupoModificadorDao())) as T

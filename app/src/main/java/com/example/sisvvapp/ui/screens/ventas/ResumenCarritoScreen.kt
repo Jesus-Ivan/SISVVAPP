@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.ui.components.ResponsiveContainer
 import com.example.sisvvapp.ui.components.VistaVerdeButton
+import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
@@ -37,6 +39,8 @@ fun ResumenCarritoScreen(
     total: Double,
     isSending: Boolean,
     sendResult: SendResult?,
+    onUpdateCantidad: (Int, Int) -> Unit,
+    onRemoveItem: (Int) -> Unit,
     onConfirmar: () -> Unit,
     onVolver: () -> Unit,
     onBackClick: () -> Unit,
@@ -68,6 +72,23 @@ fun ResumenCarritoScreen(
                     OfflineContent(onVolver = onVolver)
                 }
                 else -> {
+                    if (items.isEmpty()) {
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            VistaVerdeEmptyState(
+                                icon = Icons.Default.ShoppingCart,
+                                message = "No hay productos en el carrito"
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            VistaVerdeButton(
+                                text = "Agregar productos",
+                                onClick = onBackClick
+                            )
+                        }
+                    } else {
                     Column(
                         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 24.dp)
                     ) {
@@ -104,8 +125,8 @@ fun ResumenCarritoScreen(
                                     precioUnitario = item.precioUnitario,
                                     subtotal = item.subtotal,
                                     modificadores = item.modificadores.map { it.nombre },
-                                    onCantidadChange = {},
-                                    onRemove = {}
+                                    onCantidadChange = { cant -> onUpdateCantidad(index, cant) },
+                                    onRemove = { onRemoveItem(index) }
                                 )
                             }
                         }
@@ -143,6 +164,7 @@ fun ResumenCarritoScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
+                }
                 }
             }
         }
@@ -269,6 +291,8 @@ fun ResumenCarritoScreenPreview() {
             total = 370.0,
             isSending = false,
             sendResult = null,
+            onUpdateCantidad = { _, _ -> },
+            onRemoveItem = {},
             onConfirmar = {},
             onVolver = {},
             onBackClick = {}

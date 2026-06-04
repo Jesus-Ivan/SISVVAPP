@@ -3,7 +3,6 @@ package com.example.sisvvapp.network
 import com.example.sisvvapp.network.dto.auth.LoginRequest
 import com.example.sisvvapp.network.dto.auth.LoginResponse
 import com.example.sisvvapp.network.dto.cajas.CajaDto
-import com.example.sisvvapp.network.dto.productos.GrupoModificadorDto
 import com.example.sisvvapp.network.dto.productos.ProductoDto
 import com.example.sisvvapp.network.dto.socios.SocioDto
 import com.example.sisvvapp.network.dto.ventas.TipoPagoDto
@@ -24,11 +23,6 @@ interface ApiService {
 
     @GET("sync/productos")
     suspend fun getProductos(): Response<List<ProductoDto>>
-
-    @GET("productos/{clave}/modificadores")
-    suspend fun getModificadores(
-        @Path("clave") clave: Int
-    ): Response<List<GrupoModificadorDto>>
 
     @GET("cajas/activas")
     suspend fun getCajasActivas(): Response<List<CajaDto>>
@@ -53,6 +47,14 @@ interface ApiService {
     @POST("logout")
     suspend fun logout(): Response<Unit>
 
+    @GET("ventas/{folio}")
+    suspend fun getVentaDetalle(
+        @Path("folio") folio: Int
+    ): Response<VentaResponse>
+
     @GET("tipos-pago")
     suspend fun getTiposPago(): Response<List<TipoPagoDto>>
+
+    @GET("sync/tipos-venta")
+    suspend fun getTiposVenta(): Response<List<String>>
 }

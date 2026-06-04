@@ -40,11 +40,25 @@ fun NuevaVentaConfigScreen(
     onMenuClick: () -> Unit,
     onContinuarClick: () -> Unit,
     isOnline: Boolean = true,
-    cajasDisponibles: Boolean = true
+    cajasDisponibles: Boolean = true,
+    isFormValid: Boolean = true
 ) {
-    val requiereSocio = tipoSeleccionado == "Socio" || tipoSeleccionado == "Invitado del Socio"
-    val requiereNombreManual = tipoSeleccionado != "Socio"
+    val requiereSocio = tipoSeleccionado == "socio" || tipoSeleccionado == "invitado"
+    val requiereNombreManual = tipoSeleccionado != "socio"
     val focusManager = LocalFocusManager.current
+
+    val getDisplayType = { type: String ->
+        when (type) {
+            "socio" -> "Socio"
+            "invitado" -> "Invitado del Socio"
+            "general" -> "Público General"
+            "empleado" -> "Empleado"
+            else -> type.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
+        }
+    }
+
+    val displayOptions = tiposDeVenta.map { getDisplayType(it) }
+    val displaySelected = getDisplayType(tipoSeleccionado)
 
     VistaVerdeScaffold(
         title = "Nueva Venta",
@@ -63,12 +77,14 @@ fun NuevaVentaConfigScreen(
 
                 VistaVerdeDropdown(
                     label = "Tipo de Venta",
-                    options = tiposDeVenta,
-                    selectedOption = tipoSeleccionado,
-                    onOptionSelected = { nuevoTipo ->
-                        onTipoVentaChange(nuevoTipo)
+                    options = displayOptions,
+                    selectedOption = displaySelected,
+                    onOptionSelected = { nuevoDisplay ->
+                        val index = displayOptions.indexOf(nuevoDisplay)
+                        val realType = if (index >= 0) tiposDeVenta[index] else "general"
+                        onTipoVentaChange(realType)
                         onNombreClienteChange("")
-                        if (nuevoTipo != "Socio" && nuevoTipo != "Invitado del Socio") {
+                        if (realType != "socio" && realType != "invitado") {
                             onSearchQueryChange("")
                             onSocioSeleccionado(null)
                         }

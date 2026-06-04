@@ -6,5 +6,6 @@ data class PagoDto(
     val id: Int,
     @SerializedName("tipo_pago_id") val tipoPagoId: Int,
     val monto: Double,
-    val fecha: String
+    val fecha: String,
+    @SerializedName("nombre_tipo_pago") val nombreTipoPago: String? = null
 )
