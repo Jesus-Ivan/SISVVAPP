@@ -68,7 +68,7 @@ fun SociosScreen(
                     onValueChange = onSearchQueryChange,
                     placeholder = stringResource(R.string.socios_search_placeholder)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 if (isLoading) {
                     LazyColumn(

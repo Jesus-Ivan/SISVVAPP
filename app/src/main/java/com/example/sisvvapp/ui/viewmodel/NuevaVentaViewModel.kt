@@ -9,6 +9,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 class NuevaVentaViewModel(
@@ -19,16 +20,16 @@ class NuevaVentaViewModel(
     private val _tiposVenta = MutableStateFlow<List<String>>(emptyList())
     val tiposVenta: StateFlow<List<String>> = _tiposVenta
 
-    private val _tipoVenta = MutableStateFlow("general")
+    private val _tipoVenta = MutableStateFlow("socio")
     val tipoVenta: StateFlow<String> = _tipoVenta
 
     init {
         viewModelScope.launch {
-            tipoVentaRepository.getTiposVentaFlow().collect { entities ->
+            tipoVentaRepository.getTiposVentaFlow().take(1).collect { entities ->
                 val nombres = entities.map { it.nombre }
                 _tiposVenta.value = if (nombres.isNotEmpty()) nombres else listOf("socio", "invitado", "general", "empleado")
                 if (!_tiposVenta.value.contains(_tipoVenta.value)) {
-                    _tipoVenta.value = _tiposVenta.value.firstOrNull() ?: "general"
+                    _tipoVenta.value = _tiposVenta.value.firstOrNull() ?: "socio"
                 }
             }
         }
@@ -78,6 +79,7 @@ class NuevaVentaViewModel(
     }
 
     fun selectSocio(socio: SocioEntity) {
+        searchJob?.cancel()
         Log.d("NuevaVentaVM", "Socio seleccionado: ID ${socio.id} - ${socio.nombre}")
         _socioSeleccionado.value = socio
         _socioId.value = socio.id
@@ -95,16 +97,28 @@ class NuevaVentaViewModel(
     }
 
     fun setNombreCliente(nombre: String) {
-        _nombreCliente.value = nombre
+        if (_tipoVenta.value != "socio") {
+            _nombreCliente.value = nombre
+        }
     }
 
     fun clearSocioSelection() {
+        searchJob?.cancel()
         Log.d("NuevaVentaVM", "Limpiando selección de socio")
         _socioSeleccionado.value = null
         _socioId.value = null
         _nombreCliente.value = ""
         _searchQuery.value = ""
         _sociosEncontrados.value = emptyList()
+    }
+
+    fun resetFormulario() {
+        searchJob?.cancel()
+        _searchQuery.value = ""
+        _sociosEncontrados.value = emptyList()
+        _socioSeleccionado.value = null
+        _nombreCliente.value = ""
+        _socioId.value = null
     }
 
     fun isFormValid(): Boolean {
