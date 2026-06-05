@@ -21,8 +21,10 @@ import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.sync.SyncWorker
 import com.example.sisvvapp.network.dto.cajas.CajaDto
+import com.example.sisvvapp.network.dto.ventas.ProductoVentaDto
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.AppNavigationDrawerContent
+import com.example.sisvvapp.ui.components.TransferirProductoDialog
 import com.example.sisvvapp.ui.navigation.NavGraphs
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.screens.ajustes.AjustesScreen
@@ -48,6 +50,7 @@ import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.viewmodel.SociosViewModel
 import com.example.sisvvapp.ui.viewmodel.VentasViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.launch
 
 @Suppress("UNUSED_PARAMETER")
@@ -367,11 +370,43 @@ fun MainContainer(
 
                     var ventaDetalle by remember { mutableStateOf<VentaDto?>(null) }
                     var isLoadingDetalle by remember { mutableStateOf(true) }
+                    var productoATransferir by remember { mutableStateOf<ProductoVentaDto?>(null) }
+
+                    val ventasAbiertas by ventasViewModel
+                        .getVentasAbiertasDelCorte(ventaDetalle?.cajaId ?: 0)
+                        .collectAsState(initial = emptyList())
+                    val ventasDisponibles = remember(ventasAbiertas, folio) {
+                        ventasAbiertas.filter { it.folio != folio }
+                    }
 
                     LaunchedEffect(folio) {
                         isLoadingDetalle = true
                         ventaDetalle = ventasViewModel.cargarDetalle(folio)
                         isLoadingDetalle = false
+                    }
+
+                    val coroutineScope = rememberCoroutineScope()
+
+                    productoATransferir?.let { prod ->
+                        TransferirProductoDialog(
+                            producto = prod,
+                            ventasDisponibles = ventasDisponibles,
+                            onConfirmar = { folioDestino ->
+                                ventasViewModel.transferirProducto(
+                                    folioOrigen = folio,
+                                    chunk = prod.chunk,
+                                    folioDestino = folioDestino
+                                ) { result ->
+                                    if (result.isSuccess) {
+                                        coroutineScope.launch {
+                                            ventaDetalle = ventasViewModel.cargarDetalle(folio)
+                                        }
+                                    }
+                                    productoATransferir = null
+                                }
+                            },
+                            onDismiss = { productoATransferir = null }
+                        )
                     }
 
                     DetalleVentaScreen(
@@ -386,6 +421,11 @@ fun MainContainer(
                                 clavePuntoVenta = ventaDetalle?.clavePuntoVenta ?: ""
                             )
                             navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
+                        },
+                        onTransferirProducto = { producto ->
+                            if (viewModel?.isOnline == true) {
+                                productoATransferir = producto
+                            }
                         }
                     )
                 }

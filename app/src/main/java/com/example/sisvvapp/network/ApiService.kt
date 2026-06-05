@@ -6,6 +6,7 @@ import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.network.dto.productos.ProductoDto
 import com.example.sisvvapp.network.dto.socios.SocioDto
 import com.example.sisvvapp.network.dto.ventas.TipoPagoDto
+import com.example.sisvvapp.network.dto.ventas.TransferirProductoRequest
 import com.example.sisvvapp.network.dto.ventas.VentaRequest
 import com.example.sisvvapp.network.dto.ventas.VentaResponse
 import retrofit2.Response
@@ -43,6 +44,12 @@ interface ApiService {
         @Path("folio") folio: Int,
         @Body request: VentaRequest
     ): Response<VentaResponse>
+
+    @POST("ventas/{folio}/transferir-producto")
+    suspend fun transferirProducto(
+        @Path("folio") folio: Int,
+        @Body request: TransferirProductoRequest
+    ): Response<Unit>
 
     @POST("logout")
     suspend fun logout(): Response<Unit>

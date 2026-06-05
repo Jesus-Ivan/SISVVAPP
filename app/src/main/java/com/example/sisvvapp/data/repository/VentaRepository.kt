@@ -9,6 +9,7 @@ import com.example.sisvvapp.network.dto.productos.ItemCarritoDto
 import com.example.sisvvapp.network.dto.ventas.PagoDto
 import com.example.sisvvapp.network.dto.ventas.ProductoVentaDto
 import com.example.sisvvapp.network.dto.ventas.VentaDto
+import com.example.sisvvapp.network.dto.ventas.TransferirProductoRequest
 import com.example.sisvvapp.network.dto.ventas.VentaRequest
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -188,6 +189,30 @@ class VentaRepository(
 
     suspend fun getVentaRecibidaPorFolio(folio: Int): VentaRecibidaEntity? {
         return ventaRecibidaDao.getVentaPorFolio(folio)
+    }
+
+    suspend fun transferirProducto(
+        folioOrigen: Int,
+        chunk: Long,
+        folioDestino: Int
+    ): Result<Unit> {
+        return try {
+            val response = api.transferirProducto(
+                folioOrigen,
+                TransferirProductoRequest(folioDestino, chunk)
+            )
+            if (response.isSuccessful) {
+                Log.d("VentaRepo", "Producto transferido: chunk $chunk de $folioOrigen a $folioDestino")
+                Result.success(Unit)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.w("VentaRepo", "Error transferencia: ${response.code()} - $errorBody")
+                Result.failure(Exception(errorBody))
+            }
+        } catch (e: Exception) {
+            Log.e("VentaRepo", "Error de red al transferir", e)
+            Result.failure(Exception("Se requiere conexión para transferir productos"))
+        }
     }
 }
 private fun com.example.sisvvapp.network.dto.ventas.VentaResponse.toVentaRecibidaEntity(): VentaRecibidaEntity {

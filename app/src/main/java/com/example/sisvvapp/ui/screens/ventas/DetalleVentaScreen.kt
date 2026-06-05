@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,7 +34,8 @@ fun DetalleVentaScreen(
     isLoading: Boolean,
     isOnline: Boolean,
     onBackClick: () -> Unit,
-    onAgregarProductos: () -> Unit
+    onAgregarProductos: () -> Unit,
+    onTransferirProducto: ((ProductoVentaDto) -> Unit)? = null
 ) {
     VistaVerdeScaffold(
         title = "Detalle de Venta",
@@ -72,7 +74,10 @@ fun DetalleVentaScreen(
                 VistaVerdeSectionHeader(text = "Productos (${venta.productos.size})")
             }
             items(venta.productos) { producto ->
-                ProductoItemCard(producto = producto)
+                ProductoItemCard(
+                    producto = producto,
+                    onTransferClick = onTransferirProducto
+                )
             }
             item {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -173,7 +178,10 @@ private fun DetalleRow(label: String, value: String) {
 }
 
 @Composable
-private fun ProductoItemCard(producto: ProductoVentaDto) {
+private fun ProductoItemCard(
+    producto: ProductoVentaDto,
+    onTransferClick: ((ProductoVentaDto) -> Unit)? = null
+) {
     VistaVerdeBaseCard {
         Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -192,6 +200,20 @@ private fun ProductoItemCard(producto: ProductoVentaDto) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+            if (onTransferClick != null) {
+                IconButton(
+                    onClick = { onTransferClick(producto) },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.SwapHoriz,
+                        contentDescription = "Transferir",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
