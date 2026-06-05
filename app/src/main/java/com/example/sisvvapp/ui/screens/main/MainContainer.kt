@@ -311,6 +311,7 @@ fun MainContainer(
                     val tipoVenta by carritoViewModel.tipoVenta.collectAsState()
                     val nombreCliente by carritoViewModel.nombreCliente.collectAsState()
                     val corteCaja by carritoViewModel.corteCaja.collectAsState()
+                    val clavePuntoVenta by carritoViewModel.clavePuntoVenta.collectAsState()
                     val isSending by carritoViewModel.isSending.collectAsState()
                     val sendResult by carritoViewModel.sendResult.collectAsState()
 
@@ -328,14 +329,16 @@ fun MainContainer(
 
                     ResumenCarritoScreen(
                         items = items,
-                        tipoVenta = if (isAppend) "Agregar productos" else tipoVenta,
+                        tipoVenta = tipoVenta,
+                        isAppend = isAppend,
                         nombreCliente = nombreCliente,
                         corteCaja = corteCaja,
+                        clavePuntoVenta = clavePuntoVenta,
                         total = total,
                         isSending = isSending,
                         sendResult = sendResult,
                         onUpdateCantidad = { index, cant -> carritoViewModel.updateCantidad(index, cant) },
-                        onRemoveItem = { index -> carritoViewModel.removeProducto(index) },
+                        onRemoveItem = { item -> carritoViewModel.removeProducto(item) },
 
                         onDeshacer = { item, index ->
                             carritoViewModel.insertarProducto(index, item)
@@ -423,7 +426,8 @@ fun MainContainer(
                             carritoViewModel.configurarAppendMode(
                                 folio = folio,
                                 nombreCliente = ventaDetalle?.nombreCliente ?: "",
-                                clavePuntoVenta = ventaDetalle?.clavePuntoVenta ?: ""
+                                clavePuntoVenta = ventaDetalle?.clavePuntoVenta ?: "",
+                                tipoVenta = ventaDetalle?.tipoCliente ?: ""
                             )
                             navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
                         },

@@ -25,6 +25,9 @@ import com.example.sisvvapp.ui.theme.Poppins
 import com.example.sisvvapp.ui.viewmodel.CarritoItem
 import com.example.sisvvapp.ui.viewmodel.SendResult
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.sisvvapp.ui.theme.Poppins
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,13 +35,15 @@ import java.util.Locale
 fun ResumenCarritoScreen(
     items: List<CarritoItem>,
     tipoVenta: String,
+    isAppend: Boolean = false,
     nombreCliente: String,
     corteCaja: Int,
+    clavePuntoVenta: String,
     total: Double,
     isSending: Boolean,
     sendResult: SendResult?,
     onUpdateCantidad: (Int, Int) -> Unit,
-    onRemoveItem: (Int) -> Unit,
+    onRemoveItem: (CarritoItem) -> Unit,
     onDeshacer: (CarritoItem, Int) -> Unit,
     onConfirmar: () -> Unit,
     onVolver: () -> Unit,
@@ -84,6 +89,34 @@ fun ResumenCarritoScreen(
                         }
                     }
                     else -> {
+                        val tipoDisplay = when (tipoVenta) {
+                            "socio"    -> "SOCIO"
+                            "invitado" -> "INVITADO DEL SOCIO"
+                            "general"  -> "PUBLICO GENERAL"
+                            "empleado" -> "EMPLEADO"
+                            else       -> tipoVenta
+                        }
+                        val cajaDisplay = clavePuntoVenta.ifBlank { "Caja #$corteCaja" }
+
+                        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 16.dp)) {
+
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                tonalElevation = 0.dp
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    ResumenVentaRow(label = "Tipo", value = tipoDisplay)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    ResumenVentaRow(label = "Cliente", value = nombreCliente)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    ResumenVentaRow(label = "Punto de venta", value = cajaDisplay)
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            Spacer(modifier = Modifier.height(8.dp))
                         // CONTENIDO PRINCIPAL
                         Column(modifier = Modifier.fillMaxSize()) {
                             // Header del resumen
@@ -97,6 +130,37 @@ fun ResumenCarritoScreen(
                                 HorizontalDivider()
                             }
 
+                            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                itemsIndexed(
+                                    items = items,
+                                    key = { _, item -> item.id }
+                                ) { index, item ->
+
+                                    val currentOnRemoveItem by rememberUpdatedState(onRemoveItem)
+                                    val currentItem by rememberUpdatedState(item)
+                                    val currentIndex by rememberUpdatedState(index)
+
+                                    val density = androidx.compose.ui.platform.LocalDensity.current
+                                    val dismissState = remember(density, item.id) {
+                                        SwipeToDismissBoxState(
+                                            initialValue = SwipeToDismissBoxValue.Settled,
+                                            density = density,
+                                            confirmValueChange = { dismissValue: SwipeToDismissBoxValue ->
+                                                dismissValue == SwipeToDismissBoxValue.EndToStart
+                                            },
+                                            positionalThreshold = { totalDistance: Float -> totalDistance * 0.5f }
+                                        )
+                                    }
+
+                                    val isDismissed = dismissState.currentValue == SwipeToDismissBoxValue.EndToStart
+                                    LaunchedEffect(isDismissed) {
+                                        if (isDismissed) {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            kotlinx.coroutines.delay(250L) // Permite que termine la animación de deslizamiento
+                                            currentOnRemoveItem(currentItem)
+                                            mostrarNotificacion(currentItem, currentIndex)
+                                        }
+                                    }
                             // Lista de productos
                             LazyColumn(
                                 modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
@@ -200,8 +264,71 @@ fun ResumenCarritoScreen(
             }
         }
 
-        SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.TopCenter).padding(top = 80.dp)) { data ->
-            Snackbar(snackbarData = data, shape = MaterialTheme.shapes.medium)
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 80.dp, start = 24.dp, end = 24.dp)
+        ) { data ->
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = data.visuals.message,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = Poppins
+                        )
+                    }
+                    if (data.visuals.actionLabel != null) {
+                        TextButton(
+                            onClick = { data.performAction() },
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Undo,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = data.visuals.actionLabel!!,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                fontFamily = Poppins
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -314,5 +441,4 @@ private fun OfflineContent(onVolver: () -> Unit) {
         )
     }
 }
-
 
