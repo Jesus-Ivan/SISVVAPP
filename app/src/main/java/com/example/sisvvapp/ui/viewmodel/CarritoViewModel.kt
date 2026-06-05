@@ -23,7 +23,8 @@ data class CarritoItem(
     val observaciones: String = "",
     val modificadores: List<ModificadorEntity> = emptyList(),
     val precioUnitario: Double = producto.precio,
-    val subtotal: Double = precioUnitario * cantidad
+    val subtotal: Double = precioUnitario * cantidad,
+    val id: String = java.util.UUID.randomUUID().toString()
 )
 
 class CarritoViewModel(
@@ -81,11 +82,12 @@ class CarritoViewModel(
     private val _folioExistente = MutableStateFlow<Int?>(null)
     val folioExistente: StateFlow<Int?> = _folioExistente
 
-    fun configurarAppendMode(folio: Int, nombreCliente: String, clavePuntoVenta: String) {
+    fun configurarAppendMode(folio: Int, nombreCliente: String, clavePuntoVenta: String, tipoVenta: String) {
         _appendMode.value = true
         _folioExistente.value = folio
         _nombreCliente.value = nombreCliente
         _clavePuntoVenta.value = clavePuntoVenta
+        _tipoVenta.value = tipoVenta
     }
 
     fun esModoAppend(): Boolean = _appendMode.value
@@ -172,8 +174,10 @@ class CarritoViewModel(
         calcularTotal()
     }
 
-    fun removeProducto(index: Int) {
-        _items.value = _items.value.toMutableList().apply { removeAt(index) }
+    fun removeProducto(item: CarritoItem) {
+        val list = _items.value.toMutableList()
+        list.remove(item)
+        _items.value = list
         calcularTotal()
     }
 
@@ -184,7 +188,9 @@ class CarritoViewModel(
         // Nos aseguramos de que el índice sea válido (por seguridad)
         val indexSeguro = index.coerceIn(0, listaActual.size)
 
-        listaActual.add(indexSeguro, item)
+        // Generamos una copia con un ID único para evitar reutilización de estados de deslizamiento
+        val restoredItem = item.copy(id = java.util.UUID.randomUUID().toString())
+        listaActual.add(indexSeguro, restoredItem)
         _items.value = listaActual
 
         // Importante: recalcular el total al recuperar el producto
@@ -193,7 +199,7 @@ class CarritoViewModel(
 
     fun updateCantidad(index: Int, cantidad: Int) {
         if (cantidad <= 0) {
-            removeProducto(index)
+            _items.value.getOrNull(index)?.let { removeProducto(it) }
             return
         }
         val item = _items.value[index]
