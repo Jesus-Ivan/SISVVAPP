@@ -336,6 +336,11 @@ fun MainContainer(
                         sendResult = sendResult,
                         onUpdateCantidad = { index, cant -> carritoViewModel.updateCantidad(index, cant) },
                         onRemoveItem = { index -> carritoViewModel.removeProducto(index) },
+
+                        onDeshacer = { item, index ->
+                            carritoViewModel.insertarProducto(index, item)
+                        },
+
                         onConfirmar = {
                             carritoViewModel.confirmarVenta()
                         },

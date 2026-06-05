@@ -177,6 +177,20 @@ class CarritoViewModel(
         calcularTotal()
     }
 
+    fun insertarProducto(index: Int, item: CarritoItem) {
+        // Convertimos a mutable para poder insertar
+        val listaActual = _items.value.toMutableList()
+
+        // Nos aseguramos de que el índice sea válido (por seguridad)
+        val indexSeguro = index.coerceIn(0, listaActual.size)
+
+        listaActual.add(indexSeguro, item)
+        _items.value = listaActual
+
+        // Importante: recalcular el total al recuperar el producto
+        calcularTotal()
+    }
+
     fun updateCantidad(index: Int, cantidad: Int) {
         if (cantidad <= 0) {
             removeProducto(index)
