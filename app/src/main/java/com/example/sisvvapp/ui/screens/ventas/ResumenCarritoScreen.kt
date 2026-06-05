@@ -1,6 +1,5 @@
 package com.example.sisvvapp.ui.screens.ventas
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -91,10 +90,17 @@ fun ResumenCarritoScreen(
                         Box(modifier = Modifier.fillMaxSize()) {
                             Column(modifier = Modifier.fillMaxSize().padding(bottom = 120.dp)) {
                                 Column(modifier = Modifier.padding(16.dp)) {
+                                    val tipoDisplay = when (tipoVenta.lowercase()) {
+                                        "socio" -> "SOCIO"
+                                        "invitado" -> "INVITADO"
+                                        "general" -> "PUBLICO GENERAL"
+                                        "empleado" -> "EMPLEADO"
+                                        else -> tipoVenta.uppercase()
+                                    }
                                     Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)) {
                                         Column(modifier = Modifier.padding(16.dp)) {
-                                            ResumenVentaRow("Tipo", tipoVenta.uppercase())
-                                            ResumenVentaRow("Cliente", nombreCliente)
+                                            ResumenVentaRow("Tipo", tipoDisplay)
+                                            ResumenVentaRow("Cliente", nombreCliente.replace(Regex("\\s+"), " "))
                                             ResumenVentaRow("Punto Venta", clavePuntoVenta.ifBlank { "Caja #$corteCaja" })
                                         }
                                     }
@@ -106,7 +112,7 @@ fun ResumenCarritoScreen(
                                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    itemsIndexed(items = items, key = { _, item -> item.hashCode() }) { index, item ->
+                                    itemsIndexed(items = items, key = { _, item -> item.id }) { index, item ->
                                         val dismissState = rememberSwipeToDismissBoxState(
                                             confirmValueChange = { dismissValue ->
                                                 if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
@@ -152,15 +158,15 @@ fun ResumenCarritoScreen(
                                 shadowElevation = 16.dp,
                                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                             ) {
-                                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Column(modifier = Modifier.weight(0.4f)) {
-                                        Text("TOTAL", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        Text(text = "$${String.format(Locale.US, "%.2f", total)}", style = MaterialTheme.typography.headlineLarge, fontFamily = Poppins, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+                                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Column(modifier = Modifier.weight(0.5f)) {
+                                        Text("TOTAL", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 1.sp)
+                                        Text(text = "$${String.format(Locale.US, "%.2f", total)}", style = MaterialTheme.typography.titleLarge, fontFamily = Poppins, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                     }
                                     Spacer(modifier = Modifier.width(16.dp))
-                                    Button(onClick = onConfirmar, enabled = !isSending, modifier = Modifier.weight(0.6f).height(60.dp), shape = RoundedCornerShape(16.dp)) {
-                                        if (isSending) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
-                                        else Text(if (isAppend) "ACTUALIZAR VENTA" else "REALIZAR VENTA", fontWeight = FontWeight.Black, fontSize = 16.sp)
+                                    Button(onClick = onConfirmar, enabled = !isSending, modifier = Modifier.weight(0.5f).height(52.dp), shape = RoundedCornerShape(14.dp)) {
+                                        if (isSending) CircularProgressIndicator(modifier = Modifier.size(22.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                                        else Text(if (isAppend) "ACTUALIZAR VENTA" else "REALIZAR VENTA", fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
                                     }
                                 }
                             }

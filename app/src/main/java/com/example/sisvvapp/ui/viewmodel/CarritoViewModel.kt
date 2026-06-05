@@ -154,7 +154,7 @@ class CarritoViewModel(
 
         modificadoresPorGrupo.forEach { (grupoId, mods) ->
             val grupo = grupos.find { it.idGrupo.toString() == grupoId }
-            val limiteIncluidos = grupo?.modifIncluidos ?: 0
+            val limiteIncluidos = (grupo?.modifIncluidos ?: 0) * cantidad
 
             val modsOrdenados = mods.sortedBy { it.precio }
             modsOrdenados.forEachIndexed { index, mod ->
@@ -225,11 +225,14 @@ class CarritoViewModel(
             _sendResult.value = null
 
             val productos = _items.value.map { item ->
-                val modificadores = item.modificadores.map { mod ->
+                // Group duplicate modifiers by claveModificador to aggregate quantity and price
+                val modificadores = item.modificadores.groupBy { it.claveModificador }.map { (claveModificador, mods) ->
+                    val totalPrecio = mods.sumOf { if (it.incluido) 0.0 else it.precio }
+                    // We send the average price per modifier unit, or send the sum divided by quantity
                     ModificadorSeleccionadoDto(
-                        claveProducto = mod.claveModificador,
-                        cantidad = 1,
-                        precio = if (mod.incluido) 0.0 else mod.precio
+                        claveProducto = claveModificador,
+                        cantidad = mods.size,
+                        precio = totalPrecio / mods.size
                     )
                 }
                 ItemCarritoDto(

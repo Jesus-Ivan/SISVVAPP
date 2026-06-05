@@ -1,8 +1,12 @@
 package com.example.sisvvapp.ui.screens.ventas
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +32,7 @@ fun SeleccionarModificadoresScreen(
     producto: ProductoEntity,
     gruposModificadores: List<GrupoModificadorEntity>,
     modificadoresDisponibles: List<ModificadorEntity>,
+    cantidadProducto: Int = 1,
     onAddToCart: (List<ModificadorEntity>, String) -> Unit,
     onBackClick: () -> Unit,
     isOnline: Boolean = true
@@ -76,11 +81,15 @@ fun SeleccionarModificadoresScreen(
                                 grupo = grupo,
                                 modificadores = modificadoresDelGrupo,
                                 seleccionados = seleccionadosDelGrupo,
-                                onToggle = { mod, isSelected ->
-                                    if (isSelected) {
-                                        selectedModificadores.add(mod)
-                                    } else {
-                                        selectedModificadores.removeAll { it.id == mod.id }
+                                cantidadProducto = cantidadProducto,
+                                onAdd = { mod ->
+                                    selectedModificadores.add(mod)
+                                },
+                                onRemove = { mod ->
+                                    // Remove just one instance of the modifier
+                                    val index = selectedModificadores.indexOfFirst { it.id == mod.id }
+                                    if (index != -1) {
+                                        selectedModificadores.removeAt(index)
                                     }
                                 }
                             )
@@ -117,10 +126,12 @@ private fun GrupoModificadoresSection(
     grupo: GrupoModificadorEntity,
     modificadores: List<ModificadorEntity>,
     seleccionados: List<ModificadorEntity>,
-    onToggle: (ModificadorEntity, Boolean) -> Unit
+    cantidadProducto: Int,
+    onAdd: (ModificadorEntity) -> Unit,
+    onRemove: (ModificadorEntity) -> Unit
 ) {
-    val maxPermitidos = grupo.modifMaximos
-    val incluidos = grupo.modifIncluidos
+    val maxPermitidos = grupo.modifMaximos * cantidadProducto
+    val incluidos = grupo.modifIncluidos * cantidadProducto
     val enLimite = seleccionados.size >= maxPermitidos
 
     Column {
@@ -157,60 +168,74 @@ private fun GrupoModificadoresSection(
 
         // Lista de modificadores del grupo
         modificadores.forEach { mod ->
-            val isSelected = mod in seleccionados
-            val canSelect = !enLimite || isSelected
+            val count = seleccionados.count { it.id == mod.id }
+            val canAdd = !enLimite
 
-            ModificadorCheckItem(
+            // Determine if each specific instance in selected list is included
+            // An item is included if its overall index in the selected list for this group is less than the group's limit of included modifiers.
+            // When we render a specific modifier, we can determine how many of them are included.
+            // Let's count how many instances of this mod are included.
+            var includedCount = 0
+            seleccionados.forEachIndexed { idx, selectedMod ->
+                if (selectedMod.id == mod.id && idx < incluidos) {
+                    includedCount++
+                }
+            }
+
+            ModificadorQuantityItem(
                 modificador = mod,
-                isSelected = isSelected,
-                isEnabled = canSelect,
-                isIncluded = incluidos > 0 && seleccionados.indexOf(mod) < incluidos,
-                onToggle = { onToggle(mod, !isSelected) }
+                count = count,
+                canAdd = canAdd,
+                includedCount = includedCount,
+                onAdd = { onAdd(mod) },
+                onRemove = { onRemove(mod) }
             )
         }
     }
 }
 
 @Composable
-private fun ModificadorCheckItem(
+private fun ModificadorQuantityItem(
     modificador: ModificadorEntity,
-    isSelected: Boolean,
-    isEnabled: Boolean,
-    isIncluded: Boolean,
-    onToggle: () -> Unit
+    count: Int,
+    canAdd: Boolean,
+    includedCount: Int,
+    onAdd: () -> Unit,
+    onRemove: () -> Unit
 ) {
+    val isSelected = count > 0
     Surface(
         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         else MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.medium,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Checkbox(
-                checked = isSelected,
-                onCheckedChange = { onToggle() },
-                enabled = isEnabled,
-                colors = CheckboxDefaults.colors(
-                    checkedColor = MaterialTheme.colorScheme.primary
-                )
-            )
-            Spacer(modifier = Modifier.width(8.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = modificador.nombre,
                     fontWeight = FontWeight.Medium,
                     fontSize = 14.sp,
-                    color = if (isEnabled) MaterialTheme.colorScheme.onSurface
-                    else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 if (modificador.precio > 0) {
+                    val nonIncludedCount = count - includedCount
+                    val textLabel = if (count == 0) {
+                        "+$${String.format(java.util.Locale.US, "%.2f", modificador.precio)}"
+                    } else {
+                        val parts = mutableListOf<String>()
+                        if (includedCount > 0) parts.add("$includedCount Incluido(s)")
+                        if (nonIncludedCount > 0) parts.add("$nonIncludedCount de pago (+$${String.format(java.util.Locale.US, "%.2f", modificador.precio * nonIncludedCount)})")
+                        parts.joinToString(", ")
+                    }
                     Text(
-                        text = if (isIncluded) "Incluido" else "+$${String.format(java.util.Locale.US, "%.2f", modificador.precio)}",
+                        text = textLabel,
                         fontSize = 12.sp,
-                        color = if (isIncluded) MaterialTheme.colorScheme.primary
+                        color = if (includedCount > 0) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
@@ -218,6 +243,44 @@ private fun ModificadorCheckItem(
                         text = "Incluido",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f), MaterialTheme.shapes.small)
+                    .padding(horizontal = 2.dp)
+            ) {
+                IconButton(
+                    onClick = onRemove,
+                    enabled = count > 0,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Default.Remove,
+                        contentDescription = "Restar",
+                        tint = if (count > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Text(
+                    text = "$count",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                IconButton(
+                    onClick = onAdd,
+                    enabled = canAdd,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Default.Add,
+                        contentDescription = "Sumar",
+                        tint = if (canAdd) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
@@ -237,6 +300,7 @@ fun SeleccionarModificadoresScreenPreview() {
             ),
             gruposModificadores = emptyList(),
             modificadoresDisponibles = emptyList(),
+            cantidadProducto = 1,
             onAddToCart = { _, _ -> },
             onBackClick = {}
         )
