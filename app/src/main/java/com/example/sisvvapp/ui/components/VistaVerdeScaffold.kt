@@ -17,6 +17,7 @@ fun VistaVerdeScaffold(
     isBackButton: Boolean = false,
     showNavigationIcon: Boolean = true,
     subtitle: String? = null,
+    snackbarHost: @Composable () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     Scaffold(
@@ -28,7 +29,8 @@ fun VistaVerdeScaffold(
                 isBackButton = isBackButton,
                 showNavigationIcon = showNavigationIcon,
             )
-        }
+        },
+        snackbarHost = snackbarHost
     ) { innerPadding ->
         Column(
             modifier = Modifier
