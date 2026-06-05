@@ -6,11 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -61,5 +63,26 @@ class VentasViewModel(
 
     suspend fun cargarDetalle(folio: Int): VentaDto? {
         return ventaRepository.getVentaDetalle(folio)
+    }
+
+    fun getVentasAbiertasDelCorte(corteCaja: Int): Flow<List<VentaDto>> {
+        return ventaRepository.getVentasRecibidas(corteCaja).map { ventas ->
+            ventas.filter { it.estatus.equals("Abierta", ignoreCase = true) }
+        }
+    }
+
+    fun transferirProducto(
+        folioOrigen: Int,
+        chunk: Long,
+        folioDestino: Int,
+        onResult: (Result<Unit>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = ventaRepository.transferirProducto(folioOrigen, chunk, folioDestino)
+            if (result.isSuccess) {
+                Log.d("VentasVM", "Transferencia exitosa: chunk $chunk de $folioOrigen a $folioDestino")
+            }
+            onResult(result)
+        }
     }
 }
