@@ -1,6 +1,6 @@
 package com.example.sisvvapp.ui.screens.ventas
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,18 +17,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,8 +28,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,7 +47,10 @@ import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
+import com.example.sisvvapp.ui.theme.Poppins
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 import java.util.Locale
 
 @Composable
@@ -57,7 +59,7 @@ fun BuscarProductosScreen(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     carritoCount: Int,
-    onAddProducto: (ProductoEntity, Int) -> Unit,
+    onAddProducto: (ProductoEntity, Int, String) -> Unit,
     onProductoConModificadores: (ProductoEntity, Int) -> Unit,
     onVerCarrito: () -> Unit,
     onBackClick: () -> Unit,
@@ -108,7 +110,7 @@ fun BuscarProductosScreen(
                                 VistaVerdeProductoCard(
                                     producto = producto,
                                     hasModificadores = producto.modifMaximos > 0,
-                                    onAdd = { cantidad -> onAddProducto(producto, cantidad) },
+                                    onAdd = { cantidad, obs -> onAddProducto(producto, cantidad, obs) },
                                     onAddConModif = { cantidad -> onProductoConModificadores(producto, cantidad) }
                                 )
                             }
@@ -153,93 +155,131 @@ fun BuscarProductosScreen(
 private fun VistaVerdeProductoCard(
     producto: ProductoEntity,
     hasModificadores: Boolean,
-    onAdd: (Int) -> Unit,
+    onAdd: (Int, String) -> Unit,
     onAddConModif: (Int) -> Unit
 ) {
+    val deviceType = LocalDeviceType.current
+    val isTablet = deviceType == DeviceType.TABLET
+    val haptic = LocalHapticFeedback.current
+
     var cantidad by remember { mutableStateOf(1) }
+    var observaciones by remember { mutableStateOf("") }
+    var showObs by remember { mutableStateOf(false) }
 
     VistaVerdeBaseCard {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp)) {
+            // Fila 1: Información y Precio (Balanceado)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = producto.descripcion.uppercase(),
+                        style = if (isTablet) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = producto.categoria,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
                 Text(
-                    text = producto.descripcion,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = producto.categoria,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "$${String.format(Locale.US, "%.2f", producto.precio)}",
+                    style = if (isTablet) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+                    fontFamily = Poppins,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
 
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "$${String.format(Locale.US, "%.2f", producto.precio)}",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Selector de cantidad
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    IconButton(
-                        onClick = { if (cantidad > 1) cantidad-- },
-                        modifier = Modifier.size(28.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Remove,
-                            contentDescription = "Menos",
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                    Text(
-                        text = "$cantidad",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
+            if (showObs) {
+                Spacer(modifier = Modifier.height(12.dp))
+                TextField(
+                    value = observaciones,
+                    onValueChange = { observaciones = it },
+                    placeholder = { Text("Instrucciones...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                     )
-                    IconButton(
-                        onClick = { cantidad++ },
-                        modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Fila 2: Acciones refinadas
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (!hasModificadores) {
+                        Surface(
+                            onClick = { showObs = !showObs },
+                            color = if (showObs) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                            shape = MaterialTheme.shapes.small,
+                            modifier = Modifier.size(if (isTablet) 44.dp else 36.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.EditNote,
+                                    contentDescription = null,
+                                    tint = if (showObs) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f), MaterialTheme.shapes.small)
+                            .padding(horizontal = 2.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Más",
-                            modifier = Modifier.size(16.dp)
+                        IconButton(onClick = { if (cantidad > 1) cantidad-- }, modifier = Modifier.size(36.dp)) {
+                            Icon(Icons.Default.Remove, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                        }
+                        Text(
+                            text = "$cantidad",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp)
                         )
+                        IconButton(onClick = { cantidad++ }, modifier = Modifier.size(36.dp)) {
+                            Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                FilledTonalButton(
+                Button(
                     onClick = {
-                        if (hasModificadores) {
-                            onAddConModif(cantidad)
-                        } else {
-                            onAdd(cantidad)
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (hasModificadores) onAddConModif(cantidad)
+                        else {
+                            onAdd(cantidad, observaciones)
+                            observaciones = ""
+                            showObs = false
                         }
                     },
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                    shape = MaterialTheme.shapes.small
+                    modifier = Modifier.height(44.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    contentPadding = PaddingValues(horizontal = 20.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = stringResource(R.string.buscar_productos_agregar),
+                        text = if (hasModificadores) "CONFIGURAR" else "AGREGAR",
+                        fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
                     )
                 }
@@ -257,7 +297,7 @@ fun BuscarProductosScreenPreview() {
             searchQuery = "",
             onSearchQueryChange = {},
             carritoCount = 0,
-            onAddProducto = { _, _ -> },
+            onAddProducto = { _, _, _ -> },
             onProductoConModificadores = { _, _ -> },
             onVerCarrito = {},
             onBackClick = {}

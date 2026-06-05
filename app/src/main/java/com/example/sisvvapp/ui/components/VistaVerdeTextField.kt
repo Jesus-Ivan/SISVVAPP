@@ -34,6 +34,7 @@ fun VistaVerdeTextField(
     onValueChange: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
+    placeholder: String? = null,
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true,
@@ -50,7 +51,7 @@ fun VistaVerdeTextField(
         modifier = modifier.fillMaxWidth(),
         readOnly = readOnly,
         enabled = enabled,
-
+        placeholder = placeholder?.let { { Text(text = it, fontFamily = Inter) } },
         label = {
             Text(
                 text = label,

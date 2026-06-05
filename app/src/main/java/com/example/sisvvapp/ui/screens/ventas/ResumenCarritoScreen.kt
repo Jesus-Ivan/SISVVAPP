@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -20,12 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.ui.components.*
+import com.example.sisvvapp.ui.theme.Poppins
 import com.example.sisvvapp.ui.viewmodel.CarritoItem
 import com.example.sisvvapp.ui.viewmodel.SendResult
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.sisvvapp.ui.theme.Poppins
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,66 +86,49 @@ fun ResumenCarritoScreen(
                         }
                     }
                     else -> {
-                        val tipoDisplay = when (tipoVenta) {
-                            "socio"    -> "SOCIO"
-                            "invitado" -> "INVITADO DEL SOCIO"
-                            "general"  -> "PUBLICO GENERAL"
-                            "empleado" -> "EMPLEADO"
-                            else       -> tipoVenta
-                        }
-                        val cajaDisplay = clavePuntoVenta.ifBlank { "Caja #$corteCaja" }
-
-                        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 16.dp)) {
-
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                                tonalElevation = 0.dp
-                            ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    ResumenVentaRow(label = "Tipo", value = tipoDisplay)
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    ResumenVentaRow(label = "Cliente", value = nombreCliente)
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    ResumenVentaRow(label = "Punto de venta", value = cajaDisplay)
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            // Info de la venta (Tipo, Cliente, Caja)
+                            val tipoDisplay = when (tipoVenta.lowercase()) {
+                                "socio" -> "SOCIO"
+                                "invitado" -> "INVITADO"
+                                "general" -> "PUBLICO GENERAL"
+                                "empleado" -> "EMPLEADO"
+                                else -> tipoVenta.uppercase()
+                            }
+                            
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        ResumenVentaRow("Tipo", tipoDisplay)
+                                        ResumenVentaRow("Cliente", nombreCliente)
+                                        ResumenVentaRow("Punto Venta", clavePuntoVenta.ifBlank { "Caja #$corteCaja" })
+                                    }
                                 }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                VistaVerdeSectionHeader(text = "DETALLE DE ARTICULOS")
                             }
 
-                            Spacer(modifier = Modifier.height(16.dp))
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                itemsIndexed(
-                                    items = items,
-                                    key = { _, item -> item.id }
-                                ) { index, item ->
-
-                                    val currentOnRemoveItem by rememberUpdatedState(onRemoveItem)
-                                    val currentItem by rememberUpdatedState(item)
-                                    val currentIndex by rememberUpdatedState(index)
-
-                                    val density = androidx.compose.ui.platform.LocalDensity.current
-                                    val dismissState = remember(density, item.id) {
-                                        SwipeToDismissBoxState(
-                                            initialValue = SwipeToDismissBoxValue.Settled,
-                                            density = density,
-                                            confirmValueChange = { dismissValue: SwipeToDismissBoxValue ->
-                                                dismissValue == SwipeToDismissBoxValue.EndToStart
-                                            },
-                                            positionalThreshold = { totalDistance: Float -> totalDistance * 0.5f }
-                                        )
-                                    }
-
-                                    val isDismissed = dismissState.currentValue == SwipeToDismissBoxValue.EndToStart
-                                    LaunchedEffect(isDismissed) {
-                                        if (isDismissed) {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            kotlinx.coroutines.delay(250L) // Permite que termine la animación de deslizamiento
-                                            currentOnRemoveItem(currentItem)
-                                            mostrarNotificacion(currentItem, currentIndex)
-                                        }
-                                    }
+                            // Lista de productos con Swipe
+                            LazyColumn(
+                                modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(bottom = 16.dp)
+                            ) {
+                                itemsIndexed(items = items, key = { _, item -> item.id }) { index, item ->
+                                    val dismissState = rememberSwipeToDismissBoxState(
+                                        confirmValueChange = { dismissValue ->
+                                            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                onRemoveItem(item)
+                                                mostrarNotificacion(item, index)
+                                                true
+                                            } else false
+                                        },
+                                        positionalThreshold = { totalDistance -> totalDistance * 0.5f }
+                                    )
 
                                     SwipeToDismissBox(
                                         state = dismissState,
@@ -165,6 +147,7 @@ fun ResumenCarritoScreen(
                                                 cantidad = item.cantidad,
                                                 subtotal = item.subtotal,
                                                 modificadores = item.modificadores.map { it.nombre },
+                                                observacion = item.observaciones,
                                                 onCantidadChange = { cant -> onUpdateCantidad(index, cant) }
                                             )
                                         }
@@ -172,87 +155,92 @@ fun ResumenCarritoScreen(
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("Total", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                                Text("$${String.format(Locale.US, "%.2f", total)}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            // BARRA INFERIOR FIJA
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.surface,
+                                shadowElevation = 16.dp,
+                                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 20.dp, vertical = 24.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Total a la izquierda
+                                    Column(
+                                        horizontalAlignment = Alignment.Start,
+                                        modifier = Modifier.weight(0.6f)
+                                    ) {
+                                        Text(
+                                            text = "TOTAL",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 1.sp
+                                        )
+                                        Text(
+                                            text = "$${String.format(Locale.US, "%.2f", total)}",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontFamily = Poppins,
+                                            fontWeight = FontWeight.Black,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.width(20.dp))
+
+                                    // Botón de Acción a la derecha
+                                    Button(
+                                        onClick = onConfirmar,
+                                        enabled = !isSending,
+                                        modifier = Modifier
+                                            .weight(1.3f)
+                                            .height(56.dp),
+                                        shape = RoundedCornerShape(16.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    ) {
+                                        if (isSending) {
+                                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                                        } else {
+                                            Icon(Icons.Default.Check, null, modifier = Modifier.size(20.dp))
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = if (isAppend) "ACTUALIZAR" else "CONFIRMAR",
+                                                fontWeight = FontWeight.Black,
+                                                fontSize = 14.sp
+                                            )
+                                        }
+                                    }
+                                }
                             }
-                            Spacer(modifier = Modifier.height(24.dp))
-                            VistaVerdeButton(text = if (isSending) "Enviando..." else "Confirmar Venta", onClick = onConfirmar, enabled = !isSending)
                         }
                     }
                 }
             }
         }
 
+        // SNACKBAR PERSONALIZADO (como en Gmail)
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 80.dp, start = 24.dp, end = 24.dp)
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 80.dp, start = 16.dp, end = 16.dp)
         ) { data ->
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = data.visuals.message,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = Poppins
-                        )
-                    }
-                    if (data.visuals.actionLabel != null) {
-                        TextButton(
-                            onClick = { data.performAction() },
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Undo,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = data.visuals.actionLabel!!,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
-                                fontFamily = Poppins
-                            )
-                        }
-                    }
-                }
-            }
+            Snackbar(
+                snackbarData = data,
+                containerColor = MaterialTheme.colorScheme.inverseSurface,
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                actionColor = MaterialTheme.colorScheme.primary,
+                shape = MaterialTheme.shapes.medium
+            )
         }
     }
 }
+
 @Composable
 private fun SuccessContent(folio: Int, onVolver: () -> Unit) {
     Column(
@@ -260,32 +248,14 @@ private fun SuccessContent(folio: Int, onVolver: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+        Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.resumen_venta_exitosa),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
+        Text(stringResource(R.string.resumen_venta_exitosa), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Folio: $folio",
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Text("Folio: $folio", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(modifier = Modifier.height(32.dp))
-        VistaVerdeButton(
-            text = stringResource(R.string.resumen_volver),
-            onClick = onVolver
-        )
+        VistaVerdeButton(stringResource(R.string.resumen_volver), onVolver)
     }
-
 }
 
 @Composable
@@ -295,35 +265,15 @@ private fun ErrorContent(message: String, onRetry: () -> Unit, onVolver: () -> U
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.Error,
-            contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.error
-        )
+        Icon(Icons.Default.Error, null, modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.error)
         Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.resumen_venta_error),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
+        Text(stringResource(R.string.resumen_venta_error), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = message,
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+        Text(message, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(32.dp))
-        VistaVerdeButton(
-            text = "Reintentar",
-            onClick = onRetry
-        )
+        VistaVerdeButton("Reintentar", onRetry)
         Spacer(modifier = Modifier.height(8.dp))
-        TextButton(onClick = onVolver) {
-            Text(text = stringResource(R.string.resumen_volver))
-        }
+        TextButton(onClick = onVolver) { Text(stringResource(R.string.resumen_volver)) }
     }
 }
 
@@ -334,31 +284,12 @@ private fun OfflineContent(onVolver: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.CloudOff,
-            contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.tertiary
-        )
+        Icon(Icons.Default.CloudOff, null, modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.tertiary)
         Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.resumen_venta_offline),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
+        Text(stringResource(R.string.resumen_venta_offline), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "La venta se enviará automáticamente cuando se restaure la conexión.",
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+        Text("La venta se enviará automáticamente cuando se restaure la conexión.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(32.dp))
-        VistaVerdeButton(
-            text = stringResource(R.string.resumen_volver),
-            onClick = onVolver
-        )
+        VistaVerdeButton(stringResource(R.string.resumen_volver), onVolver)
     }
 }
-
