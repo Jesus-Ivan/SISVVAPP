@@ -1,35 +1,31 @@
 package com.example.sisvvapp.ui.screens.ventas
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
-import com.example.sisvvapp.ui.components.ResponsiveContainer
-import com.example.sisvvapp.ui.components.VistaVerdeButton
-import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
-import com.example.sisvvapp.ui.components.VistaVerdeScaffold
-import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
-import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.components.*
 import com.example.sisvvapp.ui.viewmodel.CarritoItem
 import com.example.sisvvapp.ui.viewmodel.SendResult
+import kotlinx.coroutines.launch
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResumenCarritoScreen(
     items: List<CarritoItem>,
@@ -41,136 +37,121 @@ fun ResumenCarritoScreen(
     sendResult: SendResult?,
     onUpdateCantidad: (Int, Int) -> Unit,
     onRemoveItem: (Int) -> Unit,
+    onDeshacer: (CarritoItem, Int) -> Unit,
     onConfirmar: () -> Unit,
     onVolver: () -> Unit,
     onBackClick: () -> Unit,
     isOnline: Boolean = true
 ) {
-    VistaVerdeScaffold(
-        title = stringResource(R.string.resumen_title),
-        subtitle = stringResource(R.string.resumen_subtitle),
-        onMenuClick = onBackClick,
-        isBackButton = true,
-        isOnline = isOnline
-    ) {
-        ResponsiveContainer {
-            when {
-                sendResult is SendResult.Success -> {
-                    SuccessContent(
-                        folio = sendResult.folio,
-                        onVolver = onVolver
-                    )
-                }
-                sendResult is SendResult.Error -> {
-                    ErrorContent(
-                        message = sendResult.message,
-                        onRetry = onConfirmar,
-                        onVolver = onVolver
-                    )
-                }
-                sendResult is SendResult.Offline -> {
-                    OfflineContent(onVolver = onVolver)
-                }
-                else -> {
-                    if (items.isEmpty()) {
-                        Column(
-                            modifier = Modifier.fillMaxSize().padding(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            VistaVerdeEmptyState(
-                                icon = Icons.Default.ShoppingCart,
-                                message = "No hay productos en el carrito"
-                            )
-                            Spacer(modifier = Modifier.height(24.dp))
-                            VistaVerdeButton(
-                                text = "Agregar productos",
-                                onClick = onBackClick
-                            )
-                        }
-                    } else {
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 24.dp)
-                    ) {
-                        VistaVerdeSectionHeader(text = stringResource(R.string.resumen_title))
-                        Spacer(modifier = Modifier.height(16.dp))
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
 
-                        // Datos de la venta
-                        ResumenVentaRow(
-                            label = "Tipo",
-                            value = tipoVenta
-                        )
-                        ResumenVentaRow(
-                            label = "Cliente",
-                            value = nombreCliente
-                        )
-                        ResumenVentaRow(
-                            label = "Caja",
-                            value = "$corteCaja"
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        HorizontalDivider()
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Lista de productos
-                        LazyColumn(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            itemsIndexed(items) { index, item ->
-                                CarritoItemCard(
-                                    nombre = item.producto.descripcion,
-                                    cantidad = item.cantidad,
-                                    precioUnitario = item.precioUnitario,
-                                    subtotal = item.subtotal,
-                                    modificadores = item.modificadores.map { it.nombre },
-                                    onCantidadChange = { cant -> onUpdateCantidad(index, cant) },
-                                    onRemove = { onRemoveItem(index) }
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        HorizontalDivider()
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Total
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = stringResource(R.string.resumen_total),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "$${String.format(Locale.US, "%.2f", total)}",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        VistaVerdeButton(
-                            text = if (isSending) stringResource(R.string.resumen_btn_enviando)
-                            else stringResource(R.string.resumen_btn_confirmar),
-                            onClick = onConfirmar,
-                            enabled = !isSending && items.isNotEmpty()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-                }
-                }
+    fun mostrarNotificacion(item: CarritoItem, index: Int) {
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val result = snackbarHostState.showSnackbar(
+                message = "${item.producto.descripcion} eliminado",
+                actionLabel = "Deshacer",
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                onDeshacer(item, index)
             }
         }
     }
-}
 
+    Box(modifier = Modifier.fillMaxSize()) {
+        VistaVerdeScaffold(
+            title = stringResource(R.string.resumen_title),
+            subtitle = stringResource(R.string.resumen_subtitle),
+            onMenuClick = onBackClick,
+            isBackButton = true,
+            isOnline = isOnline
+        ) {
+            ResponsiveContainer {
+                when {
+                    sendResult is SendResult.Success -> SuccessContent(sendResult.folio, onVolver)
+                    sendResult is SendResult.Error -> ErrorContent(sendResult.message, onConfirmar, onVolver)
+                    sendResult is SendResult.Offline -> OfflineContent(onVolver)
+                    items.isEmpty() -> {
+                        Column(modifier = Modifier.fillMaxSize().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                            VistaVerdeEmptyState(Icons.Default.ShoppingCart, "No hay productos en el carrito")
+                            Spacer(modifier = Modifier.height(24.dp))
+                            VistaVerdeButton("Agregar productos", onBackClick)
+                        }
+                    }
+                    else -> {
+                        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 24.dp)) {
+                            VistaVerdeSectionHeader(text = stringResource(R.string.resumen_title))
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            ResumenVentaRow("Tipo", tipoVenta)
+                            ResumenVentaRow("Cliente", nombreCliente)
+                            ResumenVentaRow("Caja", "$corteCaja")
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                            HorizontalDivider()
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                itemsIndexed(items = items, key = { index, item -> "${item.producto.id}-$index" }) { index, item ->
+
+                                    val dismissState = rememberSwipeToDismissBoxState(
+                                        confirmValueChange = { dismissValue ->
+                                            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                onRemoveItem(index)
+                                                mostrarNotificacion(item, index)
+                                                true
+                                            } else false
+                                        },
+                                        // Sensibilidad aumentada a 0.5f para evitar borrados accidentales
+                                        positionalThreshold = { totalDistance -> totalDistance * 0.5f }
+                                    )
+
+                                    SwipeToDismissBox(
+                                        state = dismissState,
+                                        enableDismissFromStartToEnd = false,
+                                        enableDismissFromEndToStart = true,
+                                        backgroundContent = {
+                                            val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart)
+                                                MaterialTheme.colorScheme.errorContainer else Color.Transparent
+                                            Box(modifier = Modifier.fillMaxSize().padding(vertical = 4.dp).background(color, MaterialTheme.shapes.medium), contentAlignment = Alignment.CenterEnd) {
+                                                Icon(Icons.Default.Delete, null, modifier = Modifier.padding(end = 24.dp), tint = MaterialTheme.colorScheme.onErrorContainer)
+                                            }
+                                        },
+                                        content = {
+                                            CarritoItemCard(
+                                                nombre = item.producto.descripcion,
+                                                cantidad = item.cantidad,
+                                                subtotal = item.subtotal,
+                                                modificadores = item.modificadores.map { it.nombre },
+                                                onCantidadChange = { cant -> onUpdateCantidad(index, cant) }
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Total", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                                Text("$${String.format(Locale.US, "%.2f", total)}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
+                            VistaVerdeButton(text = if (isSending) "Enviando..." else "Confirmar Venta", onClick = onConfirmar, enabled = !isSending)
+                        }
+                    }
+                }
+            }
+        }
+
+        SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.TopCenter).padding(top = 80.dp)) { data ->
+            Snackbar(snackbarData = data, shape = MaterialTheme.shapes.medium)
+        }
+    }
+}
 @Composable
 private fun SuccessContent(folio: Int, onVolver: () -> Unit) {
     Column(
@@ -203,6 +184,7 @@ private fun SuccessContent(folio: Int, onVolver: () -> Unit) {
             onClick = onVolver
         )
     }
+
 }
 
 @Composable
@@ -279,23 +261,4 @@ private fun OfflineContent(onVolver: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ResumenCarritoScreenPreview() {
-    SISVVAPPTheme {
-        ResumenCarritoScreen(
-            items = emptyList(),
-            tipoVenta = "Socio",
-            nombreCliente = "Cristian Meza",
-            corteCaja = 6858,
-            total = 370.0,
-            isSending = false,
-            sendResult = null,
-            onUpdateCantidad = { _, _ -> },
-            onRemoveItem = {},
-            onConfirmar = {},
-            onVolver = {},
-            onBackClick = {}
-        )
-    }
-}
+
