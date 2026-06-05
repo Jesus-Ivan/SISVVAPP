@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddShoppingCart
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.SwapHoriz
@@ -17,14 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sisvvapp.network.dto.ventas.PagoDto
 import com.example.sisvvapp.network.dto.ventas.ProductoVentaDto
 import com.example.sisvvapp.network.dto.ventas.VentaDto
-import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
-import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
-import com.example.sisvvapp.ui.components.VistaVerdeScaffold
-import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
-import com.example.sisvvapp.ui.components.VistaVerdeStatusBadge
+import com.example.sisvvapp.ui.components.*
 import com.example.sisvvapp.ui.theme.Poppins
 import java.util.Locale
 
@@ -43,77 +39,85 @@ fun DetalleVentaScreen(
         isBackButton = true,
         isOnline = isOnline
     ) {
-        if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-            return@VistaVerdeScaffold
-        }
+        ResponsiveContainer {
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (venta == null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    VistaVerdeEmptyState(
+                        icon = Icons.Filled.ShoppingCart,
+                        message = "Venta no encontrada"
+                    )
+                }
+            } else {
+                val esAbierta = venta.estatus.equals("Abierta", ignoreCase = true)
 
-        if (venta == null) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                VistaVerdeEmptyState(
-                    icon = Icons.Filled.ShoppingCart,
-                    message = "Venta no encontrada"
-                )
-            }
-            return@VistaVerdeScaffold
-        }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    item {
+                        DetalleHeaderCard(venta = venta)
+                    }
 
-        val esAbierta = venta.estatus.equals("Abierta", ignoreCase = true)
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            VistaVerdeSectionHeader(
+                                text = "PRODUCTOS (${venta.productos.size})",
+                                modifier = Modifier.weight(1f)
+                            )
+                            
+                            if (esAbierta) {
+                                Button(
+                                    onClick = onAgregarProductos,
+                                    modifier = Modifier.height(36.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp),
+                                    shape = MaterialTheme.shapes.medium,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Icon(Icons.Default.AddShoppingCart, null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("AGREGAR", fontWeight = FontWeight.Black, fontSize = 11.sp)
+                                }
+                            }
+                        }
+                    }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                DetalleHeaderCard(venta = venta)
-            }
-            item {
-                VistaVerdeSectionHeader(text = "Productos (${venta.productos.size})")
-            }
-            items(venta.productos) { producto ->
-                ProductoItemCard(
-                    producto = producto,
-                    onTransferClick = onTransferirProducto
-                )
-            }
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                VistaVerdeBaseCard {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Total", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        Text(
-                            text = "$${String.format(Locale.US, "%.2f", venta.total)}",
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.primary
+                    items(venta.productos) { producto ->
+                        ProductoDetalleCard(
+                            producto = producto,
+                            onTransferClick = onTransferirProducto
                         )
                     }
-                }
-            }
-
-            if (esAbierta) {
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = onAgregarProductos,
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        enabled = true
-                    ) {
-                        Icon(Icons.Filled.AddShoppingCart, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Agregar productos a esta venta", fontSize = 16.sp)
+                    
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        VistaVerdeBaseCard {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Monto Total", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                                Text(
+                                    text = "$${String.format(Locale.US, "%.2f", venta.total)}",
+                                    fontFamily = Poppins,
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 20.sp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -174,62 +178,6 @@ private fun DetalleRow(label: String, value: String) {
             fontWeight = FontWeight.Medium,
             fontSize = 13.sp
         )
-    }
-}
-
-@Composable
-private fun ProductoItemCard(
-    producto: ProductoVentaDto,
-    onTransferClick: ((ProductoVentaDto) -> Unit)? = null
-) {
-    VistaVerdeBaseCard {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = producto.nombre,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                )
-                if (producto.observaciones.isNotBlank()) {
-                    Text(
-                        text = "Obs: ${producto.observaciones}",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            if (onTransferClick != null) {
-                IconButton(
-                    onClick = { onTransferClick(producto) },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Default.SwapHoriz,
-                        contentDescription = "Transferir",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(4.dp))
-            }
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "x${producto.cantidad}",
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 13.sp
-                )
-                Text(
-                    text = "$${String.format(Locale.US, "%.2f", producto.subtotal)}",
-                    fontFamily = Poppins,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
     }
 }
 

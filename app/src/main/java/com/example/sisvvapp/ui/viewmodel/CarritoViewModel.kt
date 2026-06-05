@@ -116,9 +116,9 @@ class CarritoViewModel(
         cantidadSeleccionada = cantidad
     }
 
-    fun addProducto(producto: ProductoEntity, cantidad: Int = 1) {
+    fun addProducto(producto: ProductoEntity, cantidad: Int = 1, observaciones: String = "") {
         val existingIndex = _items.value.indexOfFirst {
-            it.producto.id == producto.id && it.modificadores.isEmpty()
+            it.producto.id == producto.id && it.modificadores.isEmpty()&& it.observaciones == observaciones
         }
         if (existingIndex >= 0) {
             val existing = _items.value[existingIndex]
@@ -131,6 +131,7 @@ class CarritoViewModel(
             val item = CarritoItem(
                 producto = producto,
                 cantidad = cantidad,
+                observaciones = observaciones,
                 precioUnitario = producto.precio,
                 subtotal = producto.precio * cantidad
             )
@@ -143,7 +144,8 @@ class CarritoViewModel(
         producto: ProductoEntity,
         modificadores: List<ModificadorEntity>,
         grupos: List<com.example.sisvvapp.data.local.entity.GrupoModificadorEntity>,
-        cantidad: Int = 1
+        cantidad: Int = 1,
+        observaciones: String = ""
     ) {
         val finalModificadores = mutableListOf<ModificadorEntity>()
         val modificadoresPorGrupo = modificadores.groupBy { it.grupo }
@@ -164,6 +166,7 @@ class CarritoViewModel(
         val item = CarritoItem(
             producto = producto,
             cantidad = cantidad,
+            observaciones = observaciones,
             modificadores = finalModificadores,
             precioUnitario = precioUnitario,
             subtotal = precioUnitario * cantidad
@@ -186,8 +189,6 @@ class CarritoViewModel(
 
         listaActual.add(indexSeguro, item)
         _items.value = listaActual
-
-        // Importante: recalcular el total al recuperar el producto
         calcularTotal()
     }
 

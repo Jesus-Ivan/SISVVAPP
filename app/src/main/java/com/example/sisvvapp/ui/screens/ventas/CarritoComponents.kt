@@ -3,19 +3,21 @@ package com.example.sisvvapp.ui.screens.ventas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
-import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.theme.*
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 import java.util.Locale
 
 @Composable
@@ -24,27 +26,89 @@ fun CarritoItemCard(
     cantidad: Int,
     subtotal: Double,
     modificadores: List<String> = emptyList(),
+    observacion: String = "",
     onCantidadChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val deviceType = LocalDeviceType.current
+    val isTablet = deviceType == DeviceType.TABLET
+
     VistaVerdeBaseCard(modifier = modifier) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = nombre, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
-                    if (modificadores.isNotEmpty()) {
-                        Text(text = modificadores.joinToString(", "), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        text = nombre,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = if (isTablet) 18.sp else 15.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (observacion.isNotEmpty()) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.EditNote,
+                                contentDescription = "Nota",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(if (isTablet) 20.dp else 16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = observacion,
+                                fontSize = if (isTablet) 14.sp else 12.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
+                    if (modificadores.isNotEmpty()) {
+                        Text(
+                            text = modificadores.joinToString(", "),
+                            fontSize = if (isTablet) 14.sp else 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(if (isTablet) 16.dp else 12.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedButton(onClick = { onCantidadChange(cantidad - 1) }, modifier = Modifier.size(32.dp), contentPadding = PaddingValues(0.dp)) { Text("-") }
-                    Text(text = "$cantidad", modifier = Modifier.padding(horizontal = 12.dp), fontWeight = FontWeight.Bold)
-                    OutlinedButton(onClick = { onCantidadChange(cantidad + 1) }, modifier = Modifier.size(32.dp), contentPadding = PaddingValues(0.dp)) { Text("+") }
+                // Selector de cantidad sutil
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), MaterialTheme.shapes.small)
+                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                ) {
+                    IconButton(
+                        onClick = { onCantidadChange(cantidad - 1) },
+                        modifier = Modifier.size(if (isTablet) 32.dp else 28.dp)
+                    ) { 
+                        Icon(Icons.Default.Remove, null, modifier = Modifier.size(16.dp)) 
+                    }
+                    
+                    Text(
+                        text = "$cantidad",
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = if (isTablet) 16.sp else 14.sp
+                    )
+                    
+                    IconButton(
+                        onClick = { onCantidadChange(cantidad + 1) },
+                        modifier = Modifier.size(if (isTablet) 32.dp else 28.dp)
+                    ) { 
+                        Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp)) 
+                    }
                 }
-                Text(text = "$${String.format(Locale.US, "%.2f", subtotal)}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+
+                // Precio dominante
+                Text(
+                    text = "$${String.format(Locale.US, "%.2f", subtotal)}",
+                    style = if (isTablet) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+                    fontFamily = Poppins,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

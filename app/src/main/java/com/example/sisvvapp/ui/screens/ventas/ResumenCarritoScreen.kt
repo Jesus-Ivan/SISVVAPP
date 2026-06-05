@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.ui.components.*
+import com.example.sisvvapp.ui.theme.Poppins
 import com.example.sisvvapp.ui.viewmodel.CarritoItem
 import com.example.sisvvapp.ui.viewmodel.SendResult
 import kotlinx.coroutines.launch
@@ -82,21 +84,25 @@ fun ResumenCarritoScreen(
                         }
                     }
                     else -> {
-                        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 24.dp)) {
-                            VistaVerdeSectionHeader(text = stringResource(R.string.resumen_title))
-                            Spacer(modifier = Modifier.height(16.dp))
+                        // CONTENIDO PRINCIPAL
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            // Header del resumen
+                            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp)) {
+                                VistaVerdeSectionHeader(text = stringResource(R.string.resumen_title))
+                                Spacer(modifier = Modifier.height(16.dp))
+                                ResumenVentaRow("Tipo", tipoVenta)
+                                ResumenVentaRow("Cliente", nombreCliente)
+                                ResumenVentaRow("Caja", "$corteCaja")
+                                Spacer(modifier = Modifier.height(16.dp))
+                                HorizontalDivider()
+                            }
 
-                            ResumenVentaRow("Tipo", tipoVenta)
-                            ResumenVentaRow("Cliente", nombreCliente)
-                            ResumenVentaRow("Caja", "$corteCaja")
-
-                            Spacer(modifier = Modifier.height(16.dp))
-                            HorizontalDivider()
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            // Lista de productos
+                            LazyColumn(
+                                modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 itemsIndexed(items = items, key = { index, item -> "${item.producto.id}-$index" }) { index, item ->
-
                                     val dismissState = rememberSwipeToDismissBoxState(
                                         confirmValueChange = { dismissValue ->
                                             if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
@@ -106,7 +112,6 @@ fun ResumenCarritoScreen(
                                                 true
                                             } else false
                                         },
-                                        // Sensibilidad aumentada a 0.5f para evitar borrados accidentales
                                         positionalThreshold = { totalDistance -> totalDistance * 0.5f }
                                     )
 
@@ -127,6 +132,7 @@ fun ResumenCarritoScreen(
                                                 cantidad = item.cantidad,
                                                 subtotal = item.subtotal,
                                                 modificadores = item.modificadores.map { it.nombre },
+                                                observacion = item.observaciones,
                                                 onCantidadChange = { cant -> onUpdateCantidad(index, cant) }
                                             )
                                         }
@@ -134,13 +140,60 @@ fun ResumenCarritoScreen(
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("Total", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                                Text("$${String.format(Locale.US, "%.2f", total)}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                            }
-                            Spacer(modifier = Modifier.height(24.dp))
-                            VistaVerdeButton(text = if (isSending) "Enviando..." else "Confirmar Venta", onClick = onConfirmar, enabled = !isSending)
+                            Spacer(modifier = Modifier.height(100.dp))
+                        }
+                    }
+                }
+            }
+        }
+
+        // BARRA INFERIOR
+        if (items.isNotEmpty() && sendResult == null) {
+            Surface(
+                modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 16.dp,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Información de Precio
+                    Column(modifier = Modifier.weight(0.4f)) {
+                        Text(
+                            "TOTAL",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "$${String.format(Locale.US, "%.2f", total)}",
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontFamily = Poppins,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    // Botón
+                    Button(
+                        onClick = onConfirmar,
+                        enabled = !isSending,
+                        modifier = Modifier.weight(0.6f).height(60.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                    ) {
+                        if (isSending) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                        } else {
+                            Text(
+                                "REALIZAR VENTA",
+                                fontWeight = FontWeight.Black,
+                                fontSize = 16.sp
+                            )
                         }
                     }
                 }
@@ -152,6 +205,7 @@ fun ResumenCarritoScreen(
         }
     }
 }
+
 @Composable
 private fun SuccessContent(folio: Int, onVolver: () -> Unit) {
     Column(

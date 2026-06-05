@@ -247,8 +247,8 @@ fun MainContainer(
                         searchQuery = searchQuery,
                         onSearchQueryChange = { carritoViewModel.searchProductos(it) },
                         carritoCount = items.size,
-                        onAddProducto = { producto, cantidad ->
-                            carritoViewModel.addProducto(producto, cantidad)
+                        onAddProducto = { producto, cantidad, obs ->
+                            carritoViewModel.addProducto(producto, cantidad, obs)
                         },
                         onProductoConModificadores = { producto, cantidad ->
                             carritoViewModel.seleccionarProducto(producto, cantidad)
@@ -289,8 +289,8 @@ fun MainContainer(
                             producto = producto,
                             gruposModificadores = grupos,
                             modificadoresDisponibles = modificadores,
-                            onAddToCart = { mods ->
-                                carritoViewModel.addProductoConModificadores(producto, mods, grupos, carritoViewModel.cantidadSeleccionada)
+                            onAddToCart = { mods, obs ->
+                                carritoViewModel.addProductoConModificadores(producto, mods, grupos, carritoViewModel.cantidadSeleccionada, obs)
                                 navController.popBackStack()
                             },
                             onBackClick = { navController.popBackStack() },

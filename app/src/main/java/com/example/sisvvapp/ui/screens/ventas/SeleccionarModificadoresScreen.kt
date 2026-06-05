@@ -20,6 +20,7 @@ import com.example.sisvvapp.ui.components.ResponsiveContainer
 import com.example.sisvvapp.ui.components.VistaVerdeButton
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
+import com.example.sisvvapp.ui.components.VistaVerdeTextField
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 
 @Composable
@@ -27,11 +28,12 @@ fun SeleccionarModificadoresScreen(
     producto: ProductoEntity,
     gruposModificadores: List<GrupoModificadorEntity>,
     modificadoresDisponibles: List<ModificadorEntity>,
-    onAddToCart: (List<ModificadorEntity>) -> Unit,
+    onAddToCart: (List<ModificadorEntity>, String) -> Unit,
     onBackClick: () -> Unit,
     isOnline: Boolean = true
 ) {
     val selectedModificadores = remember { mutableStateListOf<ModificadorEntity>() }
+    var observaciones by remember { mutableStateOf("") }
 
     VistaVerdeScaffold(
         title = stringResource(R.string.modificadores_title),
@@ -47,17 +49,19 @@ fun SeleccionarModificadoresScreen(
                 VistaVerdeSectionHeader(text = producto.descripcion)
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if (gruposModificadores.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.modificadores_sin_opciones),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (gruposModificadores.isEmpty()) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.modificadores_sin_opciones),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
                         items(
                             items = gruposModificadores,
                             key = { "${it.claveProducto}_${it.idGrupo}" }
@@ -82,13 +86,25 @@ fun SeleccionarModificadoresScreen(
                             )
                         }
                     }
+
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        VistaVerdeTextField(
+                            value = observaciones,
+                            onValueChange = { observaciones = it },
+                            label = "Observaciones / Notas especiales",
+                            placeholder = "Ej. Sin cebolla, bien cocido...",
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 VistaVerdeButton(
                     text = stringResource(R.string.modificadores_agregar),
-                    onClick = { onAddToCart(selectedModificadores.toList()) }
+                    onClick = { onAddToCart(selectedModificadores.toList(), observaciones) }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -221,7 +237,7 @@ fun SeleccionarModificadoresScreenPreview() {
             ),
             gruposModificadores = emptyList(),
             modificadoresDisponibles = emptyList(),
-            onAddToCart = {},
+            onAddToCart = { _, _ -> },
             onBackClick = {}
         )
     }
