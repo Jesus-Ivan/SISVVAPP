@@ -24,6 +24,7 @@ import com.example.sisvvapp.ui.components.*
 import com.example.sisvvapp.ui.theme.Poppins
 import com.example.sisvvapp.ui.viewmodel.CarritoItem
 import com.example.sisvvapp.ui.viewmodel.SendResult
+import androidx.compose.foundation.BorderStroke
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -225,18 +226,71 @@ fun ResumenCarritoScreen(
             }
         }
 
-        // SNACKBAR PERSONALIZADO (como en Gmail)
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 80.dp, start = 16.dp, end = 16.dp)
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 80.dp, start = 24.dp, end = 24.dp)
         ) { data ->
-            Snackbar(
-                snackbarData = data,
-                containerColor = MaterialTheme.colorScheme.inverseSurface,
-                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                actionColor = MaterialTheme.colorScheme.primary,
-                shape = MaterialTheme.shapes.medium
-            )
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = data.visuals.message,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = Poppins
+                        )
+                    }
+                    if (data.visuals.actionLabel != null) {
+                        TextButton(
+                            onClick = { data.performAction() },
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Undo,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = data.visuals.actionLabel!!,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                fontFamily = Poppins
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
