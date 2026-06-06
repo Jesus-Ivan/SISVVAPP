@@ -187,6 +187,8 @@ private fun GrupoModificadoresSection(
                 count = count,
                 canAdd = canAdd,
                 includedCount = includedCount,
+                grupoIncluidos = incluidos,
+                seleccionadosTotal = seleccionados.size,
                 onAdd = { onAdd(mod) },
                 onRemove = { onRemove(mod) }
             )
@@ -200,6 +202,8 @@ private fun ModificadorQuantityItem(
     count: Int,
     canAdd: Boolean,
     includedCount: Int,
+    grupoIncluidos: Int,
+    seleccionadosTotal: Int,
     onAdd: () -> Unit,
     onRemove: () -> Unit
 ) {
@@ -225,7 +229,9 @@ private fun ModificadorQuantityItem(
                 if (modificador.precio > 0) {
                     val nonIncludedCount = count - includedCount
                     val textLabel = if (count == 0) {
-                        "+$${String.format(java.util.Locale.US, "%.2f", modificador.precio)}"
+                        // If we haven't selected it yet, let's see if there is still space in the "incluidos" quota
+                        val hasFreeSlotsRemaining = seleccionadosTotal < grupoIncluidos
+                        if (hasFreeSlotsRemaining) "Incluido" else "+$${String.format(java.util.Locale.US, "%.2f", modificador.precio)}"
                     } else {
                         val parts = mutableListOf<String>()
                         if (includedCount > 0) parts.add("$includedCount Incluido(s)")
@@ -235,7 +241,7 @@ private fun ModificadorQuantityItem(
                     Text(
                         text = textLabel,
                         fontSize = 12.sp,
-                        color = if (includedCount > 0) MaterialTheme.colorScheme.primary
+                        color = if (includedCount > 0 || (count == 0 && seleccionadosTotal < grupoIncluidos)) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
