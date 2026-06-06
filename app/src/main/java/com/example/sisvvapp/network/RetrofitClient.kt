@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    internal const val BASE_URL = "https://stale-taxes-cross.loca.lt/api/"
+    internal const val BASE_URL = "https://angry-bikes-judge.loca.lt/api/"
 
     private var apiService: ApiService? = null
 
@@ -36,13 +36,13 @@ object RetrofitClient {
         val authInterceptor = Interceptor { chain ->
             val token = sessionManager.getToken()
             val request = chain.request()
-                .newBuilder()
-                .apply {
-                    if (!token.isNullOrEmpty()) {
-                        addHeader("Authorization", "Bearer $token")
-                    }
+            .newBuilder()
+            .apply {
+                if (!token.isNullOrEmpty()) {
+                    addHeader("Authorization", "Bearer $token")
                 }
-                .build()
+            }
+            .build()
             chain.proceed(request)
         }
 
