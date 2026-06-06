@@ -12,6 +12,7 @@ import com.example.sisvvapp.data.local.dao.TipoPagoDao
 import com.example.sisvvapp.data.local.dao.VentaColaDao
 import com.example.sisvvapp.data.local.dao.VentaRecibidaDao
 import com.example.sisvvapp.data.local.dao.TipoVentaDao
+import com.example.sisvvapp.data.local.dao.VentaGlobalDao
 import com.example.sisvvapp.data.local.entity.CajaActivaEntity
 import com.example.sisvvapp.data.local.entity.GrupoModificadorEntity
 import com.example.sisvvapp.data.local.entity.IntegranteEntity
@@ -22,6 +23,7 @@ import com.example.sisvvapp.data.local.entity.TipoPagoEntity
 import com.example.sisvvapp.data.local.entity.VentaColaEntity
 import com.example.sisvvapp.data.local.entity.VentaRecibidaEntity
 import com.example.sisvvapp.data.local.entity.TipoVentaEntity
+import com.example.sisvvapp.data.local.view.VentaGlobalView
 
 @Database(
     entities = [
@@ -36,7 +38,8 @@ import com.example.sisvvapp.data.local.entity.TipoVentaEntity
         TipoPagoEntity::class,
         TipoVentaEntity::class
     ],
-    version = 13,
+    views = [VentaGlobalView::class],
+    version = 21,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -46,6 +49,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun cajaActivaDao(): CajaActivaDao
     abstract fun ventaColaDao(): VentaColaDao
     abstract fun ventaRecibidaDao(): VentaRecibidaDao
+    abstract fun ventaGlobalDao(): VentaGlobalDao
     abstract fun tipoPagoDao(): TipoPagoDao
     abstract fun tipoVentaDao(): TipoVentaDao
 

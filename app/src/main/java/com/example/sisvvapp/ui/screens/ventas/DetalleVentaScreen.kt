@@ -33,11 +33,14 @@ fun DetalleVentaScreen(
     onAgregarProductos: () -> Unit,
     onTransferirProducto: ((ProductoVentaDto) -> Unit)? = null
 ) {
+    val syncStatus = venta?.syncStatus ?: "RECIBIDA"
+    val isSyncing = syncStatus == "SYNCING"
+
     VistaVerdeScaffold(
         title = "Detalle de Venta",
         onMenuClick = onBackClick,
         isBackButton = true,
-        isOnline = isOnline
+        isOnline = if (isSyncing) true else isOnline // Mostramos conectado si está subiendo
     ) {
         ResponsiveContainer {
             if (isLoading) {
@@ -59,6 +62,15 @@ fun DetalleVentaScreen(
                     contentPadding = PaddingValues(vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    if (isSyncing) {
+                        item {
+                            VistaVerdeBanner(
+                                text = "Sincronizando cambios con el servidor...",
+                                isError = false
+                            )
+                        }
+                    }
+
                     item {
                         DetalleHeaderCard(venta = venta)
                     }
@@ -74,7 +86,7 @@ fun DetalleVentaScreen(
                                 modifier = Modifier.weight(1f)
                             )
                             
-                            if (esAbierta) {
+                            if (esAbierta && !isSyncing) {
                                 Button(
                                     onClick = onAgregarProductos,
                                     modifier = Modifier.height(36.dp),
@@ -96,7 +108,7 @@ fun DetalleVentaScreen(
                     items(venta.productos) { producto ->
                         ProductoDetalleCard(
                             producto = producto,
-                            onTransferClick = onTransferirProducto
+                            onTransferClick = if (isSyncing) null else onTransferirProducto
                         )
                     }
                     
@@ -136,7 +148,7 @@ private fun DetalleHeaderCard(venta: VentaDto) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Folio: ${venta.folio}",
+                    text = if (venta.syncStatus != "RECIBIDA" && venta.folio == 0) "Folio: PENDIENTE" else "Folio: ${venta.folio}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
@@ -148,8 +160,10 @@ private fun DetalleHeaderCard(venta: VentaDto) {
             }
             Spacer(modifier = Modifier.height(12.dp))
             DetalleRow("Cliente", venta.nombreCliente)
-            if (venta.socioId != null) {
+            if (venta.socioId != null && venta.socioId != 0) {
                 DetalleRow("ID Socio", venta.socioId.toString())
+            } else {
+                DetalleRow("ID Socio", "N/A")
             }
             if (venta.tipoCliente != null) {
                 DetalleRow("Tipo", venta.tipoCliente)

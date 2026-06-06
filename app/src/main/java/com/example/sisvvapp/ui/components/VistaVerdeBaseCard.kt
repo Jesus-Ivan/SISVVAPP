@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun VistaVerdeBaseCard(
     modifier: Modifier = Modifier,
+    border: BorderStroke? = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     content: @Composable () -> Unit
 ) {
     Card(
@@ -23,7 +24,7 @@ fun VistaVerdeBaseCard(
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        border = border
     ) {
         content()
     }

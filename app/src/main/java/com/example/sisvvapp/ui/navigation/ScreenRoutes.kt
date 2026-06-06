@@ -11,13 +11,13 @@ object ScreenRoutes {
     const val BUSCAR_PRODUCTOS = "buscar_productos"
     const val MODIFICADORES = "modificadores/{productoId}"
     const val RESUMEN_CARRITO = "resumen_carrito"
-    const val DETALLE_VENTA = "detalle_venta/{folio}"
+    const val DETALLE_VENTA = "detalle_venta/{id}"
 
     const val PERFIL_SOCIO = "perfil_socio/{socioId}"
 
     fun crearRutaPerfilSocio(socioId: Int) = "perfil_socio/$socioId"
     fun crearRutaModificadores(productoId: Int) = "modificadores/$productoId"
-    fun crearRutaDetalleVenta(folio: Int) = "detalle_venta/$folio"
+    fun crearRutaDetalleVenta(id: String) = "detalle_venta/$id"
 }
 
 object NavGraphs {
