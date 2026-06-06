@@ -9,5 +9,6 @@ data class VentaRequest(
     @SerializedName("id_socio")          val idSocio: Int?,
     val nombre: String?,
     @SerializedName("clave_punto_venta") val clavePuntoVenta: String,
-    val productos: List<ItemCarritoDto>
+    val productos: List<ItemCarritoDto>,
+    val total: Double? = null // Usado para persistencia offline
 )

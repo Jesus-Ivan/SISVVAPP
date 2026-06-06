@@ -46,10 +46,7 @@ fun VentasScreen(
     VistaVerdeScaffold(
         title = stringResource(R.string.ventas_title),
         onMenuClick = onMenuClick,
-        isOnline = when (uiState) {
-            is VentasUiState.NetworkError -> false
-            else -> isOnline
-        },
+        isOnline = isOnline,
         actions = {
             IconButton(onClick = { showDatePicker = true }) {
                 Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.ventas_filter_date_desc))
@@ -226,11 +223,11 @@ private fun VentasList(
         ) {
             items(
                 items = filteredVentas,
-                key = { venta -> venta.folio }
+                key = { venta -> if (venta.syncStatus == "RECIBIDA") venta.folio else (venta.idTemporal ?: venta.hashCode()) }
             ) { venta ->
                 VistaVerdeSaleCard(
                     venta = venta,
-                    modifier = Modifier.clickable { onVentaClick(venta) }
+                    modifier = Modifier.clickable(enabled = venta.syncStatus != "SYNCING") { onVentaClick(venta) }
                 )
             }
         }

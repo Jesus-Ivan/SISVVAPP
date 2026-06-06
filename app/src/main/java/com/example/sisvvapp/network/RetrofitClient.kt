@@ -2,13 +2,17 @@ package com.example.sisvvapp.network
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import com.example.sisvvapp.SisvvApplication
 import com.example.sisvvapp.data.local.SessionManager
+import com.example.sisvvapp.network.exceptions.ServerUnreachableException
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
@@ -16,6 +20,13 @@ object RetrofitClient {
     internal const val BASE_URL = "https://angry-bikes-judge.loca.lt/api/"
 
     private var apiService: ApiService? = null
+
+    private fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val actNw = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return actNw.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
 
     fun create(context: Context): ApiService {
         if (apiService != null) return apiService!!
@@ -31,6 +42,21 @@ object RetrofitClient {
                 .addHeader("Bypass-Tunnel-Reminder", "true")
                 .build()
             chain.proceed(request)
+        }
+
+        val connectivityInterceptor = Interceptor { chain ->
+            try {
+                val response = chain.proceed(chain.request())
+                response
+            } catch (e: IOException) {
+                if (isNetworkAvailable(context)) {
+                    // Hay internet, pero la petición falló -> Servidor caído
+                    throw ServerUnreachableException("El servidor no responde (loca.lt)")
+                } else {
+                    // No hay internet
+                    throw e
+                }
+            }
         }
 
         val authInterceptor = Interceptor { chain ->
@@ -59,6 +85,7 @@ object RetrofitClient {
 
         val client = OkHttpClient.Builder()
             .addInterceptor(bypassTunnelInterceptor)
+            .addInterceptor(connectivityInterceptor)
             .apply {
                 if (isDebug) {
                     addInterceptor(logging)

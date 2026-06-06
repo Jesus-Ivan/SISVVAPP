@@ -239,7 +239,9 @@ class CarritoViewModel(
                     claveProducto = item.producto.id,
                     cantidad = item.cantidad,
                     observaciones = item.observaciones,
-                    modificadores = modificadores
+                    modificadores = modificadores,
+                    nombre = item.producto.descripcion,
+                    precio = item.producto.precio
                 )
             }
 
@@ -249,7 +251,8 @@ class CarritoViewModel(
                 idSocio = _socioId.value,
                 nombre = _nombreCliente.value,
                 clavePuntoVenta = _clavePuntoVenta.value,
-                productos = productos
+                productos = productos,
+                total = _total.value
             )
 
             if (_appendMode.value && _folioExistente.value != null) {

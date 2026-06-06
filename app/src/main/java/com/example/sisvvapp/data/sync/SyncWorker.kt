@@ -23,7 +23,7 @@ class SyncWorker(
         val cajaRepo = CajaRepository(api, db.cajaActivaDao())
         val tipoPagoRepo = TipoPagoRepository(api, db.tipoPagoDao())
         val tipoVentaRepo = com.example.sisvvapp.data.repository.TipoVentaRepository(api, db.tipoVentaDao())
-        val ventaRepo = VentaRepository(api, db.ventaColaDao(), db.ventaRecibidaDao())
+        val ventaRepo = VentaRepository(api, db)
         return try {
             // Sync catálogos
             socioRepo.sync()
@@ -31,6 +31,11 @@ class SyncWorker(
             cajaRepo.sync()
             tipoPagoRepo.sync()
             tipoVentaRepo.sync()
+
+            // Sincronizar ventas del día y descargar detalles (Prefetch)
+            val today = java.time.LocalDate.now().toString()
+            ventaRepo.syncVentas(today)
+
             // Descargar fotos de socios e integrantes para uso offline
             try {
                 val socios = db.socioDao().getAllSociosSync()

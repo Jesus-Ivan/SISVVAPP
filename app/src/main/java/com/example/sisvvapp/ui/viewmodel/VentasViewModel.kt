@@ -41,19 +41,25 @@ class VentasViewModel(
     private val _ventasData: StateFlow<List<VentaDto>> =
         combine(_corteCaja, _fecha) { corte, fecha -> Pair(corte, fecha) }
             .flatMapLatest { (corte, fecha) ->
-                if (corte != null) {
-                    ventaRepository.getVentasPorCorteYFecha(corte, fecha)
-                } else {
-                    ventaRepository.getVentasPorFecha(fecha)
-                }
+                ventaRepository.getVentasGlobales(corte, fecha)
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val uiState: StateFlow<VentasUiState> = combine(_ventasData, _isLoading, _error, _isNetworkError) { data, loading, error, isNetError ->
         when {
+            // Caso 1: Está cargando y no hay datos locales (Primer arranque)
             loading && data.isEmpty() -> VentasUiState.Loading
+            
+            // Caso 2: Hubo un error de red específico (Offline)
             isNetError -> VentasUiState.NetworkError(error ?: "Error de red", data)
+            
+            // Caso 3: No está cargando, no hay error, pero la lista está vacía
             !loading && data.isEmpty() && error == null -> VentasUiState.Empty
+            
+            // Caso 4: Hubo un error general (no de red) y no hay datos
             error != null && data.isEmpty() -> VentasUiState.Error(error)
+            
+            // Caso 5: Tenemos datos (locales o remotos). 
+            // isRefreshing será true si _isLoading es true, permitiendo que la UI muestre el banner de "Conectando...".
             else -> VentasUiState.Success(data, isRefreshing = loading)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VentasUiState.Loading)
@@ -91,8 +97,8 @@ class VentasViewModel(
         }
     }
 
-    suspend fun cargarDetalle(folio: Int): VentaDto? {
-        return ventaRepository.getVentaDetalle(folio)
+    suspend fun cargarDetalle(id: String): VentaDto? {
+        return ventaRepository.getVentaDetalleGlobal(id)
     }
 
     fun getVentasAbiertasDelCorte(corteCaja: Int): Flow<List<VentaDto>> {

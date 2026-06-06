@@ -24,6 +24,12 @@ import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeStatusBadge
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.filled.CloudQueue
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Sync
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
 import java.util.Locale
@@ -135,24 +141,60 @@ fun VistaVerdeSaleCard(
     val deviceType = LocalDeviceType.current
     val isTablet = deviceType == DeviceType.TABLET
     val esAbierta = venta.estatus.equals("Abierta", ignoreCase = true)
+    
+    // Configuración visual según SyncStatus
+    val syncStatus = venta.syncStatus
+    val isOffline = syncStatus != "RECIBIDA"
+    val isSyncing = syncStatus == "SYNCING"
+    val isError = syncStatus == "ERROR"
+    
+    val cardAlpha = if (isSyncing) 0.6f else 1.0f
+    val borderColor = when (syncStatus) {
+        "ERROR" -> MaterialTheme.colorScheme.error
+        "PENDIENTE" -> MaterialTheme.colorScheme.outlineVariant
+        "SYNCING" -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        else -> Color.Transparent
+    }
 
-    VistaVerdeBaseCard(modifier = modifier) {
+    VistaVerdeBaseCard(
+        modifier = modifier.graphicsLayer(alpha = cardAlpha),
+        border = if (isOffline) BorderStroke(1.dp, borderColor) else null
+    ) {
         Row(
             modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Folio: ${venta.folio}",
-                    fontSize = if (isTablet) 13.sp else 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (isOffline) {
+                        val (icon, tint) = when (syncStatus) {
+                            "SYNCING" -> Icons.Default.Sync to MaterialTheme.colorScheme.primary
+                            "ERROR" -> Icons.Default.Error to MaterialTheme.colorScheme.error
+                            else -> Icons.Default.CloudQueue to MaterialTheme.colorScheme.outline
+                        }
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(if (isTablet) 18.dp else 14.dp),
+                            tint = tint
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
+                    Text(
+                        text = if (isOffline && venta.folio == 0) "VENTA LOCAL" 
+                               else if (isOffline) "Folio: ${venta.folio} (Editando)" 
+                               else "Folio: ${venta.folio}",
+                        fontSize = if (isTablet) 13.sp else 11.sp,
+                        fontWeight = if (isOffline) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 Spacer(modifier = Modifier.height(if (isTablet) 8.dp else 6.dp))
                 Text(
-                    text = "${venta.socioId ?: "N/A"} - ${venta.nombreCliente}",
+                    text = "${if (venta.socioId == null || venta.socioId == 0) "N/A" else venta.socioId} - ${venta.nombreCliente}",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = if (isTablet) 18.sp else 15.sp,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = if (isOffline) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(if (isTablet) 8.dp else 6.dp))
                 Text(
@@ -164,9 +206,9 @@ fun VistaVerdeSaleCard(
 
             Column(horizontalAlignment = Alignment.End) {
                 VistaVerdeStatusBadge(
-                    text = if (esAbierta) "Abierta" else "Cerrada",
-                    containerColor = if (esAbierta) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
-                    textColor = if (esAbierta) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+                    text = if (isSyncing) "Enviando..." else if (isError) "Reintentar" else if (esAbierta) "Abierta" else "Cerrada",
+                    containerColor = if (isError) MaterialTheme.colorScheme.errorContainer else if (isSyncing) MaterialTheme.colorScheme.tertiaryContainer else if (esAbierta) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+                    textColor = if (isError) MaterialTheme.colorScheme.onErrorContainer else if (isSyncing) MaterialTheme.colorScheme.onTertiaryContainer else if (esAbierta) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Spacer(modifier = Modifier.height(if (isTablet) 12.dp else 8.dp))
                 Text(
@@ -174,7 +216,7 @@ fun VistaVerdeSaleCard(
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Bold,
                     fontSize = if (isTablet) 18.sp else 15.sp,
-                    color = MaterialTheme.colorScheme.primary
+                    color = if (isOffline) Color.Gray else MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -196,10 +238,13 @@ fun VentasList(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        items(items = ventas, key = { venta -> venta.folio }) { venta ->
+        items(
+            items = ventas, 
+            key = { venta -> if (venta.syncStatus == "RECIBIDA") venta.folio else (venta.idTemporal ?: venta.hashCode()) }
+        ) { venta ->
             VistaVerdeSaleCard(
                 venta = venta,
-                modifier = Modifier.clickable { onVentaClick(venta) }
+                modifier = Modifier.clickable(enabled = venta.syncStatus != "SYNCING") { onVentaClick(venta) }
             )
         }
     }

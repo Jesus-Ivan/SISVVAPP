@@ -14,5 +14,7 @@ data class ItemCarritoDto(
     @SerializedName("clave_producto") val claveProducto: Int,
     val cantidad: Int,
     val observaciones: String = "",
-    val modificadores: List<ModificadorSeleccionadoDto> = emptyList()
+    val modificadores: List<ModificadorSeleccionadoDto> = emptyList(),
+    val nombre: String? = null, // Usado para visualización offline
+    val precio: Double? = null // Usado para visualización offline
 )
