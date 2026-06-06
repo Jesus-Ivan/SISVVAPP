@@ -49,6 +49,7 @@ import com.example.sisvvapp.ui.viewmodel.SendResult
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.viewmodel.SociosViewModel
 import com.example.sisvvapp.ui.viewmodel.VentasViewModel
+import com.example.sisvvapp.ui.viewmodel.VentasUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.launch
@@ -103,10 +104,15 @@ fun MainContainer(
             ) {
 
                 // --- PANTALLA DE VENTAS ---
-                composable(ScreenRoutes.VENTAS) {
+                composable(ScreenRoutes.VENTAS) { backStackEntry ->
                     val ventasViewModel: VentasViewModel = viewModel(factory = factory)
-                    val ventas by ventasViewModel.ventas.collectAsState()
-                    val isLoading by ventasViewModel.isLoading.collectAsState()
+                    val uiState by ventasViewModel.uiState.collectAsState()
+
+                    val saleGraphEntry = remember(backStackEntry) {
+                        navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH)
+                    }
+                    val carritoViewModel: CarritoViewModel = viewModel<CarritoViewModel>(viewModelStoreOwner = saleGraphEntry, factory = factory)
+
                     val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
                     val cajas by sharedCajaViewModel.cajas.collectAsState()
                     val cajaActiva = cajas.find { it.id == selectedCajaId }
@@ -118,16 +124,6 @@ fun MainContainer(
                     // 2. Fecha activa (se actualiza cuando el VM la cambia)
                     var fechaActiva by remember { mutableStateOf("") }
 
-                    // 3. Filtro en tiempo real para las ventas
-                    val ventasFiltradas = if (searchQuery.isBlank()) {
-                        ventas
-                    } else {
-                        ventas.filter { venta ->
-                            venta.folio.toString().contains(searchQuery, ignoreCase = true) ||
-                                    venta.nombreCliente.contains(searchQuery, ignoreCase = true)
-                        }
-                    }
-
                     LaunchedEffect(selectedCajaId, cajas) {
                         val today = java.time.LocalDate.now().toString()
                         fechaActiva = today
@@ -136,9 +132,8 @@ fun MainContainer(
 
                     VentasScreen(
                         onMenuClick = { scope.launch { drawerState.open() } },
-                        ventas = ventasFiltradas,
+                        uiState = uiState,
                         isOnline = viewModel?.isOnline ?: true,
-                        isLoading = isLoading,
                         selectedDate = fechaActiva,
 
                         // 4. Conectamos los parámetros de la búsqueda
@@ -156,6 +151,7 @@ fun MainContainer(
                             navController.navigate(ScreenRoutes.crearRutaDetalleVenta(venta.folio))
                         },
                         onNuevaVentaClick = {
+                            carritoViewModel.clearState()
                             navController.navigate(ScreenRoutes.NUEVA_VENTA)
                         },
                         onDateSelected = { fecha ->
@@ -320,11 +316,12 @@ fun MainContainer(
 
                     LaunchedEffect(sendResult) {
                         if (sendResult is SendResult.Success) {
-                            delay(1500L)
-                            carritoViewModel.clearState()
+                            delay(2000L) // Un poco más de tiempo para ver el folio
                             navController.navigate(ScreenRoutes.VENTAS) {
                                 popUpTo(ScreenRoutes.VENTAS) { inclusive = true }
                             }
+                            // No limpiamos el estado aquí para evitar el flash.
+                            // Se limpiará al presionar "Volver" o al iniciar una nueva venta.
                         }
                     }
 
@@ -424,6 +421,7 @@ fun MainContainer(
                         isOnline = viewModel?.isOnline ?: true,
                         onBackClick = { navController.popBackStack() },
                         onAgregarProductos = {
+                            carritoViewModel.clearState()
                             carritoViewModel.configurarAppendMode(
                                 folio = folio,
                                 nombreCliente = ventaDetalle?.nombreCliente ?: "",

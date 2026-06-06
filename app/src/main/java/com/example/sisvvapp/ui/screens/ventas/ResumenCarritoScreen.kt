@@ -115,7 +115,7 @@ fun ResumenCarritoScreen(
                                     itemsIndexed(items = items, key = { _, item -> item.id }) { index, item ->
                                         val dismissState = rememberSwipeToDismissBoxState(
                                             confirmValueChange = { dismissValue ->
-                                                if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                                                if (!isSending && dismissValue == SwipeToDismissBoxValue.EndToStart) {
                                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                     onRemoveItem(item)
                                                     mostrarNotificacion(item, index)
@@ -128,7 +128,7 @@ fun ResumenCarritoScreen(
                                         SwipeToDismissBox(
                                             state = dismissState,
                                             enableDismissFromStartToEnd = false,
-                                            enableDismissFromEndToStart = true,
+                                            enableDismissFromEndToStart = !isSending,
                                             backgroundContent = {
                                                 val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart)
                                                     MaterialTheme.colorScheme.errorContainer else Color.Transparent
@@ -143,7 +143,9 @@ fun ResumenCarritoScreen(
                                                     subtotal = item.subtotal,
                                                     modificadores = item.modificadores.map { it.nombre },
                                                     observacion = item.observaciones,
-                                                    onCantidadChange = { cant -> onUpdateCantidad(index, cant) }
+                                                    onCantidadChange = { cant -> 
+                                                        if (!isSending) onUpdateCantidad(index, cant) 
+                                                    }
                                                 )
                                             }
                                         )

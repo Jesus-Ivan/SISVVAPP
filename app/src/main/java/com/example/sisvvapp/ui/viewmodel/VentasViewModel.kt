@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sisvvapp.data.repository.VentaRepository
+import com.example.sisvvapp.network.ApiResult
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -16,22 +17,28 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+sealed class VentasUiState {
+    object Loading : VentasUiState()
+    data class Success(val ventas: List<VentaDto>, val isRefreshing: Boolean = false) : VentasUiState()
+    object Empty : VentasUiState()
+    data class Error(val message: String) : VentasUiState()
+    data class NetworkError(val message: String, val ventasLocales: List<VentaDto>) : VentasUiState()
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class VentasViewModel(
     private val ventaRepository: VentaRepository
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
-
     private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
+    private val _isNetworkError = MutableStateFlow(false)
 
     // Ambos valores (corte + fecha) controlan qué ventas se muestran en Room
     private val _corteCaja = MutableStateFlow<Int?>(null)
     private val _fecha = MutableStateFlow(java.time.LocalDate.now().toString())
 
-    val ventas: StateFlow<List<VentaDto>> =
+    private val _ventasData: StateFlow<List<VentaDto>> =
         combine(_corteCaja, _fecha) { corte, fecha -> Pair(corte, fecha) }
             .flatMapLatest { (corte, fecha) ->
                 if (corte != null) {
@@ -40,6 +47,16 @@ class VentasViewModel(
                     ventaRepository.getVentasPorFecha(fecha)
                 }
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val uiState: StateFlow<VentasUiState> = combine(_ventasData, _isLoading, _error, _isNetworkError) { data, loading, error, isNetError ->
+        when {
+            loading && data.isEmpty() -> VentasUiState.Loading
+            isNetError -> VentasUiState.NetworkError(error ?: "Error de red", data)
+            !loading && data.isEmpty() && error == null -> VentasUiState.Empty
+            error != null && data.isEmpty() -> VentasUiState.Error(error)
+            else -> VentasUiState.Success(data, isRefreshing = loading)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VentasUiState.Loading)
 
     val pendientesCount: StateFlow<Int> = ventaRepository.getPendientesCountFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
@@ -50,14 +67,27 @@ class VentasViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            try {
-                ventaRepository.syncVentas(fecha, corteCaja)
-            } catch (e: Exception) {
-                Log.w("VentasVM", "No se pudo sync, usando datos locales", e)
-                _error.value = "Modo offline - Mostrando datos locales"
-            } finally {
-                _isLoading.value = false
+            _isNetworkError.value = false
+            
+            val result = ventaRepository.syncVentas(fecha, corteCaja)
+            when (result) {
+                is ApiResult.Success -> {
+                    // OK
+                }
+                is ApiResult.NetworkError -> {
+                    Log.w("VentasVM", "Error de red, usando locales")
+                    _error.value = result.message
+                    _isNetworkError.value = true
+                }
+                is ApiResult.ServerError -> {
+                    Log.e("VentasVM", "Error de servidor: ${result.code}")
+                    _error.value = "Error de servidor: ${result.message}"
+                }
+                is ApiResult.EmptyData -> {
+                    // No hay ventas, sync exitoso pero sin datos
+                }
             }
+            _isLoading.value = false
         }
     }
 

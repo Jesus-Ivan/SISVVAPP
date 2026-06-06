@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,20 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.ventas.VentaDto
-import com.example.sisvvapp.ui.components.ResponsiveContainer
-import com.example.sisvvapp.ui.components.VistaVerdeDatePicker
-import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
-import com.example.sisvvapp.ui.components.VistaVerdeScaffold
-import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
-import com.example.sisvvapp.ui.components.VistaVerdeSkeletonCard
+import com.example.sisvvapp.ui.components.*
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.viewmodel.VentasUiState
 
 @Composable
 fun VentasScreen(
     onMenuClick: () -> Unit,
-    ventas: List<VentaDto> = emptyList(),
+    uiState: VentasUiState,
     isOnline: Boolean = true,
-    isLoading: Boolean = false,
     searchQuery: String = "",
     selectedDate: String = "",
     onSearchQueryChange: (String) -> Unit = {},
@@ -50,7 +46,10 @@ fun VentasScreen(
     VistaVerdeScaffold(
         title = stringResource(R.string.ventas_title),
         onMenuClick = onMenuClick,
-        isOnline = isOnline,
+        isOnline = when (uiState) {
+            is VentasUiState.NetworkError -> false
+            else -> isOnline
+        },
         actions = {
             IconButton(onClick = { showDatePicker = true }) {
                 Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.ventas_filter_date_desc))
@@ -114,43 +113,54 @@ fun VentasScreen(
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                     Spacer(modifier = Modifier.height(6.dp))
-                    if (isLoading) {
-                        // ESTADO 1: Cargando
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(6) {
-                                VistaVerdeSkeletonCard()
+
+                    when (uiState) {
+                        is VentasUiState.Loading -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(6) {
+                                    VistaVerdeSkeletonCard()
+                                }
                             }
                         }
-                    } else if (ventas.isEmpty()) {
-                        // ESTADO 2: Ya no está cargando y la lista vino vacía
-                        VistaVerdeEmptyState(
-                            icon = Icons.AutoMirrored.Filled.ReceiptLong,
-                            message = stringResource(R.string.ventas_empty_state),
-                            modifier = Modifier.weight(1f)
-                        )
-                    } else {
-                        // ESTADO 3: Ya no está cargando y SÍ hay ventas
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(
-                                items = ventas,
-                                key = { venta -> venta.folio }
-                            ) { venta ->
-                                VistaVerdeSaleCard(
-                                    venta = venta,
-                                    modifier = Modifier.clickable { onVentaClick(venta) }
-                                )
+                        is VentasUiState.Empty -> {
+                            VistaVerdeEmptyState(
+                                icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                                message = stringResource(R.string.ventas_empty_state),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        is VentasUiState.Error -> {
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(uiState.message, color = MaterialTheme.colorScheme.error)
+                                Button(onClick = onRefresh) { Text("Reintentar") }
                             }
+                        }
+                        is VentasUiState.NetworkError -> {
+                            VentasList(
+                                ventas = uiState.ventasLocales,
+                                searchQuery = searchQuery,
+                                onVentaClick = onVentaClick
+                            )
+                        }
+                        is VentasUiState.Success -> {
+                            VentasList(
+                                ventas = uiState.ventas,
+                                searchQuery = searchQuery,
+                                onVentaClick = onVentaClick
+                            )
                         }
                     }
                 }
+                
+                // ... FloatingActionButton ...
 
                 FloatingActionButton(
                     onClick = onNuevaVentaClick,
@@ -181,12 +191,59 @@ fun VentasScreen(
     )
 }
 
+@Composable
+private fun VentasList(
+    ventas: List<VentaDto>,
+    searchQuery: String,
+    onVentaClick: (VentaDto) -> Unit
+) {
+    val filteredVentas = if (searchQuery.isBlank()) {
+        ventas
+    } else {
+        ventas.filter { venta ->
+            venta.folio.toString().contains(searchQuery, ignoreCase = true) ||
+                    venta.nombreCliente.contains(searchQuery, ignoreCase = true)
+        }
+    }
+
+    if (filteredVentas.isEmpty() && searchQuery.isNotBlank()) {
+        VistaVerdeEmptyState(
+            icon = Icons.Default.Search,
+            message = "No se encontraron ventas para \"$searchQuery\"",
+            modifier = Modifier.fillMaxSize()
+        )
+    } else if (filteredVentas.isEmpty()) {
+        VistaVerdeEmptyState(
+            icon = Icons.AutoMirrored.Filled.ReceiptLong,
+            message = stringResource(R.string.ventas_empty_state),
+            modifier = Modifier.fillMaxSize()
+        )
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(
+                items = filteredVentas,
+                key = { venta -> venta.folio }
+            ) { venta ->
+                VistaVerdeSaleCard(
+                    venta = venta,
+                    modifier = Modifier.clickable { onVentaClick(venta) }
+                )
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun VentasScreenPreview() {
     SISVVAPPTheme {
         VentasScreen(
-            onMenuClick = {}
+            onMenuClick = {},
+            uiState = VentasUiState.Success(emptyList())
         )
     }
 }

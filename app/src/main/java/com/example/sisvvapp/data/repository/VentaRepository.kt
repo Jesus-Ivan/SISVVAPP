@@ -5,6 +5,8 @@ import com.example.sisvvapp.data.local.dao.VentaRecibidaDao
 import com.example.sisvvapp.data.local.entity.VentaColaEntity
 import com.example.sisvvapp.data.local.entity.VentaRecibidaEntity
 import com.example.sisvvapp.network.ApiService
+import com.example.sisvvapp.network.ApiResult
+import com.example.sisvvapp.network.exceptions.ServerUnreachableException
 import com.example.sisvvapp.network.dto.productos.ItemCarritoDto
 import com.example.sisvvapp.network.dto.ventas.PagoDto
 import com.example.sisvvapp.network.dto.ventas.ProductoVentaDto
@@ -62,25 +64,32 @@ class VentaRepository(
             ventaRecibidaDao.getVentaPorFolio(folio)?.toVentaDto()
         }
     }
-    suspend fun syncVentas(fecha: String, corteCaja: Int? = null): Result<Unit> {
+    suspend fun syncVentas(fecha: String, corteCaja: Int? = null): ApiResult<Unit> {
         return try {
             val response = api.getVentas(fecha, corteCaja)
             if (response.isSuccessful) {
-                val entities = response.body()?.map { it.toVentaRecibidaEntity() } ?: emptyList()
-                // Borramos las ventas de ESA fecha antes de re-insertar para evitar
-                // que datos de diferentes fechas se mezclen en Room.
-                ventaRecibidaDao.deleteByFecha(fecha)
-                if (entities.isNotEmpty()) {
+                val body = response.body()
+                if (body.isNullOrEmpty()) {
+                    Log.d("VentaRepo", "Servidor devolvió lista vacía para $fecha")
+                    ventaRecibidaDao.deleteByFecha(fecha)
+                    ApiResult.EmptyData
+                } else {
+                    val entities = body.map { it.toVentaRecibidaEntity() }
+                    // Solo borramos si tenemos datos nuevos para reemplazar
+                    ventaRecibidaDao.deleteByFecha(fecha)
                     ventaRecibidaDao.insertAll(entities)
+                    Log.d("VentaRepo", "Ventas sincronizadas para $fecha: ${entities.size}")
+                    ApiResult.Success(Unit)
                 }
-                Log.d("VentaRepo", "Ventas sincronizadas para $fecha: ${entities.size}")
-                Result.success(Unit)
             } else {
-                Result.failure(Exception("Error ${response.code()}"))
+                ApiResult.ServerError(response.code(), response.message())
             }
+        } catch (e: ServerUnreachableException) {
+            Log.w("VentaRepo", "Servidor inalcanzable: ${e.message}")
+            ApiResult.NetworkError("Servidor fuera de línea")
         } catch (e: Exception) {
-            Log.w("VentaRepo", "No hay conexión para sync ventas", e)
-            Result.failure(e)
+            Log.w("VentaRepo", "Error de red al sync ventas", e)
+            ApiResult.NetworkError("Error de conexión")
         }
     }
     suspend fun crearVenta(request: VentaRequest): Result<com.example.sisvvapp.network.dto.ventas.VentaResponse> {
