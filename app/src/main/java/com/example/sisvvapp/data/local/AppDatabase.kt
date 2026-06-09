@@ -39,7 +39,7 @@ import com.example.sisvvapp.data.local.view.VentaGlobalView
         TipoVentaEntity::class
     ],
     views = [VentaGlobalView::class],
-    version = 21,
+    version = 22,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

@@ -370,9 +370,16 @@ fun MainContainer(
                                 val v = ventaDetalle
                                 if (v != null) {
                                     carritoViewModel.clearState()
-                                    if (v.syncStatus == "RECIBIDA") {
-                                        carritoViewModel.configurarAppendMode(v.folio, v.nombreCliente, v.clavePuntoVenta, v.tipoCliente ?: "")
-                                    }
+                                    // Configuramos append mode con el idTemporal si existe (para ventas locales)
+                                    // o con el folio (para ventas recibidas)
+                                    carritoViewModel.configurarAppendMode(
+                                        folio = v.folio,
+                                        nombreCliente = v.nombreCliente,
+                                        clavePuntoVenta = v.clavePuntoVenta,
+                                        tipoVenta = v.tipoCliente ?: "",
+                                        corteCaja = v.cajaId ?: 0,
+                                        idTemporal = v.idTemporal
+                                    )
                                     navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
                                 }
                             },

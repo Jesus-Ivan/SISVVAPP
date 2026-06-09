@@ -76,8 +76,18 @@ class VentaRepository(
                 // Es un append offline, necesitamos combinar con los productos ya existentes en el servidor/histórico
                 val baseVenta = getVentaDetalle(localCola.folioExistente)
                 if (baseVenta != null) {
+                    // Combinamos y agrupamos para evitar duplicados visuales (ej. 2 Tacos + 1 Taco -> 3 Tacos)
+                    val combinedProductos = (baseVenta.productos + dto.productos)
+                        .groupBy { it.claveProducto to it.observaciones }
+                        .map { (_, list) ->
+                            val first = list.first()
+                            first.copy(
+                                cantidad = list.sumOf { it.cantidad },
+                                subtotal = list.sumOf { it.subtotal }
+                            )
+                        }
                     dto.copy(
-                        productos = baseVenta.productos + dto.productos,
+                        productos = combinedProductos,
                         pagos = baseVenta.pagos,
                         total = baseVenta.total + dto.total,
                     )
@@ -199,7 +209,7 @@ class VentaRepository(
         }
     }
 
-    suspend fun appendProductos(folio: Int, request: VentaRequest): Result<Unit> {
+    suspend fun appendProductos(folio: Int, request: VentaRequest, idTemporal: String? = null): Result<Unit> {
         return try {
             val response = api.appendProductos(folio, request)
             if (response.isSuccessful) {
@@ -218,8 +228,8 @@ class VentaRepository(
                     msg.contains("network is unreachable") ||
                     msg.contains("route to host")
             if (isNetworkError) {
-                Log.w("VentaRepo", "Sin conexión, encolando append offline", e)
-                encolarVentaOffline(request, folio)
+                Log.w("VentaRepo", "Sin conexión, encolando append offline")
+                encolarVentaOffline(request, if (folio > 0) folio else null, idTemporal)
                 Result.failure(Exception("offline"))
             } else {
                 Log.e("VentaRepo", "Error no recuperable al agregar productos, no se encola", e)
@@ -228,23 +238,54 @@ class VentaRepository(
         }
     }
 
-    private suspend fun encolarVentaOffline(request: VentaRequest, folioExistente: Int?) {
-        val idTemporal = java.util.UUID.randomUUID().toString()
-        val entity = VentaColaEntity(
-            idTemporal = idTemporal,
-            tipoVenta = request.tipoVenta,
-            idSocio = request.idSocio,
-            nombreCliente = request.nombre ?: "",
-            corteCaja = request.corteCaja,
-            clavePuntoVenta = request.clavePuntoVenta,
-            nombreCaja = "",
-            productosJson = gson.toJson(request.productos),
-            fechaCreacion = System.currentTimeMillis(),
-            totalVenta = request.total ?: 0.0,
-            estado = "PENDIENTE",
-            folioExistente = folioExistente,
-            pagosJson = null
-        )
+    private suspend fun encolarVentaOffline(request: VentaRequest, folioExistente: Int?, idTemporalExistente: String? = null) {
+        val finalIdTemporal = idTemporalExistente ?: java.util.UUID.randomUUID().toString()
+        
+        // Buscamos si ya existe en la cola para no duplicar si es una edición
+        val existente = if (folioExistente != null && folioExistente > 0) {
+            ventaColaDao.getByFolioExistente(folioExistente)
+        } else if (idTemporalExistente != null) {
+            ventaColaDao.getById(idTemporalExistente)
+        } else {
+            null
+        }
+
+        val entity = if (existente != null) {
+            // MERGE: Si ya existe, combinamos los productos
+            val type = object : com.google.gson.reflect.TypeToken<List<com.example.sisvvapp.network.dto.productos.ItemCarritoDto>>() {}.type
+            val productosExistentes: List<com.example.sisvvapp.network.dto.productos.ItemCarritoDto> = gson.fromJson(existente.productosJson, type)
+            val nuevosProductos = request.productos
+            
+            // Combinar y agrupar para evitar filas separadas del mismo producto
+            val listaCombinada = (productosExistentes + nuevosProductos)
+                .groupBy { it.claveProducto to it.observaciones to it.modificadores }
+                .map { (_, list) ->
+                    list.first().copy(cantidad = list.sumOf { it.cantidad })
+                }
+            
+            existente.copy(
+                productosJson = gson.toJson(listaCombinada),
+                totalVenta = listaCombinada.sumOf { (it.cantidad * (it.precio ?: 0.0)) + it.modificadores.sumOf { m -> m.cantidad * (m.precio ?: 0.0) } },
+                fechaCreacion = System.currentTimeMillis(),
+                estado = "PENDIENTE"
+            )
+        } else {
+            VentaColaEntity(
+                idTemporal = finalIdTemporal,
+                tipoVenta = request.tipoVenta,
+                idSocio = request.idSocio,
+                nombreCliente = request.nombre ?: "",
+                corteCaja = request.corteCaja,
+                clavePuntoVenta = request.clavePuntoVenta,
+                nombreCaja = "",
+                productosJson = gson.toJson(request.productos),
+                fechaCreacion = System.currentTimeMillis(),
+                totalVenta = request.total ?: 0.0,
+                estado = "PENDIENTE",
+                folioExistente = folioExistente,
+                pagosJson = null
+            )
+        }
         ventaColaDao.insert(entity)
     }
 
@@ -413,6 +454,32 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
         displayTime = parts.getOrElse(1) { "" }.take(5)
     }
 
+    val gson = Gson()
+    val productos: List<ProductoVentaDto> = try {
+        if (syncStatus != "RECIBIDA") {
+            // Reconstrucción para registros offline (nuevos o ediciones)
+            val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
+            val items: List<ItemCarritoDto> = gson.fromJson(productosJson, type)
+            items.map { item ->
+                ProductoVentaDto(
+                    id = item.claveProducto,
+                    claveProducto = item.claveProducto,
+                    nombre = item.nombre ?: "Producto #${item.claveProducto}",
+                    precio = item.precio ?: 0.0,
+                    cantidad = item.cantidad,
+                    chunk = 0,
+                    observaciones = item.observaciones,
+                    subtotal = (item.precio ?: 0.0) * item.cantidad
+                )
+            }
+        } else {
+            // Venta oficial del servidor
+            gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type)
+        }
+    } catch (e: Exception) {
+        emptyList()
+    }
+
     return VentaDto(
         folio = folio ?: 0,
         nombreCliente = cliente ?: "N/A",
@@ -423,6 +490,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
         socioId = if (socioId == 0) null else socioId,
         tipoCliente = null,
         fecha = displayDate,
+        productos = productos,
         syncStatus = syncStatus,
         idTemporal = idTemporal
     )

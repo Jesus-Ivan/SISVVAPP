@@ -24,6 +24,9 @@ interface VentaColaDao {
     @Query("SELECT * FROM ventas_cola WHERE idTemporal = :id")
     suspend fun getById(id: String): VentaColaEntity?
 
+    @Query("SELECT * FROM ventas_cola WHERE folioExistente = :folio AND (estado = 'PENDIENTE' OR estado = 'ERROR') LIMIT 1")
+    suspend fun getByFolioExistente(folio: Int): VentaColaEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(venta: VentaColaEntity)
 

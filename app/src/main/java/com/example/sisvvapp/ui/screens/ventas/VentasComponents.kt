@@ -1,5 +1,6 @@
 package com.example.sisvvapp.ui.screens.ventas
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -148,76 +149,95 @@ fun VistaVerdeSaleCard(
     val isSyncing = syncStatus == "SYNCING"
     val isError = syncStatus == "ERROR"
     
-    val cardAlpha = if (isSyncing) 0.6f else 1.0f
+    // Si es edición offline o venta local, usamos un tono más grisáceo
+    val cardAlpha = if (isOffline) 0.8f else 1.0f
     val borderColor = when (syncStatus) {
         "ERROR" -> MaterialTheme.colorScheme.error
-        "PENDIENTE" -> MaterialTheme.colorScheme.outlineVariant
+        "PENDIENTE" -> if (venta.folio > 0) Color.Gray.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant
         "SYNCING" -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
         else -> Color.Transparent
     }
 
     VistaVerdeBaseCard(
         modifier = modifier.graphicsLayer(alpha = cardAlpha),
-        border = if (isOffline) BorderStroke(1.dp, borderColor) else null
+        border = if (isOffline) BorderStroke(1.5.dp, borderColor) else null
     ) {
-        Row(
-            modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (isOffline) {
-                        val (icon, tint) = when (syncStatus) {
-                            "SYNCING" -> Icons.Default.Sync to MaterialTheme.colorScheme.primary
-                            "ERROR" -> Icons.Default.Error to MaterialTheme.colorScheme.error
-                            else -> Icons.Default.CloudQueue to MaterialTheme.colorScheme.outline
+        // Fondo grisáceo para indicar modo local/offline
+        val backgroundColor = if (isOffline) {
+            if (isError) MaterialTheme.colorScheme.error.copy(alpha = 0.05f)
+            else Color.LightGray.copy(alpha = 0.15f)
+        } else Color.Transparent
+
+        Box(modifier = Modifier.background(backgroundColor)) {
+            Row(
+                modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (isOffline) {
+                            val (icon, tint) = when (syncStatus) {
+                                "SYNCING" -> Icons.Default.Sync to MaterialTheme.colorScheme.primary
+                                "ERROR" -> Icons.Default.Error to MaterialTheme.colorScheme.error
+                                else -> Icons.Default.CloudQueue to Color.Gray
+                            }
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(if (isTablet) 18.dp else 14.dp),
+                                tint = tint
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
                         }
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            modifier = Modifier.size(if (isTablet) 18.dp else 14.dp),
-                            tint = tint
+                        Text(
+                            text = if (isOffline && venta.folio == 0) "NUEVA VENTA LOCAL" 
+                                   else if (isOffline) "EDICIÓN LOCAL" 
+                                   else "Folio: ${venta.folio}",
+                            fontSize = if (isTablet) 13.sp else 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (isError) MaterialTheme.colorScheme.error 
+                                    else if (isOffline) Color.Gray
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                            letterSpacing = 0.5.sp
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
                     }
+                    if (isOffline && venta.folio > 0) {
+                        Text(
+                            text = "Folio: ${venta.folio}",
+                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(if (isTablet) 8.dp else 6.dp))
                     Text(
-                        text = if (isOffline && venta.folio == 0) "VENTA LOCAL" 
-                               else if (isOffline) "Folio: ${venta.folio} (Editando)" 
-                               else "Folio: ${venta.folio}",
+                        text = "${if (venta.socioId == null || venta.socioId == 0) "N/A" else venta.socioId} - ${venta.nombreCliente}",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = if (isTablet) 18.sp else 15.sp,
+                        color = if (isOffline) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(if (isTablet) 8.dp else 6.dp))
+                    Text(
+                        text = "${venta.fecha ?: "Sin fecha"} | ${venta.hora}",
                         fontSize = if (isTablet) 13.sp else 11.sp,
-                        fontWeight = if (isOffline) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Spacer(modifier = Modifier.height(if (isTablet) 8.dp else 6.dp))
-                Text(
-                    text = "${if (venta.socioId == null || venta.socioId == 0) "N/A" else venta.socioId} - ${venta.nombreCliente}",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = if (isTablet) 18.sp else 15.sp,
-                    color = if (isOffline) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(if (isTablet) 8.dp else 6.dp))
-                Text(
-                    text = "${venta.fecha ?: "Sin fecha"} | ${venta.hora}",
-                    fontSize = if (isTablet) 13.sp else 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
 
-            Column(horizontalAlignment = Alignment.End) {
-                VistaVerdeStatusBadge(
-                    text = if (isSyncing) "Enviando..." else if (isError) "Reintentar" else if (esAbierta) "Abierta" else "Cerrada",
-                    containerColor = if (isError) MaterialTheme.colorScheme.errorContainer else if (isSyncing) MaterialTheme.colorScheme.tertiaryContainer else if (esAbierta) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
-                    textColor = if (isError) MaterialTheme.colorScheme.onErrorContainer else if (isSyncing) MaterialTheme.colorScheme.onTertiaryContainer else if (esAbierta) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Spacer(modifier = Modifier.height(if (isTablet) 12.dp else 8.dp))
-                Text(
-                    text = "TOTAL: $${String.format(Locale.US, "%.2f", venta.total)}",
-                    fontFamily = Poppins,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = if (isTablet) 18.sp else 15.sp,
-                    color = if (isOffline) Color.Gray else MaterialTheme.colorScheme.primary
-                )
+                Column(horizontalAlignment = Alignment.End) {
+                    VistaVerdeStatusBadge(
+                        text = if (isSyncing) "Enviando..." else if (isError) "Error Sync" else if (esAbierta) "Abierta" else "Cerrada",
+                        containerColor = if (isError) MaterialTheme.colorScheme.errorContainer else if (isSyncing) MaterialTheme.colorScheme.tertiaryContainer else if (esAbierta) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+                        textColor = if (isError) MaterialTheme.colorScheme.onErrorContainer else if (isSyncing) MaterialTheme.colorScheme.onTertiaryContainer else if (esAbierta) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(modifier = Modifier.height(if (isTablet) 12.dp else 8.dp))
+                    Text(
+                        text = "TOTAL: $${String.format(Locale.US, "%.2f", venta.total)}",
+                        fontFamily = Poppins,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = if (isTablet) 18.sp else 15.sp,
+                        color = if (isOffline) Color.Gray else MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

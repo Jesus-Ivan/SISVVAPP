@@ -1,13 +1,25 @@
 package com.example.sisvvapp.ui.screens.ventas
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -34,85 +46,121 @@ fun CarritoItemCard(
 ) {
     val deviceType = LocalDeviceType.current
     val isTablet = deviceType == DeviceType.TABLET
+    // Estado para controlar si el desglose está abierto
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
 
-    VistaVerdeBaseCard(modifier = modifier) {
-        Column(modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = nombre,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = if (isTablet) 18.sp else 15.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    if (observacion.isNotEmpty()) {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-                            Icon(
-                                imageVector = Icons.Default.EditNote,
-                                contentDescription = "Nota",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(if (isTablet) 20.dp else 16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = observacion,
-                                fontSize = if (isTablet) 14.sp else 12.sp,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
-                            )
+    VistaVerdeBaseCard(
+        modifier = modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+        ) { if (modificadores.isNotEmpty()) isExpanded = !isExpanded }
+    ) {
+        Column {
+            // Parte Superior (Siempre visible)
+            Column(modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = nombre,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = if (isTablet) 18.sp else 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (observacion.isNotEmpty()) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.EditNote,
+                                    "Nota",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    observacion,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
+                    // Indicador sutil de expansión
                     if (modificadores.isNotEmpty()) {
-                        Text(
-                            text = modificadores.joinToString(", "),
-                            fontSize = if (isTablet) 14.sp else 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(start = 8.dp)
                         )
                     }
+                }
 
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Selector de cantidad
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.background(
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            MaterialTheme.shapes.small
+                        ).padding(2.dp)
+                    ) {
+                        IconButton(
+                            onClick = { onCantidadChange(cantidad - 1) },
+                            modifier = Modifier.size(28.dp)
+                        ) { Icon(Icons.Default.Remove, null, modifier = Modifier.size(16.dp)) }
+                        Text(
+                            "$cantidad",
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            fontWeight = FontWeight.Bold
+                        )
+                        IconButton(
+                            onClick = { onCantidadChange(cantidad + 1) },
+                            modifier = Modifier.size(28.dp)
+                        ) { Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp)) }
+                    }
+                    Text(
+                        "$${String.format(Locale.US, "%.2f", subtotal)}",
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(if (isTablet) 16.dp else 12.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                // Selector de cantidad sutil
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+
+            // Desglose de Modificadores (Expandible)
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Column(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), MaterialTheme.shapes.small)
-                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    IconButton(
-                        onClick = { onCantidadChange(cantidad - 1) },
-                        modifier = Modifier.size(if (isTablet) 32.dp else 28.dp)
-                    ) { 
-                        Icon(Icons.Default.Remove, null, modifier = Modifier.size(16.dp)) 
-                    }
-                    
-                    Text(
-                        text = "$cantidad",
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = if (isTablet) 16.sp else 14.sp
-                    )
-                    
-                    IconButton(
-                        onClick = { onCantidadChange(cantidad + 1) },
-                        modifier = Modifier.size(if (isTablet) 32.dp else 28.dp)
-                    ) { 
-                        Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp)) 
+                    modificadores.forEach { mod ->
+                        Text(
+                            text = "> $mod",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(start = 8.dp, bottom = 2.dp)
+                        )
                     }
                 }
-
-                // Precio dominante
-                Text(
-                    text = "$${String.format(Locale.US, "%.2f", subtotal)}",
-                    style = if (isTablet) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
-                    fontFamily = Poppins,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.primary
-                )
             }
         }
+
     }
 }
 
