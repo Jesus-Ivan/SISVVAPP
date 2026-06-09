@@ -91,27 +91,7 @@ fun DetalleVentaScreen(
                                     text = "PRODUCTOS (${venta.productos.size})",
                                     modifier = Modifier.weight(1f)
                                 )
-                                
-                                if (esAbierta && !isSyncing) {
-                                    Button(
-                                        onClick = onAgregarProductos,
-                                        modifier = Modifier.height(if (isTablet) 44.dp else 36.dp),
-                                        contentPadding = PaddingValues(horizontal = 16.dp),
-                                        shape = MaterialTheme.shapes.medium,
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primary,
-                                            contentColor = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    ) {
-                                        Icon(Icons.Default.AddShoppingCart, null, modifier = Modifier.size(if (isTablet) 20.dp else 16.dp))
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(
-                                            "AGREGAR", 
-                                            fontWeight = FontWeight.Black, 
-                                            fontSize = if (isTablet) 13.sp else 11.sp
-                                        )
-                                    }
-                                }
+
                             }
                         }
 
@@ -139,13 +119,29 @@ fun DetalleVentaScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "MONTO TOTAL",
-                                style = if (isTablet) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                letterSpacing = 1.sp
-                            )
+
+                            if (esAbierta && !isSyncing) {
+                                Button(
+                                    onClick = onAgregarProductos,
+                                    modifier = Modifier.height(if (isTablet) 44.dp else 36.dp),
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    shape = MaterialTheme.shapes.medium,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Icon(Icons.Default.AddShoppingCart, null, modifier = Modifier.size(if (isTablet) 20.dp else 16.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        "AGREGAR",
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = if (isTablet) 13.sp else 11.sp
+                                    )
+                                }
+                            }
+
+
                             Text(
                                 text = "$${String.format(Locale.US, "%.2f", venta.total)}",
                                 fontFamily = Poppins,
