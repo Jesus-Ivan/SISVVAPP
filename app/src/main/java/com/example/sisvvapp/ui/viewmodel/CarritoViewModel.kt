@@ -82,12 +82,17 @@ class CarritoViewModel(
     private val _folioExistente = MutableStateFlow<Int?>(null)
     val folioExistente: StateFlow<Int?> = _folioExistente
 
-    fun configurarAppendMode(folio: Int, nombreCliente: String, clavePuntoVenta: String, tipoVenta: String) {
+    private val _idTemporalExistente = MutableStateFlow<String?>(null)
+    val idTemporalExistente: StateFlow<String?> = _idTemporalExistente
+
+    fun configurarAppendMode(folio: Int, nombreCliente: String, clavePuntoVenta: String, tipoVenta: String, corteCaja: Int, idTemporal: String? = null) {
         _appendMode.value = true
-        _folioExistente.value = folio
+        _folioExistente.value = if (folio > 0) folio else null
+        _idTemporalExistente.value = idTemporal
         _nombreCliente.value = nombreCliente
         _clavePuntoVenta.value = clavePuntoVenta
         _tipoVenta.value = tipoVenta
+        _corteCaja.value = corteCaja
     }
 
     fun esModoAppend(): Boolean = _appendMode.value
@@ -224,11 +229,10 @@ class CarritoViewModel(
             _isSending.value = true
             _sendResult.value = null
 
-            val productos = _items.value.map { item ->
+            val productosRaw = _items.value.map { item ->
                 // Group duplicate modifiers by claveModificador to aggregate quantity and price
                 val modificadores = item.modificadores.groupBy { it.claveModificador }.map { (claveModificador, mods) ->
                     val totalPrecio = mods.sumOf { if (it.incluido) 0.0 else it.precio }
-                    // We send the average price per modifier unit, or send the sum divided by quantity
                     ModificadorSeleccionadoDto(
                         claveProducto = claveModificador,
                         cantidad = mods.size,
@@ -245,6 +249,15 @@ class CarritoViewModel(
                 )
             }
 
+            // AGREGAR: Agrupamos productos por claveProducto y observaciones para evitar filas duplicadas
+            val productos = productosRaw.groupBy { it.claveProducto to it.observaciones to it.modificadores }.map { (key, list) ->
+                val (pairClaveObs, mods) = key
+                val (clave, obs) = pairClaveObs
+                list.first().copy(
+                    cantidad = list.sumOf { it.cantidad }
+                )
+            }
+
             val request = VentaRequest(
                 corteCaja = _corteCaja.value,
                 tipoVenta = _tipoVenta.value,
@@ -255,9 +268,9 @@ class CarritoViewModel(
                 total = _total.value
             )
 
-            if (_appendMode.value && _folioExistente.value != null) {
-                val folio = _folioExistente.value!!
-                val result = ventaRepository.appendProductos(folio, request)
+            if (_appendMode.value && (_folioExistente.value != null || _idTemporalExistente.value != null)) {
+                val folio = _folioExistente.value ?: 0
+                val result = ventaRepository.appendProductos(folio, request, _idTemporalExistente.value)
                 result.fold(
                     onSuccess = {
                         Log.d("CarritoVM", "Productos agregados a venta $folio")
@@ -313,6 +326,7 @@ class CarritoViewModel(
         _isSending.value = false
         _appendMode.value = false
         _folioExistente.value = null
+        _idTemporalExistente.value = null
     }
 }
 

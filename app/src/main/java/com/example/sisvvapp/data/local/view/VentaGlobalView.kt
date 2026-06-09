@@ -16,14 +16,15 @@ import androidx.room.DatabaseView
             corte_caja as corteCaja,
             estado as estadoVenta,
             socio_id as socioId,
-            SUBSTR(fecha, 1, 10) as fechaFiltro
+            SUBSTR(fecha, 1, 10) as fechaFiltro,
+            productos_json as productosJson
         FROM ventas_recibidas
         WHERE folio NOT IN (SELECT folioExistente FROM ventas_cola WHERE folioExistente > 0 AND (estado = 'PENDIENTE' OR estado = 'SYNCING'))
         UNION ALL
         SELECT 
-            folioExistente as folio,
+            COALESCE(folioExistente, 0) as folio,
             nombreCliente as cliente,
-            totalVenta as total,
+            (totalVenta + COALESCE((SELECT total FROM ventas_recibidas WHERE folio = folioExistente AND folioExistente > 0), 0.0)) as total,
             CAST(fechaCreacion AS TEXT) as fecha,
             fechaCreacion as timestamp,
             estado as syncStatus,
@@ -31,7 +32,8 @@ import androidx.room.DatabaseView
             corteCaja as corteCaja,
             'Abierta' as estadoVenta,
             idSocio as socioId,
-            strftime('%Y-%m-%d', datetime(fechaCreacion/1000, 'unixepoch', 'localtime')) as fechaFiltro
+            COALESCE((SELECT SUBSTR(fecha, 1, 10) FROM ventas_recibidas WHERE folio = folioExistente AND folioExistente > 0), strftime('%Y-%m-%d', date(fechaCreacion/1000, 'unixepoch', 'localtime'))) as fechaFiltro,
+            productosJson as productosJson
         FROM ventas_cola
     """
 )
@@ -46,5 +48,6 @@ data class VentaGlobalView(
     val corteCaja: Int,
     val estadoVenta: String,
     val socioId: Int?,
-    val fechaFiltro: String
+    val fechaFiltro: String,
+    val productosJson: String
 )

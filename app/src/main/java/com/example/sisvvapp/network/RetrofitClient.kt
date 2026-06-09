@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    internal const val BASE_URL = "https://angry-bikes-judge.loca.lt/api/"
+    internal const val BASE_URL = "https://silent-falcons-fry.loca.lt/api/"
 
     private var apiService: ApiService? = null
 
