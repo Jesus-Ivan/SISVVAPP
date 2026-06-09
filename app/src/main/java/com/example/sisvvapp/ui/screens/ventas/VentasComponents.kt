@@ -1,36 +1,44 @@
 package com.example.sisvvapp.ui.screens.ventas
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.network.dto.ventas.ProductoVentaDto
-import com.example.sisvvapp.ui.theme.*
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeStatusBadge
-import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.material.icons.filled.CloudQueue
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Sync
+import com.example.sisvvapp.ui.theme.Poppins
+import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
 import java.util.Locale
@@ -44,104 +52,145 @@ fun ProductoDetalleCard(
     val deviceType = LocalDeviceType.current
     val isTablet = deviceType == DeviceType.TABLET
 
-    VistaVerdeBaseCard(modifier = modifier) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(if (isTablet) 20.dp else 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 1. Cantidad con un estilo de Badge circular
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = MaterialTheme.shapes.small,
-                modifier = Modifier.size(if (isTablet) 48.dp else 40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "${producto.cantidad}",
-                        style = if (isTablet) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-            }
+    // Estado para controlar si el desglose está abierto
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
 
-            Spacer(modifier = Modifier.width(if (isTablet) 20.dp else 16.dp))
+    // Blindaje contra nulos (lo único técnico necesario para evitar el crash)
+    val mods = producto.modificadores ?: emptyList()
 
-            // 2. Información central (Nombre y Notas)
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = producto.nombre,
-                    style = if (isTablet) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                
-                if (producto.observaciones.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.EditNote,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(if (isTablet) 20.dp else 16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
+    VistaVerdeBaseCard(
+        modifier = modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+        ) { if (mods.isNotEmpty()) isExpanded = !isExpanded }
+    ) {
+        Column {
+            // --- PARTE SUPERIOR (Tal como la tenías) ---
+            Column(modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    // 1. Cantidad
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier.size(if (isTablet) 48.dp else 40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "${producto.cantidad}",
+                                style = if (isTablet) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(if (isTablet) 20.dp else 16.dp))
+
+                    // 2. Información central (Nombre y Notas)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = producto.nombre,
+                                style = if (isTablet) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            // Ícono de expansión añadido
+                            if (mods.isNotEmpty()) {
+                                Icon(
+                                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp).padding(start = 4.dp)
+                                )
+                            }
+                        }
+
+                        if (producto.observaciones.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.EditNote,
+                                    contentDescription = "Nota",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(if (isTablet) 20.dp else 16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = producto.observaciones,
+                                    style = if (isTablet) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+
+                    // 3. Botón de transferencia (Tal como estaba)
+                    if (onTransferClick != null) {
+                        IconButton(
+                            onClick = { onTransferClick(producto) },
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.SwapHoriz,
+                                contentDescription = "Transferir",
+                                tint = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier.size(if (isTablet) 28.dp else 24.dp)
+                            )
+                        }
+                    }
+
+                    // 4. Precio (Tal como estaba)
+                    Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = producto.observaciones,
-                            style = if (isTablet) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
+                            text = "$${String.format(Locale.US, "%.2f", producto.subtotal)}",
+                            style = if (isTablet) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleMedium,
+                            fontFamily = Poppins,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Unit: $${String.format(Locale.US, "%.2f", producto.precio)}",
+                            style = if (isTablet) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
+            }
 
-                // Modificadores agrupados
-                val mods = producto.modificadores ?: emptyList()
-                if (mods.isNotEmpty()) {
+            // --- DESGLOSE DE MODIFICADORES (Nuevo) ---
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    Text(
+                        text = "MODIFICADORES SELECCIONADOS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        letterSpacing = 0.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                     mods.forEach { mod ->
                         Text(
-                            text = "• ${mod.cantidad}x Modificador #${mod.claveProducto}",
+                            text = "• ${mod.cantidad}x ${mod.nombre ?: "Modificador #${mod.claveProducto}"}",
                             style = if (isTablet) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                            modifier = Modifier.padding(start = 8.dp, top = 2.dp)
                         )
                     }
                 }
-            }
-
-            // 3. Botón de transferencia (si aplica)
-            if (onTransferClick != null) {
-                IconButton(
-                    onClick = { onTransferClick(producto) },
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.SwapHoriz,
-                        contentDescription = "Transferir",
-                        tint = MaterialTheme.colorScheme.outline,
-                        modifier = Modifier.size(if (isTablet) 28.dp else 24.dp)
-                    )
-                }
-            }
-
-            // 4. Precio con tipografía destacada
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "$${String.format(Locale.US, "%.2f", producto.subtotal)}",
-                    style = if (isTablet) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleMedium,
-                    fontFamily = Poppins,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "Unit: $${String.format(Locale.US, "%.2f", producto.precio)}",
-                    style = if (isTablet) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }
@@ -257,10 +306,7 @@ fun VistaVerdeSaleCard(
 }
 
 @Composable
-fun VentasList(
-    ventas: List<VentaDto>,
-    onVentaClick: (VentaDto) -> Unit
-) {
+fun VentasList(ventas: List<VentaDto>, onVentaClick: (VentaDto) -> Unit) {
     val deviceType = LocalDeviceType.current
     val isTablet = deviceType == DeviceType.TABLET
 
@@ -271,9 +317,10 @@ fun VentasList(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxSize()
     ) {
+        // CORRECCIÓN: items de LazyVerticalGrid necesita un parámetro llamado "items"
         items(
-            items = ventas, 
-            key = { venta -> if (venta.syncStatus == "RECIBIDA") venta.folio else (venta.idTemporal ?: venta.hashCode()) }
+            items = ventas,
+            key = { v -> if (v.syncStatus == "RECIBIDA") v.folio.toString() else (v.idTemporal ?: v.hashCode().toString()) }
         ) { venta ->
             VistaVerdeSaleCard(
                 venta = venta,

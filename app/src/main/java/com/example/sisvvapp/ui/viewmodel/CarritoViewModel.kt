@@ -236,7 +236,8 @@ class CarritoViewModel(
                     ModificadorSeleccionadoDto(
                         claveProducto = claveModificador,
                         cantidad = mods.size,
-                        precio = totalPrecio / mods.size
+                        precio = totalPrecio / mods.size,
+                        nombre = mods.first().nombre
                     )
                 }
                 ItemCarritoDto(

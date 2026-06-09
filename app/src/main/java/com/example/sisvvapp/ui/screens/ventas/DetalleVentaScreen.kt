@@ -35,6 +35,8 @@ fun DetalleVentaScreen(
 ) {
     val syncStatus = venta?.syncStatus ?: "RECIBIDA"
     val isSyncing = syncStatus == "SYNCING"
+    val deviceType = com.example.sisvvapp.ui.utils.LocalDeviceType.current
+    val isTablet = deviceType == com.example.sisvvapp.ui.utils.DeviceType.TABLET
 
     VistaVerdeScaffold(
         title = "Detalle de Venta",
@@ -57,78 +59,100 @@ fun DetalleVentaScreen(
             } else {
                 val esAbierta = venta.estatus.equals("Abierta", ignoreCase = true)
 
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    if (isSyncing) {
-                        item {
-                            VistaVerdeBanner(
-                                text = "Sincronizando cambios con el servidor...",
-                                isError = false
-                            )
-                        }
-                    }
-
-                    item {
-                        DetalleHeaderCard(venta = venta)
-                    }
-
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            VistaVerdeSectionHeader(
-                                text = "PRODUCTOS (${venta.productos.size})",
-                                modifier = Modifier.weight(1f)
-                            )
-                            
-                            if (esAbierta && !isSyncing) {
-                                Button(
-                                    onClick = onAgregarProductos,
-                                    modifier = Modifier.height(36.dp),
-                                    contentPadding = PaddingValues(horizontal = 12.dp),
-                                    shape = MaterialTheme.shapes.medium,
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                ) {
-                                    Icon(Icons.Default.AddShoppingCart, null, modifier = Modifier.size(16.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("AGREGAR", fontWeight = FontWeight.Black, fontSize = 11.sp)
-                                }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            top = 16.dp, 
+                            bottom = if (isTablet) 120.dp else 100.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        if (isSyncing) {
+                            item {
+                                VistaVerdeBanner(
+                                    text = "Sincronizando cambios con el servidor...",
+                                    isError = false
+                                )
                             }
                         }
-                    }
 
-                    items(venta.productos) { producto ->
-                        ProductoDetalleCard(
-                            producto = producto,
-                            onTransferClick = if (isSyncing) null else onTransferirProducto
-                        )
-                    }
-                    
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        VistaVerdeBaseCard {
+                        item {
+                            DetalleHeaderCard(venta = venta)
+                        }
+
+                        item {
                             Row(
-                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = if (isTablet) 8.dp else 0.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Monto Total", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                                Text(
-                                    text = "$${String.format(Locale.US, "%.2f", venta.total)}",
-                                    fontFamily = Poppins,
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 20.sp,
-                                    color = MaterialTheme.colorScheme.primary
+                                VistaVerdeSectionHeader(
+                                    text = "PRODUCTOS (${venta.productos.size})",
+                                    modifier = Modifier.weight(1f)
                                 )
+                                
+                                if (esAbierta && !isSyncing) {
+                                    Button(
+                                        onClick = onAgregarProductos,
+                                        modifier = Modifier.height(if (isTablet) 44.dp else 36.dp),
+                                        contentPadding = PaddingValues(horizontal = 16.dp),
+                                        shape = MaterialTheme.shapes.medium,
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    ) {
+                                        Icon(Icons.Default.AddShoppingCart, null, modifier = Modifier.size(if (isTablet) 20.dp else 16.dp))
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            "AGREGAR", 
+                                            fontWeight = FontWeight.Black, 
+                                            fontSize = if (isTablet) 13.sp else 11.sp
+                                        )
+                                    }
+                                }
                             }
+                        }
+
+                        items(venta.productos) { producto ->
+                            ProductoDetalleCard(
+                                producto = producto,
+                                onTransferClick = if (isSyncing) null else onTransferirProducto
+                            )
+                        }
+                    }
+
+                    // Barra Inferior Fija para el Total
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter),
+                        color = MaterialTheme.colorScheme.surface,
+                        shadowElevation = 16.dp,
+                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(if (isTablet) 32.dp else 24.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "MONTO TOTAL",
+                                style = if (isTablet) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = "$${String.format(Locale.US, "%.2f", venta.total)}",
+                                fontFamily = Poppins,
+                                fontWeight = FontWeight.Black,
+                                style = if (isTablet) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
                 }

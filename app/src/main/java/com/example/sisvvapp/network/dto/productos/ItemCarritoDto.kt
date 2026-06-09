@@ -6,7 +6,8 @@ import com.google.gson.annotations.SerializedName
 data class ModificadorSeleccionadoDto(
     @SerializedName("clave_producto") val claveProducto: Int,
     val cantidad: Int,
-    val precio: Double?
+    val precio: Double?,
+    val nombre: String? = null
 )
 
 /** Representa un ítem en el carrito de una nueva venta o al agregar productos. */

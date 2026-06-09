@@ -39,7 +39,7 @@ fun CarritoItemCard(
     nombre: String,
     cantidad: Int,
     subtotal: Double,
-    modificadores: List<String> = emptyList(),
+    modificadores: List<Pair<String, Int>> = emptyList(),
     observacion: String = "",
     onCantidadChange: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -147,14 +147,22 @@ fun CarritoItemCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
-                    modificadores.forEach { mod ->
+                    Text(
+                        text = "MODIFICADORES SELECCIONADOS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        letterSpacing = 0.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    modificadores.forEach { (nombreMod, cantMod) ->
                         Text(
-                            text = "> $mod",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(start = 8.dp, bottom = 2.dp)
+                            text = "• ${cantMod}x $nombreMod",
+                            style = if (isTablet) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                            modifier = Modifier.padding(start = 8.dp, top = 2.dp)
                         )
                     }
                 }
@@ -203,7 +211,7 @@ fun CarritoItemCardPreview() {
                 nombre = "Hamburguesa Vista Verde",
                 cantidad = 2,
                 subtotal = 370.0,
-                modificadores = listOf("Sin cebolla", "Extra queso"),
+                modificadores = listOf("Sin cebolla" to 1, "Extra queso" to 1),
                 onCantidadChange = {},
 
             )
