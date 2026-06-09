@@ -72,6 +72,9 @@ fun MainContainer(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    // ViewModel persistente para el flujo de ventas
+    val globalCarritoViewModel: CarritoViewModel = viewModel(factory = factory)
+
     // Sincronización automática de la cola al recuperar conexión
     LaunchedEffect(isConnected) {
         if (isConnected) {
@@ -161,8 +164,6 @@ fun MainContainer(
                     composable(ScreenRoutes.VENTAS) { backStackEntry ->
                         val ventasViewModel: VentasViewModel = viewModel(factory = factory)
                         val uiState by ventasViewModel.uiState.collectAsState()
-                        val saleGraphEntry = remember(backStackEntry) { navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH) }
-                        val carritoViewModel: CarritoViewModel = viewModel(viewModelStoreOwner = saleGraphEntry, factory = factory)
                         val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
                         val cajas by sharedCajaViewModel.cajas.collectAsState()
                         val cajaActiva = cajas.find { it.id == selectedCajaId }
@@ -200,7 +201,11 @@ fun MainContainer(
                                 navController.navigate(ScreenRoutes.crearRutaDetalleVenta(id))
                             },
                             onNuevaVentaClick = {
-                                carritoViewModel.clearState()
+                                // Solo limpiamos si el carrito está vacío o ya se envió la venta anterior
+                                // Esto permite reanudar si el usuario se salió por error
+                                if (globalCarritoViewModel.items.value.isEmpty() && !globalCarritoViewModel.esModoAppend()) {
+                                    globalCarritoViewModel.clearState()
+                                }
                                 navController.navigate(ScreenRoutes.NUEVA_VENTA)
                             },
                             onDateSelected = { fechaActiva = it; searchQuery = ""; ventasViewModel.refreshVentas(it, corteCajaActivo) },
@@ -210,8 +215,6 @@ fun MainContainer(
 
                     composable(ScreenRoutes.NUEVA_VENTA) { backStackEntry ->
                         val nuevaVentaViewModel: NuevaVentaViewModel = viewModel(factory = factory)
-                        val saleGraphEntry = remember(backStackEntry) { navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH) }
-                        val carritoViewModel: CarritoViewModel = viewModel(viewModelStoreOwner = saleGraphEntry, factory = factory)
                         val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
                         val cajas by sharedCajaViewModel.cajas.collectAsState()
                         val cajaActiva = cajas.find { it.id == selectedCajaId }
@@ -225,7 +228,11 @@ fun MainContainer(
                         val socioSeleccionado by nuevaVentaViewModel.socioSeleccionado.collectAsState()
 
                         LaunchedEffect(tipoVenta, nombreCliente, cajaActiva?.corte) {
-                            carritoViewModel.configurarVenta(tipoVenta, socioId, nombreCliente, cajaActiva?.corte ?: 0, cajaActiva?.clavePuntoVenta ?: "")
+                            // Si el carrito ya tiene items, no sobreescribimos la config de la venta
+                            // a menos que estemos en modo append explícito
+                            if (globalCarritoViewModel.items.value.isEmpty() || globalCarritoViewModel.esModoAppend()) {
+                                globalCarritoViewModel.configurarVenta(tipoVenta, socioId, nombreCliente, cajaActiva?.corte ?: 0, cajaActiva?.clavePuntoVenta ?: "")
+                            }
                         }
 
                         NuevaVentaConfigScreen(
@@ -248,20 +255,17 @@ fun MainContainer(
                     }
 
                     composable(ScreenRoutes.BUSCAR_PRODUCTOS) { backStackEntry ->
-                        val saleGraphEntry = remember(backStackEntry) { navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH) }
-                        val carritoViewModel: CarritoViewModel = viewModel(viewModelStoreOwner = saleGraphEntry, factory = factory)
-
-                        val productos by carritoViewModel.productos.collectAsState()
-                        val searchQuery by carritoViewModel.searchQuery.collectAsState()
-                        val items by carritoViewModel.items.collectAsState()
+                        val productos by globalCarritoViewModel.productos.collectAsState()
+                        val searchQuery by globalCarritoViewModel.searchQuery.collectAsState()
+                        val items by globalCarritoViewModel.items.collectAsState()
 
                         BuscarProductosScreen(
                             productos = productos,
                             searchQuery = searchQuery,
-                            onSearchQueryChange = { carritoViewModel.searchProductos(it) },
+                            onSearchQueryChange = { globalCarritoViewModel.searchProductos(it) },
                             carritoCount = items.size,
-                            onAddProducto = { p, c, o -> carritoViewModel.addProducto(p, c, o) },
-                            onProductoConModificadores = { p, c -> carritoViewModel.seleccionarProducto(p, c); navController.navigate(ScreenRoutes.crearRutaModificadores(p.id)) },
+                            onAddProducto = { p, c, o -> globalCarritoViewModel.addProducto(p, c, o) },
+                            onProductoConModificadores = { p, c -> globalCarritoViewModel.seleccionarProducto(p, c); navController.navigate(ScreenRoutes.crearRutaModificadores(p.id)) },
                             onVerCarrito = { navController.navigate(ScreenRoutes.RESUMEN_CARRITO) },
                             onBackClick = { navController.popBackStack() },
                             isOnline = isConnected
@@ -270,10 +274,8 @@ fun MainContainer(
 
                     composable(route = ScreenRoutes.MODIFICADORES, arguments = listOf(navArgument("productoId") { type = NavType.IntType })) { backStackEntry ->
                         val productoId = backStackEntry.arguments?.getInt("productoId") ?: 0
-                        val saleGraphEntry = remember(navController.currentBackStackEntry) { navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH) }
-                        val carritoViewModel: CarritoViewModel = viewModel(viewModelStoreOwner = saleGraphEntry, factory = factory)
                         val modVM: ModificadoresViewModel = viewModel(factory = factory)
-                        val productos by carritoViewModel.productos.collectAsState()
+                        val productos by globalCarritoViewModel.productos.collectAsState()
                         val grupos by modVM.grupos.collectAsState()
                         val modificadores by modVM.modificadores.collectAsState()
 
@@ -285,8 +287,8 @@ fun MainContainer(
                                 producto = producto,
                                 gruposModificadores = grupos,
                                 modificadoresDisponibles = modificadores,
-                                cantidadProducto = carritoViewModel.cantidadSeleccionada,
-                                onAddToCart = { m, o -> carritoViewModel.addProductoConModificadores(producto, m, grupos, carritoViewModel.cantidadSeleccionada, o); navController.popBackStack() },
+                                cantidadProducto = globalCarritoViewModel.cantidadSeleccionada,
+                                onAddToCart = { m, o -> globalCarritoViewModel.addProductoConModificadores(producto, m, grupos, globalCarritoViewModel.cantidadSeleccionada, o); navController.popBackStack() },
                                 onBackClick = { navController.popBackStack() },
                                 isOnline = isConnected
                             )
@@ -294,20 +296,20 @@ fun MainContainer(
                     }
 
                     composable(ScreenRoutes.RESUMEN_CARRITO) { backStackEntry ->
-                        val saleGraphEntry = remember(backStackEntry) { navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH) }
-                        val carritoViewModel: CarritoViewModel = viewModel(viewModelStoreOwner = saleGraphEntry, factory = factory)
-                        val items by carritoViewModel.items.collectAsState()
-                        val tipoVenta by carritoViewModel.tipoVenta.collectAsState()
-                        val nombreCliente by carritoViewModel.nombreCliente.collectAsState()
-                        val corteCaja by carritoViewModel.corteCaja.collectAsState()
-                        val clavePuntoVenta by carritoViewModel.clavePuntoVenta.collectAsState()
-                        val total by carritoViewModel.total.collectAsState()
-                        val isSending by carritoViewModel.isSending.collectAsState()
-                        val sendResult by carritoViewModel.sendResult.collectAsState()
+                        val items by globalCarritoViewModel.items.collectAsState()
+                        val tipoVenta by globalCarritoViewModel.tipoVenta.collectAsState()
+                        val nombreCliente by globalCarritoViewModel.nombreCliente.collectAsState()
+                        val corteCaja by globalCarritoViewModel.corteCaja.collectAsState()
+                        val clavePuntoVenta by globalCarritoViewModel.clavePuntoVenta.collectAsState()
+                        val total by globalCarritoViewModel.total.collectAsState()
+                        val isSending by globalCarritoViewModel.isSending.collectAsState()
+                        val sendResult by globalCarritoViewModel.sendResult.collectAsState()
 
                         LaunchedEffect(sendResult) {
                             if (sendResult is SendResult.Success) {
                                 delay(2000L)
+                                // Limpiamos el carrito global solo al éxito
+                                globalCarritoViewModel.clearState()
                                 // Volvemos a la pantalla de ventas de forma segura
                                 navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
                             }
@@ -316,19 +318,19 @@ fun MainContainer(
                         ResumenCarritoScreen(
                             items = items,
                             tipoVenta = tipoVenta,
-                            isAppend = carritoViewModel.esModoAppend(),
+                            isAppend = globalCarritoViewModel.esModoAppend(),
                             nombreCliente = nombreCliente,
                             corteCaja = corteCaja,
                             clavePuntoVenta = clavePuntoVenta,
                             total = total,
                             isSending = isSending,
                             sendResult = sendResult,
-                            onUpdateCantidad = { i, c -> carritoViewModel.updateCantidad(i, c) },
-                            onRemoveItem = { carritoViewModel.removeProducto(it) },
-                            onDeshacer = { i, idx -> carritoViewModel.insertarProducto(idx, i) },
-                            onConfirmar = { carritoViewModel.confirmarVenta() },
+                            onUpdateCantidad = { i, c -> globalCarritoViewModel.updateCantidad(i, c) },
+                            onRemoveItem = { globalCarritoViewModel.removeProducto(it) },
+                            onDeshacer = { i, idx -> globalCarritoViewModel.insertarProducto(idx, i) },
+                            onConfirmar = { globalCarritoViewModel.confirmarVenta() },
                             onVolver = {
-                                carritoViewModel.clearState()
+                                globalCarritoViewModel.clearState()
                                 navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
                             },
                             onBackClick = { navController.popBackStack() },
@@ -339,8 +341,6 @@ fun MainContainer(
                     composable(route = ScreenRoutes.DETALLE_VENTA, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStackEntry ->
                         val id = backStackEntry.arguments?.getString("id") ?: ""
                         val ventasViewModel: VentasViewModel = viewModel(factory = factory)
-                        val saleGraphEntry = remember(backStackEntry) { navController.getBackStackEntry(NavGraphs.VENTAS_GRAPH) }
-                        val carritoViewModel: CarritoViewModel = viewModel(viewModelStoreOwner = saleGraphEntry, factory = factory)
                         var ventaDetalle by remember { mutableStateOf<VentaDto?>(null) }
                         var productoATransferir by remember { mutableStateOf<ProductoVentaDto?>(null) }
                         val ventasAbiertas by ventasViewModel.getVentasAbiertasDelCorte(ventaDetalle?.cajaId ?: 0).collectAsState(initial = emptyList())
@@ -369,10 +369,10 @@ fun MainContainer(
                             onAgregarProductos = {
                                 val v = ventaDetalle
                                 if (v != null) {
-                                    carritoViewModel.clearState()
+                                    globalCarritoViewModel.clearState()
                                     // Configuramos append mode con el idTemporal si existe (para ventas locales)
                                     // o con el folio (para ventas recibidas)
-                                    carritoViewModel.configurarAppendMode(
+                                    globalCarritoViewModel.configurarAppendMode(
                                         folio = v.folio,
                                         nombreCliente = v.nombreCliente,
                                         clavePuntoVenta = v.clavePuntoVenta,

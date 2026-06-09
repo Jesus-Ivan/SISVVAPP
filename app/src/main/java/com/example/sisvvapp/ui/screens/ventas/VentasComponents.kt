@@ -98,6 +98,19 @@ fun ProductoDetalleCard(
                         )
                     }
                 }
+
+                // Modificadores agrupados
+                val mods = producto.modificadores ?: emptyList()
+                if (mods.isNotEmpty()) {
+                    mods.forEach { mod ->
+                        Text(
+                            text = "• ${mod.cantidad}x Modificador #${mod.claveProducto}",
+                            style = if (isTablet) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                        )
+                    }
+                }
             }
 
             // 3. Botón de transferencia (si aplica)
