@@ -1,5 +1,6 @@
 package com.example.sisvvapp.network.dto.ventas
 
+import com.example.sisvvapp.network.dto.productos.ModificadorSeleccionadoDto
 import com.google.gson.annotations.SerializedName
 
 data class ProductoVentaDto(
@@ -10,5 +11,6 @@ data class ProductoVentaDto(
     val cantidad: Int,
     val chunk: Long,
     val observaciones: String = "",
-    val subtotal: Double = 0.0
+    val subtotal: Double = 0.0,
+    val modificadores: List<ModificadorSeleccionadoDto> = emptyList()
 )
