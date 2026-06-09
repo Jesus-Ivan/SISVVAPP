@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    internal const val BASE_URL = "https://silent-falcons-fry.loca.lt/api/"
+    internal const val BASE_URL = "https://deep-rockets-move.loca.lt/api/"
 
     private var apiService: ApiService? = null
 
@@ -93,9 +93,9 @@ object RetrofitClient {
             }
             .addInterceptor(authInterceptor)
             .addInterceptor(authResponseInterceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
             .build()
 
         val retrofit = Retrofit.Builder()

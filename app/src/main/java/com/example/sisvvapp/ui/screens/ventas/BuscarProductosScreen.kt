@@ -1,5 +1,7 @@
 package com.example.sisvvapp.ui.screens.ventas
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,13 +27,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +56,7 @@ import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 @Composable
 fun BuscarProductosScreen(
@@ -65,6 +70,7 @@ fun BuscarProductosScreen(
     onBackClick: () -> Unit,
     isOnline: Boolean = true
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     VistaVerdeScaffold(
         title = stringResource(R.string.buscar_productos_title),
         subtitle = stringResource(R.string.buscar_productos_subtitle),
@@ -110,8 +116,14 @@ fun BuscarProductosScreen(
                                 VistaVerdeProductoCard(
                                     producto = producto,
                                     hasModificadores = producto.modifMaximos > 0,
-                                    onAdd = { cantidad, obs -> onAddProducto(producto, cantidad, obs) },
-                                    onAddConModif = { cantidad -> onProductoConModificadores(producto, cantidad) }
+                                    onAdd = { cantidad, obs ->
+                                        onSearchQueryChange("")
+                                        keyboardController?.hide()
+                                        onAddProducto(producto, cantidad, obs)
+                                    },
+                                    onAddConModif = { cantidad ->
+                                        onProductoConModificadores(producto, cantidad)
+                                    }
                                 )
                             }
                         }
@@ -165,9 +177,15 @@ private fun VistaVerdeProductoCard(
     var cantidad by remember { mutableStateOf(1) }
     var observaciones by remember { mutableStateOf("") }
     var showObs by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val scale = remember { Animatable(1f) }
 
     VistaVerdeBaseCard {
-        Column(modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp)) {
+        Column(
+            modifier = Modifier
+                .graphicsLayer { scaleX = scale.value; scaleY = scale.value }
+                .padding(if (isTablet) 20.dp else 16.dp)
+        ) {
             // Fila 1: Información y Precio (Balanceado)
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -268,6 +286,10 @@ private fun VistaVerdeProductoCard(
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         if (hasModificadores) onAddConModif(cantidad)
                         else {
+                            scope.launch {
+                                scale.animateTo(1.08f, tween(120))
+                                scale.animateTo(1f, tween(120))
+                            }
                             onAdd(cantidad, observaciones)
                             observaciones = ""
                             showObs = false

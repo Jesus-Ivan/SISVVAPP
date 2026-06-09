@@ -194,14 +194,14 @@ private fun VentasList(
     searchQuery: String,
     onVentaClick: (VentaDto) -> Unit
 ) {
-    val filteredVentas = if (searchQuery.isBlank()) {
+    val filteredVentas = (if (searchQuery.isBlank()) {
         ventas
     } else {
         ventas.filter { venta ->
             venta.folio.toString().contains(searchQuery, ignoreCase = true) ||
                     venta.nombreCliente.contains(searchQuery, ignoreCase = true)
         }
-    }
+    }).sortedByDescending { it.hora }
 
     if (filteredVentas.isEmpty() && searchQuery.isNotBlank()) {
         VistaVerdeEmptyState(

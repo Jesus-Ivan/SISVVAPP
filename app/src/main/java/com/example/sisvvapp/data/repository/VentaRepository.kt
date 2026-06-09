@@ -1,8 +1,6 @@
 package com.example.sisvvapp.data.repository
 import android.util.Log
 import com.example.sisvvapp.data.local.AppDatabase
-import com.example.sisvvapp.data.local.dao.VentaColaDao
-import com.example.sisvvapp.data.local.dao.VentaRecibidaDao
 import com.example.sisvvapp.data.local.entity.VentaColaEntity
 import com.example.sisvvapp.data.local.entity.VentaRecibidaEntity
 import com.example.sisvvapp.data.local.view.VentaGlobalView
@@ -30,9 +28,6 @@ class VentaRepository(
 
     private val gson = Gson()
     fun getPendientesCountFlow(): Flow<Int> = ventaColaDao.countPendientesFlow()
-    suspend fun encolarVenta(venta: VentaColaEntity) {
-        ventaColaDao.insert(venta)
-    }
     suspend fun getPendientes(): List<VentaColaEntity> = ventaColaDao.getPendientes()
     fun getVentasGlobales(corteCaja: Int? = null, fecha: String): Flow<List<VentaDto>> {
         val flow = if (corteCaja != null) {
@@ -45,23 +40,6 @@ class VentaRepository(
 
     fun getVentasRecibidas(corteCaja: Int): Flow<List<VentaDto>> {
         return ventaRecibidaDao.getVentasPorCorte(corteCaja).map { entities ->
-            entities.map { it.toVentaDto() }
-        }
-    }
-    fun getAllVentasRecibidas(): Flow<List<VentaDto>> {
-        return ventaRecibidaDao.getAllVentas().map { entities ->
-            entities.map { it.toVentaDto() }
-        }
-    }
-    // Devuelve ventas filtradas por fecha (formato "yyyy-MM-dd")
-    fun getVentasPorFecha(fecha: String): Flow<List<VentaDto>> {
-        return ventaRecibidaDao.getVentasPorFecha(fecha).map { entities ->
-            entities.map { it.toVentaDto() }
-        }
-    }
-    // Devuelve ventas filtradas por corte Y fecha
-    fun getVentasPorCorteYFecha(corteCaja: Int, fecha: String): Flow<List<VentaDto>> {
-        return ventaRecibidaDao.getVentasPorCorteYFecha(corteCaja, fecha).map { entities ->
             entities.map { it.toVentaDto() }
         }
     }
@@ -127,9 +105,6 @@ class VentaRepository(
         }
     }
 
-    fun getVentaDetalleFlow(folio: Int): Flow<VentaDto?> {
-        return ventaRecibidaDao.getVentaPorFolioFlow(folio).map { it?.toVentaDto() }
-    }
     suspend fun syncVentas(fecha: String, corteCaja: Int? = null): ApiResult<Unit> {
         return try {
             val response = api.getVentas(fecha, corteCaja)
@@ -161,7 +136,7 @@ class VentaRepository(
                     abiertasSinDetalle.forEach { entity ->
                         try {
                             getVentaDetalle(entity.folio)
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             Log.w("VentaRepo", "Fallo prefetch folio ${entity.folio}")
                         }
                     }
@@ -252,8 +227,8 @@ class VentaRepository(
 
         val entity = if (existente != null) {
             // MERGE: Si ya existe, combinamos los productos
-            val type = object : com.google.gson.reflect.TypeToken<List<com.example.sisvvapp.network.dto.productos.ItemCarritoDto>>() {}.type
-            val productosExistentes: List<com.example.sisvvapp.network.dto.productos.ItemCarritoDto> = gson.fromJson(existente.productosJson, type)
+            val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
+            val productosExistentes: List<ItemCarritoDto> = gson.fromJson(existente.productosJson, type)
             val nuevosProductos = request.productos
             
             // Combinar y agrupar para evitar filas separadas del mismo producto
@@ -338,10 +313,6 @@ class VentaRepository(
         }
     }
 
-    /**
-     * Procesa todas las ventas en la cola (PENDIENTE o ERROR).
-     * Retorna el número de ventas que se sincronizaron exitosamente.
-     */
     suspend fun procesarColaVentas(): Int {
         val cola = ventaColaDao.getParaSincronizar()
         if (cola.isEmpty()) return 0
@@ -478,7 +449,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
             // Venta oficial del servidor
             gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type)
         }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         emptyList()
     }
 
@@ -526,12 +497,12 @@ private fun VentaRecibidaEntity.toVentaDto(): VentaDto {
     val gson = Gson()
     val productos: List<ProductoVentaDto> = try {
         gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         emptyList()
     }
     val pagos: List<PagoDto> = try {
         gson.fromJson(pagosJson, object : TypeToken<List<PagoDto>>() {}.type)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         emptyList()
     }
     return VentaDto(

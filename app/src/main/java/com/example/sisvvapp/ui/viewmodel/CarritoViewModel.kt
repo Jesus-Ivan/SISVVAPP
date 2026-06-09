@@ -73,17 +73,11 @@ class CarritoViewModel(
     private val _sendResult = MutableStateFlow<SendResult?>(null)
     val sendResult: StateFlow<SendResult?> = _sendResult
 
-    private val _productoSeleccionado = MutableStateFlow<ProductoEntity?>(null)
-    val productoSeleccionado: StateFlow<ProductoEntity?> = _productoSeleccionado
-
     private val _appendMode = MutableStateFlow(false)
-    val appendMode: StateFlow<Boolean> = _appendMode
 
     private val _folioExistente = MutableStateFlow<Int?>(null)
-    val folioExistente: StateFlow<Int?> = _folioExistente
 
     private val _idTemporalExistente = MutableStateFlow<String?>(null)
-    val idTemporalExistente: StateFlow<String?> = _idTemporalExistente
 
     fun configurarAppendMode(folio: Int, nombreCliente: String, clavePuntoVenta: String, tipoVenta: String, corteCaja: Int, idTemporal: String? = null) {
         _appendMode.value = true
@@ -119,7 +113,6 @@ class CarritoViewModel(
         private set
 
     fun seleccionarProducto(producto: ProductoEntity, cantidad: Int = 1) {
-        _productoSeleccionado.value = producto
         cantidadSeleccionada = cantidad
     }
 
@@ -251,9 +244,7 @@ class CarritoViewModel(
             }
 
             // AGREGAR: Agrupamos productos por claveProducto y observaciones para evitar filas duplicadas
-            val productos = productosRaw.groupBy { it.claveProducto to it.observaciones to it.modificadores }.map { (key, list) ->
-                val (pairClaveObs, mods) = key
-                val (clave, obs) = pairClaveObs
+            val productos = productosRaw.groupBy { it.claveProducto to it.observaciones to it.modificadores }.map { (_, list) ->
                 list.first().copy(
                     cantidad = list.sumOf { it.cantidad }
                 )
@@ -307,12 +298,6 @@ class CarritoViewModel(
         }
     }
 
-    fun limpiarCarrito() {
-        _items.value = emptyList()
-        _total.value = 0.0
-        _sendResult.value = null
-    }
-
     fun clearState() {
         _tipoVenta.value = ""
         _socioId.value = null
@@ -323,7 +308,6 @@ class CarritoViewModel(
         _total.value = 0.0
         _sendResult.value = null
         _searchQuery.value = ""
-        _productoSeleccionado.value = null
         _isSending.value = false
         _appendMode.value = false
         _folioExistente.value = null
