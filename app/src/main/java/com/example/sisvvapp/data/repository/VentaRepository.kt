@@ -470,7 +470,8 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
                     cantidad = item.cantidad,
                     chunk = 0,
                     observaciones = item.observaciones,
-                    subtotal = (item.precio ?: 0.0) * item.cantidad
+                    subtotal = (item.precio ?: 0.0) * item.cantidad,
+                    modificadores = item.modificadores
                 )
             }
         } else {

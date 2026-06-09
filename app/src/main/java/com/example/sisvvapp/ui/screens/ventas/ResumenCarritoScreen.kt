@@ -51,6 +51,8 @@ fun ResumenCarritoScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
+    val deviceType = com.example.sisvvapp.ui.utils.LocalDeviceType.current
+    val isTablet = deviceType == com.example.sisvvapp.ui.utils.DeviceType.TABLET
 
     fun mostrarNotificacion(item: CarritoItem, index: Int) {
         scope.launch {
@@ -88,43 +90,48 @@ fun ResumenCarritoScreen(
                     }
                     else -> {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            Column(modifier = Modifier.fillMaxSize().padding(bottom = 120.dp)) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    val tipoDisplay = when (tipoVenta.lowercase()) {
-                                        "socio" -> "SOCIO"
-                                        "invitado" -> "INVITADO"
-                                        "general" -> "PUBLICO GENERAL"
-                                        "empleado" -> "EMPLEADO"
-                                        else -> tipoVenta.uppercase()
-                                    }
-                                    Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)) {
-                                        Column(modifier = Modifier.padding(16.dp)) {
-                                            ResumenVentaRow("Tipo", tipoDisplay)
-                                            ResumenVentaRow("Cliente", nombreCliente.replace(Regex("\\s+"), " "))
-                                            ResumenVentaRow("Punto Venta", clavePuntoVenta.ifBlank { "Caja #$corteCaja" })
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(bottom = if (isTablet) 140.dp else 120.dp)
+                            ) {
+                                item {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        val tipoDisplay = when (tipoVenta.lowercase()) {
+                                            "socio" -> "SOCIO"
+                                            "invitado" -> "INVITADO"
+                                            "general" -> "PUBLICO GENERAL"
+                                            "empleado" -> "EMPLEADO"
+                                            else -> tipoVenta.uppercase()
                                         }
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                                        ) {
+                                            Column(modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp)) {
+                                                ResumenVentaRow("Tipo", tipoDisplay)
+                                                ResumenVentaRow("Cliente", nombreCliente.replace(Regex("\\s+"), " "))
+                                                ResumenVentaRow("Punto Venta", clavePuntoVenta.ifBlank { "Caja #$corteCaja" })
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        VistaVerdeSectionHeader(text = "DETALLE DE ARTICULOS")
                                     }
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    VistaVerdeSectionHeader(text = "DETALLE DE ARTICULOS")
                                 }
 
-                                LazyColumn(
-                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    itemsIndexed(items = items, key = { _, item -> item.id }) { index, item ->
-                                        val dismissState = rememberSwipeToDismissBoxState(
-                                            confirmValueChange = { dismissValue ->
-                                                if (!isSending && dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                    onRemoveItem(item)
-                                                    mostrarNotificacion(item, index)
-                                                    return@rememberSwipeToDismissBoxState true
-                                                }
-                                                return@rememberSwipeToDismissBoxState false
+                                itemsIndexed(items = items, key = { _, item -> item.id }) { index, item ->
+                                    val dismissState = rememberSwipeToDismissBoxState(
+                                        confirmValueChange = { dismissValue ->
+                                            if (!isSending && dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                onRemoveItem(item)
+                                                mostrarNotificacion(item, index)
+                                                return@rememberSwipeToDismissBoxState true
                                             }
-                                        )
+                                            return@rememberSwipeToDismissBoxState false
+                                        }
+                                    )
 
+                                    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
                                         SwipeToDismissBox(
                                             state = dismissState,
                                             enableDismissFromStartToEnd = false,
@@ -132,7 +139,10 @@ fun ResumenCarritoScreen(
                                             backgroundContent = {
                                                 val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart)
                                                     MaterialTheme.colorScheme.errorContainer else Color.Transparent
-                                                Box(modifier = Modifier.fillMaxSize().padding(vertical = 4.dp).background(color, MaterialTheme.shapes.medium), contentAlignment = Alignment.CenterEnd) {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize().background(color, MaterialTheme.shapes.medium),
+                                                    contentAlignment = Alignment.CenterEnd
+                                                ) {
                                                     Icon(Icons.Default.Delete, null, modifier = Modifier.padding(end = 24.dp), tint = MaterialTheme.colorScheme.onErrorContainer)
                                                 }
                                             },
@@ -141,7 +151,9 @@ fun ResumenCarritoScreen(
                                                     nombre = item.producto.descripcion,
                                                     cantidad = item.cantidad,
                                                     subtotal = item.subtotal,
-                                                    modificadores = item.modificadores.map { it.nombre },
+                                                    modificadores = item.modificadores.groupBy { it.id }.map { (_, list) ->
+                                                        list.first().nombre to list.size
+                                                    },
                                                     observacion = item.observaciones,
                                                     onCantidadChange = { cant -> 
                                                         if (!isSending) onUpdateCantidad(index, cant) 
@@ -160,15 +172,45 @@ fun ResumenCarritoScreen(
                                 shadowElevation = 16.dp,
                                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                             ) {
-                                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(if (isTablet) 32.dp else 20.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
                                     Column(modifier = Modifier.weight(0.5f)) {
-                                        Text("TOTAL", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 1.sp)
-                                        Text(text = "$${String.format(Locale.US, "%.2f", total)}", style = MaterialTheme.typography.titleLarge, fontFamily = Poppins, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                        Text(
+                                            text = "TOTAL",
+                                            style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            letterSpacing = 1.sp
+                                        )
+                                        Text(
+                                            text = "$${String.format(Locale.US, "%.2f", total)}",
+                                            style = if (isTablet) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge,
+                                            fontFamily = Poppins,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
                                     }
                                     Spacer(modifier = Modifier.width(16.dp))
-                                    Button(onClick = onConfirmar, enabled = !isSending, modifier = Modifier.weight(0.5f).height(52.dp), shape = RoundedCornerShape(14.dp)) {
-                                        if (isSending) CircularProgressIndicator(modifier = Modifier.size(22.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
-                                        else Text(if (isAppend) "ACTUALIZAR VENTA" else "REALIZAR VENTA", fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
+                                    Button(
+                                        onClick = onConfirmar,
+                                        enabled = !isSending,
+                                        modifier = Modifier.weight(0.5f).height(if (isTablet) 64.dp else 52.dp),
+                                        shape = RoundedCornerShape(if (isTablet) 18.dp else 14.dp)
+                                    ) {
+                                        if (isSending) {
+                                            CircularProgressIndicator(modifier = Modifier.size(22.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                                        } else {
+                                            Text(
+                                                text = if (isAppend) "ACTUALIZAR VENTA" else "REALIZAR VENTA",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = if (isTablet) 16.sp else 14.sp,
+                                                maxLines = 1
+                                            )
+                                        }
                                     }
                                 }
                             }
