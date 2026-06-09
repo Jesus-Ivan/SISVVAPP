@@ -153,11 +153,6 @@ fun ProductoDetalleCard(
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary
                         )
-                        Text(
-                            text = "Unit: $${String.format(Locale.US, "%.2f", producto.precio)}",
-                            style = if (isTablet) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
                 }
             }

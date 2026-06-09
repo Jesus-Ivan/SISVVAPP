@@ -5,12 +5,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddShoppingCart
-import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -123,20 +119,20 @@ fun DetalleVentaScreen(
                             if (esAbierta && !isSyncing) {
                                 Button(
                                     onClick = onAgregarProductos,
-                                    modifier = Modifier.height(if (isTablet) 44.dp else 36.dp),
-                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    modifier = Modifier.height(if (isTablet) 52.dp else 44.dp),
+                                    contentPadding = PaddingValues(horizontal = 20.dp),
                                     shape = MaterialTheme.shapes.medium,
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primary,
                                         contentColor = MaterialTheme.colorScheme.onPrimary
                                     )
                                 ) {
-                                    Icon(Icons.Default.AddShoppingCart, null, modifier = Modifier.size(if (isTablet) 20.dp else 16.dp))
+                                    Icon(Icons.Default.AddShoppingCart, null, modifier = Modifier.size(if (isTablet) 22.dp else 18.dp))
                                     Spacer(Modifier.width(8.dp))
                                     Text(
                                         "AGREGAR",
                                         fontWeight = FontWeight.Black,
-                                        fontSize = if (isTablet) 13.sp else 11.sp
+                                        fontSize = if (isTablet) 15.sp else 13.sp
                                     )
                                 }
                             }

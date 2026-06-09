@@ -119,17 +119,16 @@ fun ResumenCarritoScreen(
                                 }
 
                                 itemsIndexed(items = items, key = { _, item -> item.id }) { index, item ->
-                                    val dismissState = rememberSwipeToDismissBoxState(
-                                        confirmValueChange = { dismissValue ->
-                                            if (!isSending && dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                onRemoveItem(item)
-                                                mostrarNotificacion(item, index)
-                                                return@rememberSwipeToDismissBoxState true
-                                            }
-                                            return@rememberSwipeToDismissBoxState false
+                                    val dismissState = rememberSwipeToDismissBoxState()
+
+                                    LaunchedEffect(dismissState.currentValue) {
+                                        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            onRemoveItem(item)
+                                            mostrarNotificacion(item, index)
+                                            dismissState.snapTo(SwipeToDismissBoxValue.Settled)
                                         }
-                                    )
+                                    }
 
                                     Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
                                         SwipeToDismissBox(
@@ -205,7 +204,7 @@ fun ResumenCarritoScreen(
                                             CircularProgressIndicator(modifier = Modifier.size(22.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                                         } else {
                                             Text(
-                                                text = if (isAppend) "ACTUALIZAR VENTA" else "REALIZAR VENTA",
+                                                text = if (isAppend) "CONFIRMAR VENTA" else "REALIZAR VENTA",
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = if (isTablet) 16.sp else 14.sp,
                                                 maxLines = 1

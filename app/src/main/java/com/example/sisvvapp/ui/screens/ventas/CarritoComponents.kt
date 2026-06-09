@@ -36,13 +36,13 @@ import java.util.Locale
 
 @Composable
 fun CarritoItemCard(
+    modifier: Modifier = Modifier,
     nombre: String,
     cantidad: Int,
     subtotal: Double,
     modificadores: List<Pair<String, Int>> = emptyList(),
     observacion: String = "",
     onCantidadChange: (Int) -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val deviceType = LocalDeviceType.current
     val isTablet = deviceType == DeviceType.TABLET

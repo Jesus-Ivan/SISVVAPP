@@ -383,7 +383,7 @@ fun MainContainer(
                                     navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
                                 }
                             },
-                            onTransferirProducto = { if (isConnected && ventaDetalle?.syncStatus == "RECIBIDA") productoATransferir = it }
+                            onTransferirProducto = null
                         )
                     }
                 }
