@@ -109,7 +109,7 @@ fun ResumenCarritoScreen(
                                         ) {
                                             Column(modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp)) {
                                                 ResumenVentaRow("Tipo", tipoDisplay)
-                                                ResumenVentaRow("Cliente", nombreCliente.replace(Regex("\\s+"), " "))
+                                                ResumenVentaRow("Cliente", nombreCliente.replace(Regex("\\s+"), " ").trim().uppercase())
                                                 ResumenVentaRow("Punto Venta", clavePuntoVenta.ifBlank { "Caja #$corteCaja" })
                                             }
                                         }
