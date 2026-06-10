@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import androidx.compose.material3.*
+import com.example.sisvvapp.network.dto.cajas.CajaDto
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +37,7 @@ fun VentasScreen(
     selectedDate: String = "",
     onSearchQueryChange: (String) -> Unit = {},
     onRefresh: () -> Unit = {},
+    nombreCaja: String,
     onVentaClick: (VentaDto) -> Unit = {},
     onNuevaVentaClick: () -> Unit = {},
     onDateSelected: (String) -> Unit = {},
@@ -46,6 +48,7 @@ fun VentasScreen(
     VistaVerdeScaffold(
         title = stringResource(R.string.ventas_title),
         onMenuClick = onMenuClick,
+        subtitle = "Caja: $nombreCaja",
         isOnline = isOnline,
         actions = {
             IconButton(onClick = { showDatePicker = true }) {
@@ -240,7 +243,8 @@ fun VentasScreenPreview() {
     SISVVAPPTheme {
         VentasScreen(
             onMenuClick = {},
-            uiState = VentasUiState.Success(emptyList())
+            uiState = VentasUiState.Success(emptyList()),
+            nombreCaja = "Caja de Pruebas"
         )
     }
 }
