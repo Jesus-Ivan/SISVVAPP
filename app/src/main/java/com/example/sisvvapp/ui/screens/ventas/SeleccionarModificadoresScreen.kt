@@ -3,6 +3,7 @@ package com.example.sisvvapp.ui.screens.ventas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -11,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +41,11 @@ fun SeleccionarModificadoresScreen(
 ) {
     val selectedModificadores = remember { mutableStateListOf<ModificadorEntity>() }
     var observaciones by remember { mutableStateOf("") }
+    
+    // Estado para el filtro de grupo seleccionado
+    var selectedGroupId by remember(gruposModificadores) { 
+        mutableStateOf(gruposModificadores.firstOrNull()?.idGrupo) 
+    }
 
     VistaVerdeScaffold(
         title = stringResource(R.string.modificadores_title),
@@ -54,6 +61,38 @@ fun SeleccionarModificadoresScreen(
                 VistaVerdeSectionHeader(text = producto.descripcion)
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Selector de Grupos (Filtro tipo Chips/Botones)
+                if (gruposModificadores.isNotEmpty()) {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(end = 16.dp)
+                    ) {
+                        items(gruposModificadores) { grupo ->
+                            val isSelected = selectedGroupId == grupo.idGrupo
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { selectedGroupId = grupo.idGrupo },
+                                label = {
+                                    Text(
+                                        text = grupo.descripcionGrupo,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                    )
+                                },
+                                shape = MaterialTheme.shapes.medium,
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                ),
+                                border = null
+                            )
+                        }
+                    }
+                }
+
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -67,32 +106,33 @@ fun SeleccionarModificadoresScreen(
                             )
                         }
                     } else {
-                        items(
-                            items = gruposModificadores,
-                            key = { "${it.claveProducto}_${it.idGrupo}" }
-                        ) { grupo ->
-                            val modificadoresDelGrupo = modificadoresDisponibles
-                                .filter { it.grupo == grupo.idGrupo.toString() }
+                        val grupoAMostrar = gruposModificadores.find { it.idGrupo == selectedGroupId }
+                        
+                        if (grupoAMostrar != null) {
+                            item(key = "${grupoAMostrar.claveProducto}_${grupoAMostrar.idGrupo}") {
+                                val modificadoresDelGrupo = modificadoresDisponibles
+                                    .filter { it.grupo == grupoAMostrar.idGrupo.toString() }
 
-                            val seleccionadosDelGrupo = selectedModificadores
-                                .filter { it.grupo == grupo.idGrupo.toString() }
+                                val seleccionadosDelGrupo = selectedModificadores
+                                    .filter { it.grupo == grupoAMostrar.idGrupo.toString() }
 
-                            GrupoModificadoresSection(
-                                grupo = grupo,
-                                modificadores = modificadoresDelGrupo,
-                                seleccionados = seleccionadosDelGrupo,
-                                cantidadProducto = cantidadProducto,
-                                onAdd = { mod ->
-                                    selectedModificadores.add(mod)
-                                },
-                                onRemove = { mod ->
-                                    // Remove just one instance of the modifier
-                                    val index = selectedModificadores.indexOfFirst { it.id == mod.id }
-                                    if (index != -1) {
-                                        selectedModificadores.removeAt(index)
+                                GrupoModificadoresSection(
+                                    grupo = grupoAMostrar,
+                                    modificadores = modificadoresDelGrupo,
+                                    seleccionados = seleccionadosDelGrupo,
+                                    cantidadProducto = cantidadProducto,
+                                    onAdd = { mod ->
+                                        selectedModificadores.add(mod)
+                                    },
+                                    onRemove = { mod ->
+                                        // Remove just one instance of the modifier
+                                        val index = selectedModificadores.indexOfFirst { it.id == mod.id }
+                                        if (index != -1) {
+                                            selectedModificadores.removeAt(index)
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
 
