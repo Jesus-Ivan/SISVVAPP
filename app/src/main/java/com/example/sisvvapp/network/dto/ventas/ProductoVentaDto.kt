@@ -12,5 +12,6 @@ data class ProductoVentaDto(
     val chunk: Long,
     val observaciones: String = "",
     val subtotal: Double = 0.0,
+    @SerializedName("id_estado") val idEstado: String = "",
     val modificadores: List<ModificadorSeleccionadoDto> = emptyList()
 )

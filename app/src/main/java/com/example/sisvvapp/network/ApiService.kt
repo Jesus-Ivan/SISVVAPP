@@ -51,6 +51,11 @@ interface ApiService {
         @Body request: TransferirProductoRequest
     ): Response<Unit>
 
+    @POST("ventas/{folio}/reimprimir")
+    suspend fun reimprimirComanda(
+        @Path("folio") folio: Int
+    ): Response<Unit>
+
     @POST("logout")
     suspend fun logout(): Response<Unit>
 

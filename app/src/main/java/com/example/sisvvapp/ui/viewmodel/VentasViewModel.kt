@@ -121,4 +121,14 @@ class VentasViewModel(
             onResult(result)
         }
     }
+
+    fun reimprimirComanda(folio: Int, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            val result = ventaRepository.reimprimirComanda(folio)
+            if (result.isSuccess) {
+                Log.d("VentasVM", "Reimpresión exitosa para folio $folio")
+            }
+            onResult(result)
+        }
+    }
 }

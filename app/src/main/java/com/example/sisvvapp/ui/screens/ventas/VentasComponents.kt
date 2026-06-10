@@ -98,6 +98,24 @@ fun ProductoDetalleCard(
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f, fill = false)
                             )
+
+                            val estadoColor = when (producto.idEstado ?: "") {
+                                "0" -> Color(0xFFF59E0B)   // COLA - amber
+                                "1" -> Color(0xFF10B981)   // IMPRESO - green
+                                "2" -> Color(0xFF3B82F6)   // LISTO - blue
+                                "3" -> Color(0xFFEF4444)   // ERROR - red
+                                "4" -> Color(0xFF6B7280)   // CANCELADO - gray
+                                else -> Color.Transparent
+                            }
+                            if (estadoColor != Color.Transparent) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(if (isTablet) 12.dp else 10.dp)
+                                        .background(estadoColor, shape = MaterialTheme.shapes.extraLarge)
+                                )
+                            }
+
                             // Ícono de expansión añadido
                             if (mods.isNotEmpty()) {
                                 Icon(

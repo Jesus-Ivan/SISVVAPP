@@ -42,6 +42,7 @@ fun CarritoItemCard(
     subtotal: Double,
     modificadores: List<ModificadorDisplayInfo> = emptyList(),
     observacion: String = "",
+    printDefault: Boolean = true,
     onCantidadChange: (Int) -> Unit,
 ) {
     val deviceType = LocalDeviceType.current
@@ -63,12 +64,31 @@ fun CarritoItemCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = nombre,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = if (isTablet) 18.sp else 15.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = nombre,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = if (isTablet) 18.sp else 15.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            if (!printDefault) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Surface(
+                                    color = MaterialTheme.colorScheme.errorContainer,
+                                    shape = MaterialTheme.shapes.extraSmall
+                                ) {
+                                    Text(
+                                        text = "NO GENERA COMANDA",
+                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onErrorContainer,
+                                        letterSpacing = 0.5.sp
+                                    )
+                                }
+                            }
+                        }
                         if (observacion.isNotEmpty()) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -247,6 +267,7 @@ fun CarritoItemCardPreview() {
                 nombre = "Hamburguesa Vista Verde",
                 cantidad = 2,
                 subtotal = 370.0,
+                printDefault = false,
                 modificadores = listOf(
                     ModificadorDisplayInfo("Sin cebolla", 1),
                     ModificadorDisplayInfo("Extra queso", 1, "Muy fundido")
