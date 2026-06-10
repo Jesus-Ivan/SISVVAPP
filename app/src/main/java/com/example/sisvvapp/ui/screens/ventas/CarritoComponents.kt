@@ -107,27 +107,43 @@ fun CarritoItemCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Selector de cantidad
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.background(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            MaterialTheme.shapes.small
-                        ).padding(2.dp)
-                    ) {
-                        IconButton(
-                            onClick = { onCantidadChange(cantidad - 1) },
-                            modifier = Modifier.size(28.dp)
-                        ) { Icon(Icons.Default.Remove, null, modifier = Modifier.size(16.dp)) }
-                        Text(
-                            "$cantidad",
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            fontWeight = FontWeight.Bold
-                        )
-                        IconButton(
-                            onClick = { onCantidadChange(cantidad + 1) },
-                            modifier = Modifier.size(28.dp)
-                        ) { Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp)) }
+                    // Selector de cantidad o etiqueta simple
+                    if (modificadores.isEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.background(
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                MaterialTheme.shapes.small
+                            ).padding(2.dp)
+                        ) {
+                            IconButton(
+                                onClick = { onCantidadChange(cantidad - 1) },
+                                modifier = Modifier.size(28.dp)
+                            ) { Icon(Icons.Default.Remove, null, modifier = Modifier.size(16.dp)) }
+                            Text(
+                                "$cantidad",
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                fontWeight = FontWeight.Bold
+                            )
+                            IconButton(
+                                onClick = { onCantidadChange(cantidad + 1) },
+                                modifier = Modifier.size(28.dp)
+                            ) { Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp)) }
+                        }
+                    } else {
+                        // Si tiene modificadores, solo mostramos la cantidad como etiqueta
+                        Surface(
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            shape = MaterialTheme.shapes.small
+                        ) {
+                            Text(
+                                text = "CANTIDAD: $cantidad",
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                     Text(
                         "$${String.format(Locale.US, "%.2f", subtotal)}",
