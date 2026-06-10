@@ -290,7 +290,10 @@ fun MainContainer(
                                 gruposModificadores = grupos,
                                 modificadoresDisponibles = modificadores,
                                 cantidadProducto = globalCarritoViewModel.cantidadSeleccionada,
-                                onAddToCart = { m, o -> globalCarritoViewModel.addProductoConModificadores(producto, m, grupos, globalCarritoViewModel.cantidadSeleccionada, o); navController.popBackStack() },
+                                onAddToCart = { m, o, mn -> 
+                                    globalCarritoViewModel.addProductoConModificadores(producto, m, grupos, globalCarritoViewModel.cantidadSeleccionada, o, mn)
+                                    navController.popBackStack() 
+                                },
                                 onBackClick = { navController.popBackStack() },
                                 isOnline = isConnected
                             )

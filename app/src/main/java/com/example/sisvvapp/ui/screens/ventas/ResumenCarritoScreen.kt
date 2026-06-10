@@ -151,8 +151,12 @@ fun ResumenCarritoScreen(
                                                     nombre = item.producto.descripcion,
                                                     cantidad = item.cantidad,
                                                     subtotal = item.subtotal,
-                                                    modificadores = item.modificadores.groupBy { it.id }.map { (_, list) ->
-                                                        list.first().nombre to list.size
+                                                    modificadores = item.modificadores.groupBy { it.claveModificador }.map { (clave, list) ->
+                                                        ModificadorDisplayInfo(
+                                                            nombre = list.first().nombre,
+                                                            cantidad = list.size,
+                                                            nota = item.modificadorObservaciones[list.first().id] ?: ""
+                                                        )
                                                     },
                                                     observacion = item.observaciones,
                                                     onCantidadChange = { cant -> 

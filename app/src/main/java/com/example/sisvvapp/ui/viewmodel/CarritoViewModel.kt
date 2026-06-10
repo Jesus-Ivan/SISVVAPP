@@ -22,6 +22,7 @@ data class CarritoItem(
     val cantidad: Int,
     val observaciones: String = "",
     val modificadores: List<ModificadorEntity> = emptyList(),
+    val modificadorObservaciones: Map<Int, String> = emptyMap(),
     val precioUnitario: Double = producto.precio,
     val subtotal: Double = precioUnitario * cantidad,
     val id: String = java.util.UUID.randomUUID().toString()
@@ -145,7 +146,8 @@ class CarritoViewModel(
         modificadores: List<ModificadorEntity>,
         grupos: List<com.example.sisvvapp.data.local.entity.GrupoModificadorEntity>,
         cantidad: Int = 1,
-        observaciones: String = ""
+        observaciones: String = "",
+        modificadorNotas: Map<Int, String> = emptyMap()
     ) {
         val finalModificadores = mutableListOf<ModificadorEntity>()
         val modificadoresPorGrupo = modificadores.groupBy { it.grupo }
@@ -168,6 +170,7 @@ class CarritoViewModel(
             cantidad = cantidad,
             observaciones = observaciones,
             modificadores = finalModificadores,
+            modificadorObservaciones = modificadorNotas,
             precioUnitario = precioUnitario,
             subtotal = precioUnitario * cantidad
         )
@@ -230,7 +233,8 @@ class CarritoViewModel(
                         claveProducto = claveModificador,
                         cantidad = mods.size,
                         precio = totalPrecio / mods.size,
-                        nombre = mods.first().nombre
+                        nombre = mods.first().nombre,
+                        observaciones = item.modificadorObservaciones[mods.first().id] ?: ""
                     )
                 }
                 ItemCarritoDto(

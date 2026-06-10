@@ -7,7 +7,8 @@ data class ModificadorSeleccionadoDto(
     @SerializedName("clave_producto") val claveProducto: Int,
     val cantidad: Int,
     val precio: Double?,
-    val nombre: String? = null
+    val nombre: String? = null,
+    val observaciones: String = ""
 )
 
 /** Representa un ítem en el carrito de una nueva venta o al agregar productos. */
