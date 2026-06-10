@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -49,6 +50,12 @@ fun SeleccionarModificadoresScreen(
 
     val isTablet = com.example.sisvvapp.ui.utils.LocalDeviceType.current == com.example.sisvvapp.ui.utils.DeviceType.TABLET
 
+    val gruposForzadosSinSeleccion = gruposModificadores
+        .filter { it.forzarCaptura }
+        .any { grupo ->
+            selectedModificadores.none { it.grupo == grupo.idGrupo.toString() }
+        }
+
     VistaVerdeScaffold(
         title = stringResource(R.string.modificadores_title),
         subtitle = producto.descripcion,
@@ -63,7 +70,7 @@ fun SeleccionarModificadoresScreen(
                 // Producto Principal con estilo resaltado
                 Text(
                     text = producto.descripcion.uppercase(),
-                    style = if (isTablet) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 4.dp)
@@ -87,11 +94,21 @@ fun SeleccionarModificadoresScreen(
                                 selected = isSelected,
                                 onClick = { selectedGroupId = grupo.idGrupo },
                                 label = {
-                                    Text(
-                                        text = grupo.descripcionGrupo,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = grupo.descripcionGrupo,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                        )
+                                        if (grupo.forzarCaptura) {
+                                            Spacer(Modifier.width(4.dp))
+                                            Text(
+                                                text = "\u25CF",
+                                                color = Color(0xFFFF8C00),
+                                                fontSize = 10.sp
+                                            )
+                                        }
+                                    }
                                 },
                                 shape = MaterialTheme.shapes.medium,
                                 colors = FilterChipDefaults.filterChipColors(
@@ -164,9 +181,29 @@ fun SeleccionarModificadoresScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                if (gruposForzadosSinSeleccion) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Info, null,
+                            modifier = Modifier.size(14.dp),
+                            tint = Color(0xFFFF8C00)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = "Selecciona los modificadores requeridos",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+
                 VistaVerdeButton(
                     text = stringResource(R.string.modificadores_agregar),
-                    onClick = { onAddToCart(selectedModificadores.toList(), observaciones) }
+                    onClick = { onAddToCart(selectedModificadores.toList(), observaciones) },
+                    enabled = !gruposForzadosSinSeleccion
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
