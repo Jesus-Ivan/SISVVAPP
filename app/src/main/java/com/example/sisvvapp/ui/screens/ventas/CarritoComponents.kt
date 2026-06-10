@@ -40,7 +40,7 @@ fun CarritoItemCard(
     nombre: String,
     cantidad: Int,
     subtotal: Double,
-    modificadores: List<Pair<String, Int>> = emptyList(),
+    modificadores: List<ModificadorDisplayInfo> = emptyList(),
     observacion: String = "",
     onCantidadChange: (Int) -> Unit,
 ) {
@@ -95,7 +95,7 @@ fun CarritoItemCard(
                             imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(start = 8.dp)
+                            modifier = Modifier.size(24.dp).padding(start = 8.dp)
                         )
                     }
                 }
@@ -173,13 +173,27 @@ fun CarritoItemCard(
                         letterSpacing = 0.5.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    modificadores.forEach { (nombreMod, cantMod) ->
-                        Text(
-                            text = "• ${cantMod}x $nombreMod",
-                            style = if (isTablet) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                            modifier = Modifier.padding(start = 8.dp, top = 2.dp)
-                        )
+                    modificadores.forEach { mod ->
+                        Column(modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)) {
+                            Text(
+                                text = "• ${mod.cantidad}x ${mod.nombre}",
+                                style = if (isTablet) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                fontWeight = FontWeight.Bold
+                            )
+                            if (mod.nota.isNotEmpty()) {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 12.dp)) {
+                                    Icon(Icons.Default.EditNote, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = mod.nota,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -187,6 +201,12 @@ fun CarritoItemCard(
 
     }
 }
+
+data class ModificadorDisplayInfo(
+    val nombre: String,
+    val cantidad: Int,
+    val nota: String = ""
+)
 
 @Composable
 fun ResumenVentaRow(
@@ -227,7 +247,10 @@ fun CarritoItemCardPreview() {
                 nombre = "Hamburguesa Vista Verde",
                 cantidad = 2,
                 subtotal = 370.0,
-                modificadores = listOf("Sin cebolla" to 1, "Extra queso" to 1),
+                modificadores = listOf(
+                    ModificadorDisplayInfo("Sin cebolla", 1),
+                    ModificadorDisplayInfo("Extra queso", 1, "Muy fundido")
+                ),
                 onCantidadChange = {},
 
             )
