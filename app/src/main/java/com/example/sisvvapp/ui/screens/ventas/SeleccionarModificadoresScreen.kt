@@ -47,6 +47,8 @@ fun SeleccionarModificadoresScreen(
         mutableStateOf(gruposModificadores.firstOrNull()?.idGrupo) 
     }
 
+    val isTablet = com.example.sisvvapp.ui.utils.LocalDeviceType.current == com.example.sisvvapp.ui.utils.DeviceType.TABLET
+
     VistaVerdeScaffold(
         title = stringResource(R.string.modificadores_title),
         subtitle = producto.descripcion,
@@ -58,8 +60,19 @@ fun SeleccionarModificadoresScreen(
             Column(
                 modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                VistaVerdeSectionHeader(text = producto.descripcion)
-                Spacer(modifier = Modifier.height(16.dp))
+                // Producto Principal con estilo resaltado
+                Text(
+                    text = producto.descripcion.uppercase(),
+                    style = if (isTablet) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                HorizontalDivider(
+                    thickness = if (isTablet) 4.dp else 3.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
 
                 // Selector de Grupos (Filtro tipo Chips/Botones)
                 if (gruposModificadores.isNotEmpty()) {
