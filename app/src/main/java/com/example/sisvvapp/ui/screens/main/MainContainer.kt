@@ -167,6 +167,7 @@ fun MainContainer(
                         val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
                         val cajas by sharedCajaViewModel.cajas.collectAsState()
                         val cajaActiva = cajas.find { it.id == selectedCajaId }
+                        val nombreCajaActiva = cajaActiva?.nombre ?: "Sin Caja"
                         val corteCajaActivo = cajaActiva?.corte
                         var searchQuery by remember { mutableStateOf("") }
                         var fechaActiva by remember { mutableStateOf("") }
@@ -196,6 +197,7 @@ fun MainContainer(
                                 // Al refrescar manualmente, forzamos que el repositorio actualice Room
                                 ventasViewModel.refreshVentas(fechaActiva, corteCajaActivo) 
                             },
+                            nombreCaja = nombreCajaActiva,
                             onVentaClick = { venta ->
                                 val id = if (venta.syncStatus == "RECIBIDA") venta.folio.toString() else (venta.idTemporal ?: "0")
                                 navController.navigate(ScreenRoutes.crearRutaDetalleVenta(id))
@@ -395,12 +397,16 @@ fun MainContainer(
                         val isLoading by sociosVM.isLoading.collectAsState()
                         val searchQuery by sociosVM.searchQuery.collectAsState()
                         val errorMessage by sociosVM.error.collectAsState()
+                        val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
+                        val cajas by sharedCajaViewModel.cajas.collectAsState()
+                        val cajaActiva = cajas.find { it.id == selectedCajaId }
 
                         SociosScreen(
                             socios = socios,
                             isLoading = isLoading,
                             isOnline = viewModel?.isOnline ?: true,
                             searchQuery = searchQuery,
+                            nombreCaja = cajaActiva?.nombre ?: "Sin Caja",
                             errorMessage = errorMessage,
                             onSearchQueryChange = { sociosVM.search(it) },
                             onMenuClick = { scope.launch { drawerState.open() } },

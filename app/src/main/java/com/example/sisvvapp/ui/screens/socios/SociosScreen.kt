@@ -31,6 +31,7 @@ fun SociosScreen(
     isLoading: Boolean,
     isOnline: Boolean = true,
     searchQuery: String,
+    nombreCaja: String,
     errorMessage: String? = null,
     onSearchQueryChange: (String) -> Unit,
     onMenuClick: () -> Unit,
@@ -40,7 +41,7 @@ fun SociosScreen(
 ) {
     VistaVerdeScaffold(
         title = stringResource(R.string.title_socios),
-        subtitle = stringResource(R.string.socios_subtitle),
+        subtitle = "Caja: $nombreCaja",
         onMenuClick = onMenuClick,
         isOnline = isOnline,
         actions = {
@@ -154,7 +155,8 @@ fun SociosScreenPreview() {
             searchQuery = "",
             onSearchQueryChange = {},
             onMenuClick = {},
-            onSocioClick = {}
+            onSocioClick = {},
+            nombreCaja = "Caja de Pruebas"
         )
     }
 }

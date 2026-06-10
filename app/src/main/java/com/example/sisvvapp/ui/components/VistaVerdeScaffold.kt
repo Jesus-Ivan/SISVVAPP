@@ -24,6 +24,7 @@ fun VistaVerdeScaffold(
         topBar = {
             VistaVerdeTopBar(
                 title = title,
+                subtitle = subtitle,
                 onMenuClick = onMenuClick,
                 actions = actions,
                 isBackButton = isBackButton,

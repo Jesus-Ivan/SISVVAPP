@@ -32,6 +32,7 @@ fun VistaVerdeTopBar(
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
     isBackButton: Boolean = false,
+    subtitle: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
     showNavigationIcon: Boolean = true
 ) {
@@ -45,7 +46,14 @@ fun VistaVerdeTopBar(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-
+                if (subtitle != null) {
+                    Text(
+                        text = subtitle,
+                        fontFamily = Inter,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         },
         navigationIcon = {
