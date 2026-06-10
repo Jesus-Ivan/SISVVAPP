@@ -61,7 +61,7 @@ class NuevaVentaViewModel(
         _searchQuery.value = query
         searchJob?.cancel()
 
-        if (query.length < 2) {
+        if (query.length < 1) {
             _sociosEncontrados.value = emptyList()
             return
         }
