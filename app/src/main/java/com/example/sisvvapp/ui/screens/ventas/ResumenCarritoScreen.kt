@@ -151,6 +151,7 @@ fun ResumenCarritoScreen(
                                                     nombre = item.producto.descripcion,
                                                     cantidad = item.cantidad,
                                                     subtotal = item.subtotal,
+                                                    printDefault = item.printDefault,
                                                     modificadores = item.modificadores.groupBy { it.claveModificador }.map { (clave, list) ->
                                                         ModificadorDisplayInfo(
                                                             nombre = list.first().nombre,

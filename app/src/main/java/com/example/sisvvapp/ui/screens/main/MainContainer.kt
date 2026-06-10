@@ -2,6 +2,7 @@ package com.example.sisvvapp.ui.screens.main
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -386,6 +387,21 @@ fun MainContainer(
                                         idTemporal = v.idTemporal
                                     )
                                     navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
+                                }
+                            },
+                            onReimprimir = {
+                                val folio = ventaDetalle?.folio
+                                if (folio != null) {
+                                    ventasViewModel.reimprimirComanda(folio) {
+                                        coroutineScope.launch { ventaDetalle = ventasViewModel.cargarDetalle(id) }
+                                        if (it.isFailure) {
+                                            Toast.makeText(
+                                                context,
+                                                "Error al reimprimir: ${it.exceptionOrNull()?.message ?: "Error desconocido"}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
                                 }
                             },
                             onTransferirProducto = null

@@ -66,7 +66,8 @@ fun ProductoDto.toProductoEntity() = ProductoEntity(
     imagenUrl = null,
     forzarCaptura = gruposModificadores.any { it.forzarCaptura },
     modifIncluidos = gruposModificadores.maxOfOrNull { it.modifIncluidos } ?: 0,
-    modifMaximos = gruposModificadores.maxOfOrNull { it.modifMaximos } ?: 0
+    modifMaximos = gruposModificadores.maxOfOrNull { it.modifMaximos } ?: 0,
+    printDefault = printDefault
 )
 
 fun ProductoDto.toModificadorEntities(): List<ModificadorEntity> = modificadoresOpciones.map { mod ->

@@ -25,6 +25,7 @@ data class CarritoItem(
     val modificadorObservaciones: Map<Int, String> = emptyMap(),
     val precioUnitario: Double = producto.precio,
     val subtotal: Double = precioUnitario * cantidad,
+    val printDefault: Boolean = producto.printDefault,
     val id: String = java.util.UUID.randomUUID().toString()
 )
 

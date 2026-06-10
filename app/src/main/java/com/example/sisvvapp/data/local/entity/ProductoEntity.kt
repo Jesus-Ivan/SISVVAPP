@@ -14,5 +14,6 @@ data class ProductoEntity(
     @ColumnInfo(name = "imagen_url") val imagenUrl: String?,
     @ColumnInfo(name = "forzar_captura") val forzarCaptura: Boolean,
     @ColumnInfo(name = "modif_incluidos") val modifIncluidos: Int,
-    @ColumnInfo(name = "modif_maximos") val modifMaximos: Int
+    @ColumnInfo(name = "modif_maximos") val modifMaximos: Int,
+    @ColumnInfo(name = "print_default") val printDefault: Boolean = true
 )

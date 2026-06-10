@@ -13,6 +13,8 @@ import com.example.sisvvapp.data.local.dao.VentaColaDao
 import com.example.sisvvapp.data.local.dao.VentaRecibidaDao
 import com.example.sisvvapp.data.local.dao.TipoVentaDao
 import com.example.sisvvapp.data.local.dao.VentaGlobalDao
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.sisvvapp.data.local.entity.CajaActivaEntity
 import com.example.sisvvapp.data.local.entity.GrupoModificadorEntity
 import com.example.sisvvapp.data.local.entity.IntegranteEntity
@@ -39,7 +41,7 @@ import com.example.sisvvapp.data.local.view.VentaGlobalView
         TipoVentaEntity::class
     ],
     views = [VentaGlobalView::class],
-    version = 22,
+    version = 23,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

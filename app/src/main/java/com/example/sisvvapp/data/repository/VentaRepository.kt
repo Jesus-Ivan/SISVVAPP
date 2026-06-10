@@ -363,6 +363,23 @@ class VentaRepository(
             Result.failure(Exception("Se requiere conexión para transferir productos"))
         }
     }
+
+    suspend fun reimprimirComanda(folio: Int): Result<Unit> {
+        return try {
+            val response = api.reimprimirComanda(folio)
+            if (response.isSuccessful) {
+                Log.d("VentaRepo", "Reimpresión solicitada para folio $folio")
+                Result.success(Unit)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.w("VentaRepo", "Error reimpresión: ${response.code()} - $errorBody")
+                Result.failure(Exception(errorBody))
+            }
+        } catch (e: Exception) {
+            Log.e("VentaRepo", "Error de red al reimprimir", e)
+            Result.failure(Exception("Se requiere conexión para reimprimir"))
+        }
+    }
 }
 private fun VentaColaEntity.toVentaDto(): VentaDto {
     val sdfDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
