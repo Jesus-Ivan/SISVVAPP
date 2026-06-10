@@ -163,57 +163,57 @@ fun ResumenCarritoScreen(
                                     }
                                 }
                             }
-
-                            // Barra Inferior Fija
-                            Surface(
-                                modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
-                                color = MaterialTheme.colorScheme.surface,
-                                shadowElevation = 16.dp,
-                                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(if (isTablet) 32.dp else 20.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column(modifier = Modifier.weight(0.5f)) {
-                                        Text(
-                                            text = "TOTAL",
-                                            style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            letterSpacing = 1.sp
-                                        )
-                                        Text(
-                                            text = "$${String.format(Locale.US, "%.2f", total)}",
-                                            style = if (isTablet) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge,
-                                            fontFamily = Poppins,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Button(
-                                        onClick = onConfirmar,
-                                        enabled = !isSending,
-                                        modifier = Modifier.weight(0.5f).height(if (isTablet) 64.dp else 52.dp),
-                                        shape = RoundedCornerShape(if (isTablet) 18.dp else 14.dp)
-                                    ) {
-                                        if (isSending) {
-                                            CircularProgressIndicator(modifier = Modifier.size(22.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
-                                        } else {
-                                            Text(
-                                                text = if (isAppend) "CONFIRMAR VENTA" else "REALIZAR VENTA",
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = if (isTablet) 16.sp else 14.sp,
-                                                maxLines = 1
-                                            )
-                                        }
-                                    }
-                                }
-                            }
                         }
+                    }
+                }
+            }
+        }
+
+        // Barra Inferior Fija
+        Surface(
+            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 16.dp,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(if (isTablet) 32.dp else 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(0.5f)) {
+                    Text(
+                        text = "TOTAL",
+                        style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = "$${String.format(Locale.US, "%.2f", total)}",
+                        style = if (isTablet) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge,
+                        fontFamily = Poppins,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Button(
+                    onClick = onConfirmar,
+                    enabled = !isSending,
+                    modifier = Modifier.weight(0.5f).height(if (isTablet) 64.dp else 52.dp),
+                    shape = RoundedCornerShape(if (isTablet) 18.dp else 14.dp)
+                ) {
+                    if (isSending) {
+                        CircularProgressIndicator(modifier = Modifier.size(22.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                    } else {
+                        Text(
+                            text = if (isAppend) "CONFIRMAR VENTA" else "REALIZAR VENTA",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = if (isTablet) 16.sp else 14.sp,
+                            maxLines = 1
+                        )
                     }
                 }
             }
