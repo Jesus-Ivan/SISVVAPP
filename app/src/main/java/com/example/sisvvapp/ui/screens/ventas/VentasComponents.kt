@@ -267,7 +267,7 @@ fun VistaVerdeSaleCard(
                     }
                     Spacer(modifier = Modifier.height(if (isTablet) 8.dp else 6.dp))
                     Text(
-                        text = "${if (venta.socioId == null || venta.socioId == 0) "N/A" else venta.socioId} - ${venta.nombreCliente}",
+                        text = "${if (venta.socioId == null || venta.socioId == 0) "N/A" else venta.socioId} - ${venta.nombreCliente.replace(Regex("\\s+"), " ").trim().uppercase()}",
                         fontWeight = FontWeight.SemiBold,
                         fontSize = if (isTablet) 18.sp else 15.sp,
                         color = if (isOffline) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface

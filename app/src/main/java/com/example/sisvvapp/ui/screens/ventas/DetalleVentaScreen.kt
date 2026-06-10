@@ -175,7 +175,7 @@ private fun DetalleHeaderCard(venta: VentaDto) {
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
-            DetalleRow("Cliente", venta.nombreCliente)
+            DetalleRow("Cliente", venta.nombreCliente.replace(Regex("\\s+"), " ").trim().uppercase())
             if (venta.socioId != null && venta.socioId != 0) {
                 DetalleRow("ID Socio", venta.socioId.toString())
             } else {

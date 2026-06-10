@@ -24,6 +24,7 @@ import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.components.VistaVerdeTextField
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.utils.normalizeName
 
 @Composable
 fun NuevaVentaConfigScreen(
@@ -151,7 +152,7 @@ fun NuevaVentaConfigScreen(
 
                         VistaVerdeTextField(
                             value = nombreSocioText,
-                            onValueChange = {},
+                            onValueChange = { onNombreClienteChange(it.normalizeName()) },
                             label = "Socio",
                             readOnly = true,
                             enabled = false
