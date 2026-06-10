@@ -31,6 +31,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -56,6 +58,7 @@ import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
 import java.util.Locale
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -179,11 +182,20 @@ private fun VistaVerdeProductoCard(
     var showObs by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
+    val borderAlpha = remember { Animatable(0f) }
 
     VistaVerdeBaseCard {
         Column(
             modifier = Modifier
                 .graphicsLayer { scaleX = scale.value; scaleY = scale.value }
+                .drawBehind {
+                    if (borderAlpha.value > 0f) {
+                        drawRoundRect(
+                            color = Color(0xFF4CAF50).copy(alpha = borderAlpha.value * 0.18f),
+                            cornerRadius = CornerRadius(12.dp.toPx())
+                        )
+                    }
+                }
                 .padding(if (isTablet) 20.dp else 16.dp)
         ) {
             // Fila 1: Información y Precio (Balanceado)
@@ -287,10 +299,16 @@ private fun VistaVerdeProductoCard(
                         if (hasModificadores) onAddConModif(cantidad)
                         else {
                             scope.launch {
-                                scale.animateTo(1.08f, tween(120))
-                                scale.animateTo(1f, tween(120))
+                                coroutineScope {
+                                    launch { scale.animateTo(1.08f, tween(120)) }
+                                    launch { borderAlpha.animateTo(1f, tween(120)) }
+                                }
+                                coroutineScope {
+                                    launch { scale.animateTo(1f, tween(300)) }
+                                    launch { borderAlpha.animateTo(0f, tween(300)) }
+                                }
+                                onAdd(cantidad, observaciones)
                             }
-                            onAdd(cantidad, observaciones)
                             observaciones = ""
                             showObs = false
                         }
