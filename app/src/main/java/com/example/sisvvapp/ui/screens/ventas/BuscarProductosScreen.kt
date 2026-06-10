@@ -308,9 +308,9 @@ private fun VistaVerdeProductoCard(
                                     launch { borderAlpha.animateTo(0f, tween(300)) }
                                 }
                                 onAdd(cantidad, observaciones)
+                                observaciones = ""
+                                showObs = false
                             }
-                            observaciones = ""
-                            showObs = false
                         }
                     },
                     modifier = Modifier.height(44.dp),
