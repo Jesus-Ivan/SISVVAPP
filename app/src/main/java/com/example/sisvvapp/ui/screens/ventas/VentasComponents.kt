@@ -72,7 +72,7 @@ fun ProductoDetalleCard(
                     // Lógica de colores de impresión refinada y blindaje contra nulos
                     // Se usan los colores definidos en Color.kt para soportar temas claro y oscuro
                     val isDark = isSystemInDarkTheme()
-                    val (containerColor, contentColor, border) = when (producto.idEstado) {
+                    val (containerColor, contentColor, border) = when (producto.idEstado ?: "") {
                         "1", "2" -> Triple(
                             if (isDark) StatusImpresoOscuro else StatusImpresoClaro, 
                             Color.White, 
