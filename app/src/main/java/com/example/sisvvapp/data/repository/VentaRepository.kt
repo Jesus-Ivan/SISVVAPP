@@ -411,7 +411,7 @@ private fun VentaColaEntity.toVentaDto(): VentaDto {
             chunk = 0,
             observaciones = item.observaciones,
             subtotal = (item.precio ?: 0.0) * item.cantidad,
-            idEstado = "0", // Forzamos estado 0 (En cola) para items locales
+            idEstado = if (item.printDefault) "0" else "", // Forzamos estado 0 solo si imprime comanda
             modificadores = item.modificadores
         )
     }
@@ -437,7 +437,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
     val displayDate: String
     val displayTime: String
 
-    if (folio == null || folio == 0) {
+    if (folio == null || folio == 0 || syncStatus != "RECIBIDA") {
         // Es offline, fecha es un timestamp (Long) convertido a String en la vista
         val ts = fecha.toLongOrNull() ?: timestamp
         val sdfDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
@@ -467,7 +467,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
                     chunk = 0,
                     observaciones = item.observaciones,
                     subtotal = (item.precio ?: 0.0) * item.cantidad,
-                    idEstado = "0", // Forzamos estado 0 (En cola) para items locales
+                    idEstado = if (item.printDefault) "0" else "", // Forzamos estado 0 solo si imprime comanda
                     modificadores = item.modificadores
                 )
             }
