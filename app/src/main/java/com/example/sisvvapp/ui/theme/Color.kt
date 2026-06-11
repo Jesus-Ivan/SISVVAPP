@@ -26,6 +26,12 @@ val TextoSecundarioClaro = Color(0xFF71717A)
 val RedSaaS = Color(0xFFEF4444)
 val OrangeSaaS = Color(0xFFF59E0B)
 
+// ── ESTADOS DE IMPRESIÓN (NUEVO) ─────────────────────────────────────
+val StatusImpresoClaro = Color(0xFF2196F3) // Azul vibrante para modo claro
+val StatusImpresoOscuro = Color(0xFF1976D2) // Azul con mejor contraste para modo oscuro
+val StatusErrorImpresion = Color(0xFFF44336)
+val StatusColaImpresion = Color(0xFF9E9E9E)
+
 
 val VerdePrincipalOscuro = VerdePremiumDark
 val FondoAppOscuro = Grey900

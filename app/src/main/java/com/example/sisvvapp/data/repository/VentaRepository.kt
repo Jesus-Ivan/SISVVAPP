@@ -55,8 +55,9 @@ class VentaRepository(
                 val baseVenta = getVentaDetalle(localCola.folioExistente)
                 if (baseVenta != null) {
                     // Combinamos y agrupamos para evitar duplicados visuales (ej. 2 Tacos + 1 Taco -> 3 Tacos)
+                    // IMPORTANTE: Agrupamos también por idEstado para que lo ya impreso no se mezcle con lo nuevo pendiente
                     val combinedProductos = (baseVenta.productos + dto.productos)
-                        .groupBy { it.claveProducto to it.observaciones }
+                        .groupBy { it.claveProducto to it.observaciones to (it.idEstado ?: "") }
                         .map { (_, list) ->
                             val first = list.first()
                             first.copy(
@@ -290,12 +291,18 @@ class VentaRepository(
                 val body = response.body()
                 if (body != null) {
                     db.withTransaction {
-                        // 1. Insertamos en histórico local
+                        // 1. Invalidamos caché local para evitar inconsistencias visuales
+                        ventaRecibidaDao.deleteByFolio(venta.folioExistente ?: 0)
+                        // 2. Guardamos la respuesta fresca del servidor (con folios y estados finales)
                         ventaRecibidaDao.insertAll(listOf(body.toVentaRecibidaEntity()))
-                        // 2. Borramos de la cola
+                        // 3. Limpiamos la cola local
                         ventaColaDao.deleteById(venta.idTemporal)
                     }
-                    // 3. Disparamos un sync rápido para que la UI refresque folios automáticamente
+                    // 4. Forzamos descarga del detalle para actualizar estados de impresión
+                    if (venta.folioExistente != null && venta.folioExistente > 0) {
+                        getVentaDetalle(venta.folioExistente)
+                    }
+                    // 5. Sincronizamos la lista general
                     val fechaStr = java.time.LocalDate.now().toString()
                     syncVentas(fechaStr, venta.corteCaja)
                 } else {
@@ -404,6 +411,7 @@ private fun VentaColaEntity.toVentaDto(): VentaDto {
             chunk = 0,
             observaciones = item.observaciones,
             subtotal = (item.precio ?: 0.0) * item.cantidad,
+            idEstado = "0", // Forzamos estado 0 (En cola) para items locales
             modificadores = item.modificadores
         )
     }
@@ -459,6 +467,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
                     chunk = 0,
                     observaciones = item.observaciones,
                     subtotal = (item.precio ?: 0.0) * item.cantidad,
+                    idEstado = "0", // Forzamos estado 0 (En cola) para items locales
                     modificadores = item.modificadores
                 )
             }
