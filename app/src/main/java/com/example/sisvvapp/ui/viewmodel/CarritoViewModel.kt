@@ -266,8 +266,8 @@ class CarritoViewModel(
                 total = _total.value
             )
 
-            if (_appendMode.value && (_folioExistente.value != null || _idTemporalExistente.value != null)) {
-                val folio = _folioExistente.value ?: 0
+            if (_appendMode.value && _folioExistente.value != null && _folioExistente.value!! > 0) {
+                val folio = _folioExistente.value!!
                 val result = ventaRepository.appendProductos(folio, request, _idTemporalExistente.value)
                 result.fold(
                     onSuccess = {
@@ -283,6 +283,10 @@ class CarritoViewModel(
                         }
                     }
                 )
+            } else if (_appendMode.value && _idTemporalExistente.value != null) {
+                // Venta offline sin folio real → merge local directo a la cola
+                ventaRepository.mergeIntoCola(request, _idTemporalExistente.value!!)
+                _sendResult.value = SendResult.Success(0)
             } else {
                 val result = ventaRepository.crearVenta(request)
                 result.fold(

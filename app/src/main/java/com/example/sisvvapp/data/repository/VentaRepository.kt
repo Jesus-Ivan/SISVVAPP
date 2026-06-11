@@ -269,20 +269,26 @@ class VentaRepository(
         // 1. Marcar como SYNCING
         ventaColaDao.updateEstado(venta.idTemporal, "SYNCING")
 
+        // Re-leer de DB para obtener datos actualizados (posible merge local)
+        val actual = ventaColaDao.getById(venta.idTemporal) ?: return Result.success(Unit)
         val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
-        val productos: List<ItemCarritoDto> = gson.fromJson(venta.productosJson, type)
+        val productos: List<ItemCarritoDto> = try {
+            gson.fromJson(actual.productosJson, type)
+        } catch (e: Exception) {
+            emptyList()
+        }
         val request = VentaRequest(
-            corteCaja = venta.corteCaja,
-            tipoVenta = venta.tipoVenta,
-            idSocio = venta.idSocio,
-            nombre = venta.nombreCliente,
-            clavePuntoVenta = venta.clavePuntoVenta,
+            corteCaja = actual.corteCaja,
+            tipoVenta = actual.tipoVenta,
+            idSocio = actual.idSocio,
+            nombre = actual.nombreCliente,
+            clavePuntoVenta = actual.clavePuntoVenta,
             productos = productos
         )
-        
+
         try {
-            val response = if (venta.folioExistente != null) {
-                api.appendProductos(venta.folioExistente, request)
+            val response = if (actual.folioExistente != null) {
+                api.appendProductos(actual.folioExistente, request)
             } else {
                 api.crearVenta(request)
             }
@@ -386,6 +392,29 @@ class VentaRepository(
             Log.e("VentaRepo", "Error de red al reimprimir", e)
             Result.failure(Exception("Se requiere conexión para reimprimir"))
         }
+    }
+
+    suspend fun mergeIntoCola(request: VentaRequest, idTemporal: String) {
+        val existente = ventaColaDao.getById(idTemporal) ?: return
+        val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
+        val existentes: List<ItemCarritoDto> = try {
+            gson.fromJson(existente.productosJson, type)
+        } catch (e: Exception) {
+            emptyList()
+        }
+        val merged = (existentes + request.productos)
+            .groupBy { it.claveProducto to it.observaciones to it.modificadores }
+            .map { (_, list) ->
+                list.first().copy(cantidad = list.sumOf { it.cantidad })
+            }
+        val updated = existente.copy(
+            productosJson = gson.toJson(merged),
+            totalVenta = merged.sumOf { (it.cantidad * (it.precio ?: 0.0)) + it.modificadores.sumOf { m -> m.cantidad * (m.precio ?: 0.0) } },
+            fechaCreacion = System.currentTimeMillis(),
+            estado = "PENDIENTE"
+        )
+        ventaColaDao.insert(updated)
+        Log.d("VentaRepo", "Productos mergeados localmente en cola $idTemporal")
     }
 }
 private fun VentaColaEntity.toVentaDto(): VentaDto {
