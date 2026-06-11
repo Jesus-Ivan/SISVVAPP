@@ -424,25 +424,24 @@ private fun VentaColaEntity.toVentaDto(): VentaDto {
     val displayTime = sdfTime.format(java.util.Date(fechaCreacion))
 
     val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
-    val items: List<ItemCarritoDto> = try {
-        Gson().fromJson(productosJson, type)
+    val productosVenta = try {
+        val items: List<ItemCarritoDto> = Gson().fromJson(productosJson, type) ?: emptyList()
+        items.map { item ->
+            ProductoVentaDto(
+                id = item.claveProducto,
+                claveProducto = item.claveProducto,
+                nombre = item.nombre ?: "Producto #${item.claveProducto}",
+                precio = item.precio ?: 0.0,
+                cantidad = item.cantidad,
+                chunk = 0,
+                observaciones = item.observaciones,
+                subtotal = (item.precio ?: 0.0) * item.cantidad,
+                idEstado = if (item.printDefault) "0" else "",
+                modificadores = item.modificadores
+            )
+        }
     } catch (e: Exception) {
         emptyList()
-    }
-
-    val productosVenta = items.map { item ->
-        ProductoVentaDto(
-            id = item.claveProducto,
-            claveProducto = item.claveProducto,
-            nombre = item.nombre ?: "Producto #${item.claveProducto}",
-            precio = item.precio ?: 0.0,
-            cantidad = item.cantidad,
-            chunk = 0,
-            observaciones = item.observaciones,
-            subtotal = (item.precio ?: 0.0) * item.cantidad,
-            idEstado = if (item.printDefault) "0" else "", // Forzamos estado 0 solo si imprime comanda
-            modificadores = item.modificadores
-        )
     }
 
     return VentaDto(
@@ -485,7 +484,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
         if (syncStatus != "RECIBIDA") {
             // Reconstrucción para registros offline (nuevos o ediciones)
             val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
-            val items: List<ItemCarritoDto> = gson.fromJson(productosJson, type)
+            val items: List<ItemCarritoDto> = gson.fromJson(productosJson, type) ?: emptyList()
             items.map { item ->
                 ProductoVentaDto(
                     id = item.claveProducto,
@@ -502,7 +501,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
             }
         } else {
             // Venta oficial del servidor
-            gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type)
+            gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type) ?: emptyList()
         }
     } catch (_: Exception) {
         emptyList()
@@ -551,12 +550,12 @@ private fun VentaRecibidaEntity.toVentaDto(): VentaDto {
     }
     val gson = Gson()
     val productos: List<ProductoVentaDto> = try {
-        gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type)
+        gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type) ?: emptyList()
     } catch (_: Exception) {
         emptyList()
     }
     val pagos: List<PagoDto> = try {
-        gson.fromJson(pagosJson, object : TypeToken<List<PagoDto>>() {}.type)
+        gson.fromJson(pagosJson, object : TypeToken<List<PagoDto>>() {}.type) ?: emptyList()
     } catch (_: Exception) {
         emptyList()
     }
