@@ -244,7 +244,8 @@ class CarritoViewModel(
                     observaciones = item.observaciones,
                     modificadores = modificadores,
                     nombre = item.producto.descripcion,
-                    precio = item.producto.precio
+                    precio = item.producto.precio,
+                    printDefault = item.producto.printDefault
                 )
             }
 

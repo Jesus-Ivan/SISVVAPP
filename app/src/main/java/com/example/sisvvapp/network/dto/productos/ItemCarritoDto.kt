@@ -18,5 +18,6 @@ data class ItemCarritoDto(
     val observaciones: String = "",
     val modificadores: List<ModificadorSeleccionadoDto> = emptyList(),
     val nombre: String? = null, // Usado para visualización offline
-    val precio: Double? = null // Usado para visualización offline
+    val precio: Double? = null, // Usado para visualización offline
+    @SerializedName("print_default") val printDefault: Boolean = true
 )
