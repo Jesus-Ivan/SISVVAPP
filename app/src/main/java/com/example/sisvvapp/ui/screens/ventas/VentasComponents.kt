@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -37,8 +38,7 @@ import com.example.sisvvapp.network.dto.ventas.ProductoVentaDto
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeStatusBadge
-import com.example.sisvvapp.ui.theme.Poppins
-import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.theme.*
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
 import java.util.Locale
@@ -65,21 +65,41 @@ fun ProductoDetalleCard(
         ) { if (mods.isNotEmpty()) isExpanded = !isExpanded }
     ) {
         Column {
-            // --- PARTE SUPERIOR (Tal como la tenías) ---
+            // --- PARTE SUPERIOR ---
             Column(modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    // 1. Cantidad
+                    
+                    // Lógica de colores de impresión refinada y blindaje contra nulos
+                    // Se usan los colores definidos en Color.kt para soportar temas claro y oscuro
+                    val isDark = isSystemInDarkTheme()
+                    val (containerColor, contentColor, border) = when (producto.idEstado) {
+                        "1", "2" -> Triple(
+                            if (isDark) StatusImpresoOscuro else StatusImpresoClaro, 
+                            Color.White, 
+                            null
+                        ) // IMPRESO / LISTO -> Azul vibrante adaptable
+                        "3" -> Triple(StatusErrorImpresion, Color.White, null) // ERROR -> Rojo vibrante
+                        "0" -> Triple(StatusColaImpresion, Color.White, null) // COLA -> Gris sólido
+                        else -> Triple(
+                            Color.Transparent, 
+                            MaterialTheme.colorScheme.onSurface, 
+                            BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) // NO IMPRIME -> Contorno adaptable (Negro en Light, Blanco en Dark)
+                    }
+
+                    // 1. Cantidad (Cuadro dinámico)
                     Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = containerColor,
+                        contentColor = contentColor,
                         shape = MaterialTheme.shapes.small,
+                        border = border,
                         modifier = Modifier.size(if (isTablet) 48.dp else 40.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
                                 text = "${producto.cantidad}",
                                 style = if (isTablet) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                fontWeight = FontWeight.ExtraBold
                             )
                         }
                     }
@@ -98,23 +118,6 @@ fun ProductoDetalleCard(
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f, fill = false)
                             )
-
-                            val estadoColor = when (producto.idEstado ?: "") {
-                                "0" -> Color(0xFFF59E0B)   // COLA - amber
-                                "1" -> Color(0xFF10B981)   // IMPRESO - green
-                                "2" -> Color(0xFF3B82F6)   // LISTO - blue
-                                "3" -> Color(0xFFEF4444)   // ERROR - red
-                                "4" -> Color(0xFF6B7280)   // CANCELADO - gray
-                                else -> Color.Transparent
-                            }
-                            if (estadoColor != Color.Transparent) {
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .size(if (isTablet) 12.dp else 10.dp)
-                                        .background(estadoColor, shape = MaterialTheme.shapes.extraLarge)
-                                )
-                            }
 
                             // Ícono de expansión añadido
                             if (mods.isNotEmpty()) {

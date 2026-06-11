@@ -32,6 +32,9 @@ interface VentaRecibidaDao {
     @Query("SELECT * FROM ventas_recibidas WHERE folio = :folio")
     fun getVentaPorFolioFlow(folio: Int): Flow<VentaRecibidaEntity?>
 
+    @Query("DELETE FROM ventas_recibidas WHERE folio = :folio")
+    suspend fun deleteByFolio(folio: Int)
+
     @Query("DELETE FROM ventas_recibidas WHERE fecha LIKE :fechaPrefix || '%'")
     suspend fun deleteByFecha(fechaPrefix: String)
 
