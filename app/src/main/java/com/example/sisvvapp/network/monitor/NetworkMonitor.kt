@@ -17,6 +17,10 @@ class NetworkMonitor(private val connectivityManager: ConnectivityManager) {
             override fun onLost(network: Network) {
                 trySend(false)
             }
+            override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+                val connected = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                trySend(connected)
+            }
         }
 
         val request = NetworkRequest.Builder()

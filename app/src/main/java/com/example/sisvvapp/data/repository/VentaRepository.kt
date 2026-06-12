@@ -29,6 +29,7 @@ class VentaRepository(
     private val gson = Gson()
     fun getPendientesCountFlow(): Flow<Int> = ventaColaDao.countPendientesFlow()
     suspend fun getPendientes(): List<VentaColaEntity> = ventaColaDao.getPendientes()
+    suspend fun getParaSincronizar(): List<VentaColaEntity> = ventaColaDao.getParaSincronizar()
     fun getVentasGlobales(corteCaja: Int? = null, fecha: String): Flow<List<VentaDto>> {
         val flow = if (corteCaja != null) {
             ventaGlobalDao.getVentasPorCorte(corteCaja, fecha)
@@ -338,12 +339,10 @@ class VentaRepository(
                 if (resultado.isSuccess) {
                     sincronizadasExitosamente++
                 } else {
-                    Log.w("VentaRepo", "Fallo al sincronizar venta ${venta.idTemporal}, deteniendo cola.")
-                    break
+                    Log.w("VentaRepo", "Fallo al sincronizar venta ${venta.idTemporal}, continuando con la siguiente.")
                 }
             } catch (e: Exception) {
-                Log.e("VentaRepo", "Error inesperado en sincronización", e)
-                break
+                Log.e("VentaRepo", "Error inesperado en sincronización para venta ${venta.idTemporal}", e)
             }
         }
         return sincronizadasExitosamente
