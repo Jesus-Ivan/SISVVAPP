@@ -79,9 +79,7 @@ fun ResumenCarritoScreen(
         ) {
             ResponsiveContainer {
                 when {
-                    sendResult is SendResult.Success -> SuccessContent(sendResult.folio, onVolver)
                     sendResult is SendResult.Error -> ErrorContent(sendResult.message, onConfirmar, onVolver)
-                    sendResult is SendResult.Offline -> OfflineContent(onVolver)
                     items.isEmpty() -> {
                         Column(modifier = Modifier.fillMaxSize().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                             VistaVerdeEmptyState(Icons.Default.ShoppingCart, "No hay productos en el carrito")
