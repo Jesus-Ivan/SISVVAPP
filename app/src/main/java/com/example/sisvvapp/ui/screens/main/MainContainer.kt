@@ -81,7 +81,7 @@ fun MainContainer(
     // Sincronización automática de la cola al recuperar conexión
     LaunchedEffect(isConnected) {
         if (isConnected) {
-            delay(1000) // Estabilidad
+            delay(4000) // Estabilidad de red al reconectar
             scope.launch {
                 val procesadas = ventaRepository.procesarColaVentas()
                 if (procesadas > 0) {
