@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -39,7 +42,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,6 +76,10 @@ fun BuscarProductosScreen(
     isOnline: Boolean = true
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
     VistaVerdeScaffold(
         title = stringResource(R.string.buscar_productos_title),
         subtitle = stringResource(R.string.buscar_productos_subtitle),
@@ -89,7 +95,8 @@ fun BuscarProductosScreen(
                     VistaVerdeSearchBar(
                         value = searchQuery,
                         onValueChange = onSearchQueryChange,
-                        placeholder = stringResource(R.string.buscar_productos_placeholder)
+                        placeholder = stringResource(R.string.buscar_productos_placeholder),
+                        modifier = Modifier.focusRequester(focusRequester)
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))

@@ -9,8 +9,13 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +44,11 @@ fun SociosScreen(
     onRetry: () -> Unit = {},
     onRefresh: () -> Unit = {}
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
     VistaVerdeScaffold(
         title = stringResource(R.string.title_socios),
         subtitle = "Caja: $nombreCaja",
@@ -60,6 +70,7 @@ fun SociosScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     VistaVerdeSectionHeader(text = stringResource(R.string.socios_section_search))
+
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -67,7 +78,8 @@ fun SociosScreen(
                 VistaVerdeSearchBar(
                     value = searchQuery,
                     onValueChange = onSearchQueryChange,
-                    placeholder = stringResource(R.string.socios_search_placeholder)
+                    placeholder = stringResource(R.string.socios_search_placeholder),
+                    modifier = Modifier.focusRequester(focusRequester)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
 
