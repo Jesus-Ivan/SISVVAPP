@@ -46,8 +46,8 @@ class SyncWorker(
             } catch (e: Exception) {
                 Log.w("SyncWorker", "Error descargando fotos", e)
             }
-            // Enviar ventas offline pendientes
-            val pendientes = ventaRepo.getPendientes()
+            // Enviar ventas offline pendientes o en error
+            val pendientes = ventaRepo.getParaSincronizar()
             for (venta in pendientes) {
                 try {
                     ventaRepo.enviarVentaOffline(venta)
