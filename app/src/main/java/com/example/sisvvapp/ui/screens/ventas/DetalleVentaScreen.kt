@@ -30,32 +30,12 @@ fun DetalleVentaScreen(
     isOnline: Boolean,
     onBackClick: () -> Unit,
     onAgregarProductos: () -> Unit,
-    onReimprimir: () -> Unit = {},
     onTransferirProducto: ((ProductoVentaDto) -> Unit)? = null
 ) {
     val syncStatus = venta?.syncStatus ?: "RECIBIDA"
     val isSyncing = syncStatus == "SYNCING"
     val deviceType = com.example.sisvvapp.ui.utils.LocalDeviceType.current
     val isTablet = deviceType == com.example.sisvvapp.ui.utils.DeviceType.TABLET
-    val snackbarHostState = remember { SnackbarHostState() }
-    val snackbarShown = remember { mutableStateOf(false) }
-
-    val tienePendientes = venta?.productos?.any { it.idEstado == "0" || it.idEstado == "3" } == true
-
-    LaunchedEffect(tienePendientes, venta, isOnline) {
-        if (tienePendientes && !snackbarShown.value && isOnline) {
-            snackbarShown.value = true
-            val result = snackbarHostState.showSnackbar(
-                message = "Hay productos pendientes de impresión",
-                actionLabel = "REIMPRIMIR",
-                duration = SnackbarDuration.Long
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                snackbarShown.value = true
-                onReimprimir()
-            }
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         VistaVerdeScaffold(
@@ -171,59 +151,6 @@ fun DetalleVentaScreen(
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
-                        }
-                    }
-                }
-            }
-        }
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 80.dp, start = 24.dp, end = 24.dp)
-        ) { data ->
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = data.visuals.message,
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    if (data.visuals.actionLabel != null) {
-                        TextButton(
-                            onClick = { data.performAction() },
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.Undo, null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = data.visuals.actionLabel?.uppercase() ?: "",
-                                fontWeight = FontWeight.ExtraBold,
-                                style = MaterialTheme.typography.labelLarge
-                            )
                         }
                     }
                 }
