@@ -10,12 +10,14 @@ import com.example.sisvvapp.data.repository.SocioRepository
 import com.example.sisvvapp.data.repository.TipoPagoRepository
 import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.network.RetrofitClient
+import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 class SyncWorker(
     appContext: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
+        delay(4000) // Esperar a que el stack de red se estabilice
         val db = AppDatabase.getInstance(applicationContext)
         val api = RetrofitClient.create(applicationContext)
         val socioRepo = SocioRepository(api, db.socioDao(), applicationContext)

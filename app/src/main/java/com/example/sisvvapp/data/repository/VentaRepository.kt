@@ -1,4 +1,4 @@
-package com.example.sisvvapp.data.repository
+﻿package com.example.sisvvapp.data.repository
 import android.util.Log
 import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.entity.VentaColaEntity
@@ -16,6 +16,7 @@ import com.example.sisvvapp.network.dto.ventas.TransferirProductoRequest
 import com.example.sisvvapp.network.dto.ventas.VentaRequest
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 class VentaRepository(
@@ -287,44 +288,55 @@ class VentaRepository(
             productos = productos
         )
 
-        try {
-            val response = if (actual.folioExistente != null) {
-                api.appendProductos(actual.folioExistente, request)
-            } else {
-                api.crearVenta(request)
-            }
+        var lastError: Exception? = null
+        val maxRetries = 3
 
-            if (response.isSuccessful) {
-                val body = response.body()
-                if (body != null) {
-                    db.withTransaction {
-                        // 1. Invalidamos caché local para evitar inconsistencias visuales
-                        ventaRecibidaDao.deleteByFolio(venta.folioExistente ?: 0)
-                        // 2. Guardamos la respuesta fresca del servidor (con folios y estados finales)
-                        ventaRecibidaDao.insertAll(listOf(body.toVentaRecibidaEntity()))
-                        // 3. Limpiamos la cola local
+        for (attempt in 1..maxRetries) {
+            try {
+                val response = if (actual.folioExistente != null) {
+                    api.appendProductos(actual.folioExistente, request)
+                } else {
+                    api.crearVenta(request)
+                }
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body != null) {
+                        db.withTransaction {
+                            ventaRecibidaDao.deleteByFolio(venta.folioExistente ?: 0)
+                            ventaRecibidaDao.insertAll(listOf(body.toVentaRecibidaEntity()))
+                            ventaColaDao.deleteById(venta.idTemporal)
+                        }
+                        if (venta.folioExistente != null && venta.folioExistente > 0) {
+                            getVentaDetalle(venta.folioExistente)
+                        }
+                        val fechaStr = java.time.LocalDate.now().toString()
+                        syncVentas(fechaStr, venta.corteCaja)
+                    } else {
                         ventaColaDao.deleteById(venta.idTemporal)
                     }
-                    // 4. Forzamos descarga del detalle para actualizar estados de impresión
-                    if (venta.folioExistente != null && venta.folioExistente > 0) {
-                        getVentaDetalle(venta.folioExistente)
-                    }
-                    // 5. Sincronizamos la lista general
-                    val fechaStr = java.time.LocalDate.now().toString()
-                    syncVentas(fechaStr, venta.corteCaja)
+                    Log.d("VentaRepo", "Venta ${venta.idTemporal} sincronizada con éxito")
+                    return Result.success(Unit)
                 } else {
-                    ventaColaDao.deleteById(venta.idTemporal)
+                    val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                    lastError = Exception("Error ${response.code()}: $errorBody")
+                    if (response.code() in listOf(400, 404, 409, 422)) {
+                        break
+                    }
+                    Log.w("VentaRepo", "Intento $attempt/$maxRetries falló (${response.code()}), reintentando...")
                 }
-                Log.d("VentaRepo", "Venta ${venta.idTemporal} sincronizada con éxito")
-            } else {
-                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
-                ventaColaDao.updateEstado(venta.idTemporal, "ERROR")
-                throw Exception("Error ${response.code()}: $errorBody")
+            } catch (e: Exception) {
+                lastError = e
+                Log.w("VentaRepo", "Intento $attempt/$maxRetries falló: ${e.message}, reintentando...")
             }
-        } catch (e: Exception) {
-            ventaColaDao.updateEstado(venta.idTemporal, "ERROR")
-            throw e
+
+            if (attempt < maxRetries) {
+                delay(2000)
+            }
         }
+
+        ventaColaDao.updateEstado(venta.idTemporal, "ERROR")
+        throw lastError ?: Exception("Error desconocido al sincronizar venta ${venta.idTemporal}")
     }
 
     suspend fun procesarColaVentas(): Int {
