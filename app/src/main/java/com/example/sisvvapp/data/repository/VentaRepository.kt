@@ -269,20 +269,26 @@ class VentaRepository(
         // 1. Marcar como SYNCING
         ventaColaDao.updateEstado(venta.idTemporal, "SYNCING")
 
+        // Re-leer de DB para obtener datos actualizados (posible merge local)
+        val actual = ventaColaDao.getById(venta.idTemporal) ?: return Result.success(Unit)
         val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
-        val productos: List<ItemCarritoDto> = gson.fromJson(venta.productosJson, type)
+        val productos: List<ItemCarritoDto> = try {
+            gson.fromJson(actual.productosJson, type)
+        } catch (e: Exception) {
+            emptyList()
+        }
         val request = VentaRequest(
-            corteCaja = venta.corteCaja,
-            tipoVenta = venta.tipoVenta,
-            idSocio = venta.idSocio,
-            nombre = venta.nombreCliente,
-            clavePuntoVenta = venta.clavePuntoVenta,
+            corteCaja = actual.corteCaja,
+            tipoVenta = actual.tipoVenta,
+            idSocio = actual.idSocio,
+            nombre = actual.nombreCliente,
+            clavePuntoVenta = actual.clavePuntoVenta,
             productos = productos
         )
-        
+
         try {
-            val response = if (venta.folioExistente != null) {
-                api.appendProductos(venta.folioExistente, request)
+            val response = if (actual.folioExistente != null) {
+                api.appendProductos(actual.folioExistente, request)
             } else {
                 api.crearVenta(request)
             }
@@ -387,6 +393,29 @@ class VentaRepository(
             Result.failure(Exception("Se requiere conexión para reimprimir"))
         }
     }
+
+    suspend fun mergeIntoCola(request: VentaRequest, idTemporal: String) {
+        val existente = ventaColaDao.getById(idTemporal) ?: return
+        val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
+        val existentes: List<ItemCarritoDto> = try {
+            gson.fromJson(existente.productosJson, type)
+        } catch (e: Exception) {
+            emptyList()
+        }
+        val merged = (existentes + request.productos)
+            .groupBy { it.claveProducto to it.observaciones to it.modificadores }
+            .map { (_, list) ->
+                list.first().copy(cantidad = list.sumOf { it.cantidad })
+            }
+        val updated = existente.copy(
+            productosJson = gson.toJson(merged),
+            totalVenta = merged.sumOf { (it.cantidad * (it.precio ?: 0.0)) + it.modificadores.sumOf { m -> m.cantidad * (m.precio ?: 0.0) } },
+            fechaCreacion = System.currentTimeMillis(),
+            estado = "PENDIENTE"
+        )
+        ventaColaDao.insert(updated)
+        Log.d("VentaRepo", "Productos mergeados localmente en cola $idTemporal")
+    }
 }
 private fun VentaColaEntity.toVentaDto(): VentaDto {
     val sdfDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
@@ -395,25 +424,24 @@ private fun VentaColaEntity.toVentaDto(): VentaDto {
     val displayTime = sdfTime.format(java.util.Date(fechaCreacion))
 
     val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
-    val items: List<ItemCarritoDto> = try {
-        Gson().fromJson(productosJson, type)
+    val productosVenta = try {
+        val items: List<ItemCarritoDto> = Gson().fromJson(productosJson, type) ?: emptyList()
+        items.map { item ->
+            ProductoVentaDto(
+                id = item.claveProducto,
+                claveProducto = item.claveProducto,
+                nombre = item.nombre ?: "Producto #${item.claveProducto}",
+                precio = item.precio ?: 0.0,
+                cantidad = item.cantidad,
+                chunk = 0,
+                observaciones = item.observaciones,
+                subtotal = (item.precio ?: 0.0) * item.cantidad,
+                idEstado = if (item.printDefault) "0" else "",
+                modificadores = item.modificadores
+            )
+        }
     } catch (e: Exception) {
         emptyList()
-    }
-
-    val productosVenta = items.map { item ->
-        ProductoVentaDto(
-            id = item.claveProducto,
-            claveProducto = item.claveProducto,
-            nombre = item.nombre ?: "Producto #${item.claveProducto}",
-            precio = item.precio ?: 0.0,
-            cantidad = item.cantidad,
-            chunk = 0,
-            observaciones = item.observaciones,
-            subtotal = (item.precio ?: 0.0) * item.cantidad,
-            idEstado = if (item.printDefault) "0" else "", // Forzamos estado 0 solo si imprime comanda
-            modificadores = item.modificadores
-        )
     }
 
     return VentaDto(
@@ -456,7 +484,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
         if (syncStatus != "RECIBIDA") {
             // Reconstrucción para registros offline (nuevos o ediciones)
             val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
-            val items: List<ItemCarritoDto> = gson.fromJson(productosJson, type)
+            val items: List<ItemCarritoDto> = gson.fromJson(productosJson, type) ?: emptyList()
             items.map { item ->
                 ProductoVentaDto(
                     id = item.claveProducto,
@@ -473,7 +501,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
             }
         } else {
             // Venta oficial del servidor
-            gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type)
+            gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type) ?: emptyList()
         }
     } catch (_: Exception) {
         emptyList()
@@ -522,12 +550,12 @@ private fun VentaRecibidaEntity.toVentaDto(): VentaDto {
     }
     val gson = Gson()
     val productos: List<ProductoVentaDto> = try {
-        gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type)
+        gson.fromJson(productosJson, object : TypeToken<List<ProductoVentaDto>>() {}.type) ?: emptyList()
     } catch (_: Exception) {
         emptyList()
     }
     val pagos: List<PagoDto> = try {
-        gson.fromJson(pagosJson, object : TypeToken<List<PagoDto>>() {}.type)
+        gson.fromJson(pagosJson, object : TypeToken<List<PagoDto>>() {}.type) ?: emptyList()
     } catch (_: Exception) {
         emptyList()
     }
