@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -95,51 +97,9 @@ fun MainContainer(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: ScreenRoutes.VENTAS
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(snackbarHostState) { data ->
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp, vertical = 12.dp)
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
-                            shape = CircleShape,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.Sync,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            text = data.visuals.message,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-            }
-        }
-    ) { paddingValues ->
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+        ) { paddingValues ->
         ModalNavigationDrawer(
             modifier = Modifier.padding(paddingValues),
             drawerState = drawerState,
@@ -312,12 +272,29 @@ fun MainContainer(
                         val sendResult by globalCarritoViewModel.sendResult.collectAsState()
 
                         LaunchedEffect(sendResult) {
-                            if (sendResult is SendResult.Success) {
-                                delay(2000L)
-                                // Limpiamos el carrito global solo al éxito
-                                globalCarritoViewModel.clearState()
-                                // Volvemos a la pantalla de ventas de forma segura
-                                navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
+                            val result = sendResult
+                            when (result) {
+                                is SendResult.Success -> {
+                                    navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Venta realizada con éxito (Folio: ${result.folio})",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                        globalCarritoViewModel.clearState()
+                                    }
+                                }
+                                is SendResult.Offline -> {
+                                    navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Venta guardada, se sincronizará al reconectar",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                        globalCarritoViewModel.clearState()
+                                    }
+                                }
+                                else -> {}
                             }
                         }
 
@@ -460,6 +437,59 @@ fun MainContainer(
                 }
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 80.dp, start = 24.dp, end = 24.dp)
+        ) { data ->
+            val icon = when {
+                data.visuals.message.contains("éxito") -> Icons.Default.CheckCircle
+                data.visuals.message.contains("sincronizará") -> Icons.Default.CloudQueue
+                else -> Icons.Default.Sync
+            }
+            Card(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
+                        shape = CircleShape,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = data.visuals.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+        }
+    }
     }
 }
 
