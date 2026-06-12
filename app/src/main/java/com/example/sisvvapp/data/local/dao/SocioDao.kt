@@ -24,13 +24,13 @@ interface SocioDao {
     @Query("SELECT * FROM socios WHERE id = :id")
     suspend fun getSocioConIntegrantes(id: Int): SocioWithIntegrantes?
 
-    @Query("SELECT * FROM socios WHERE id LIKE :term OR nombre LIKE :term OR apellido_p LIKE :term OR apellido_m LIKE :term")
+    @Query("SELECT * FROM socios WHERE id LIKE :term OR nombre LIKE :term OR apellido_p LIKE :term OR apellido_m LIKE :term ORDER BY id ASC")
     fun searchSocios(term: String): Flow<List<SocioEntity>>
 
-    @Query("SELECT * FROM socios ORDER BY apellido_p, apellido_m, nombre")
+    @Query("SELECT * FROM socios ORDER BY id ASC")
     fun getAllSocios(): Flow<List<SocioEntity>>
 
-    @Query("SELECT * FROM socios ORDER BY apellido_p, apellido_m, nombre")
+    @Query("SELECT * FROM socios ORDER BY id ASC")
     suspend fun getAllSociosSync(): List<SocioEntity>
 
     @Query("SELECT * FROM integrantes")

@@ -75,7 +75,7 @@ fun CarritoItemCard(
                             if (!printDefault) {
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Surface(
-                                    color = MaterialTheme.colorScheme.errorContainer,
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
                                     shape = MaterialTheme.shapes.extraSmall
                                 ) {
                                     Text(
@@ -83,7 +83,7 @@ fun CarritoItemCard(
                                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onErrorContainer,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                         letterSpacing = 0.5.sp
                                     )
                                 }

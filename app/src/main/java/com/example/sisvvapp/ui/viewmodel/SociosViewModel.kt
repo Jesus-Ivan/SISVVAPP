@@ -38,7 +38,7 @@ class SociosViewModel(
                     socio.nombre.lowercase().contains(q) ||
                     socio.apellidoP.lowercase().contains(q) ||
                     socio.apellidoM.lowercase().contains(q)
-            }
+            }.sortedBy { it.id }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
