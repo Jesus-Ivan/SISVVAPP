@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -37,6 +38,7 @@ fun VistaVerdeTextField(
     placeholder: String? = null,
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
+    capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
     singleLine: Boolean = true,
     minLines: Int = 1,
     readOnly: Boolean = false,
@@ -82,7 +84,10 @@ fun VistaVerdeTextField(
         singleLine = singleLine,
         minLines = minLines,
 
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType,
+            capitalization = capitalization
+        ),
         visualTransformation = if(isPassword && !passwordVisible) {
             PasswordVisualTransformation()
         } else {
