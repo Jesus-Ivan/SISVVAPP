@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -185,10 +186,11 @@ fun NuevaVentaConfigScreen(
 
                 VistaVerdeTextField(
                     value = nombreCliente,
-                    onValueChange = onNombreClienteChange,
+                    onValueChange = { onNombreClienteChange(it.uppercase()) },
                     label = labelText,
                     readOnly = !isEditable,
-                    enabled = isEditable
+                    enabled = isEditable,
+                    capitalization = KeyboardCapitalization.Characters
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
