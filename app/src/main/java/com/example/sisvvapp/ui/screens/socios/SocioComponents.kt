@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +26,7 @@ import com.example.sisvvapp.ui.utils.LocalDeviceType
 @Composable
 fun VistaVerdeSocioCard(
     socio: SocioEntity,
+    onNuevaVentaClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isActive = socio.estatus != "CAN"
@@ -66,6 +69,22 @@ fun VistaVerdeSocioCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 2.dp)
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                IconButton(
+                    onClick = { onNuevaVentaClick() },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddShoppingCart,
+                        contentDescription = "Nueva Venta",
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
             // --- COLUMNA DERECHA ---
             Column(
@@ -87,7 +106,8 @@ fun VistaVerdeSocioCard(
 @Composable
 fun SociosList(
     socios: List<SocioEntity>,
-    onSocioClick: (SocioEntity) -> Unit
+    onSocioClick: (SocioEntity) -> Unit,
+    onNuevaVentaClick: (SocioEntity) -> Unit
 ) {
     val deviceType = LocalDeviceType.current
     val isTablet = deviceType == DeviceType.TABLET
@@ -103,6 +123,7 @@ fun SociosList(
         items(items = socios, key = { socio -> socio.id }) { socio ->
             VistaVerdeSocioCard(
                 socio = socio,
+                onNuevaVentaClick = { onNuevaVentaClick(socio) },
                 modifier = Modifier.clickable { onSocioClick(socio) }
             )
         }
@@ -121,7 +142,7 @@ fun SocioCardPreview() {
             estatus = "MEN", fotoUrl = "", numAccion = null, membresiaTipo = "Familiar"
         )
         Surface(modifier = Modifier.padding(16.dp)) {
-            VistaVerdeSocioCard(socio = mockSocio)
+            VistaVerdeSocioCard(socio = mockSocio, onNuevaVentaClick = {})
         }
     }
 }
@@ -143,7 +164,7 @@ fun SociosListPreview() {
             )
         )
         Surface(modifier = Modifier.fillMaxSize()) {
-            SociosList(socios = mockSocios, onSocioClick = {})
+            SociosList(socios = mockSocios, onSocioClick = {}, onNuevaVentaClick = {})
         }
     }
 }
