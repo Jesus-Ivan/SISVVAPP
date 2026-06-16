@@ -70,7 +70,6 @@ fun MainContainer(
     val networkMonitor = remember { NetworkMonitor(connectivityManager) }
     val isConnected by networkMonitor.isConnected.collectAsState(initial = true)
     
-    val ventaRepository = remember { VentaRepository(RetrofitClient.create(context), db) }
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -81,16 +80,8 @@ fun MainContainer(
     // Sincronización automática de la cola al recuperar conexión
     LaunchedEffect(isConnected) {
         if (isConnected) {
-            delay(4000) // Estabilidad de red al reconectar
-            scope.launch {
-                val procesadas = ventaRepository.procesarColaVentas()
-                if (procesadas > 0) {
-                    snackbarHostState.showSnackbar(
-                        message = "Se sincronizaron $procesadas ventas pendientes.",
-                        duration = SnackbarDuration.Short
-                    )
-                }
-            }
+            // Disparamos una sincronización inmediata al detectar conexión
+            SyncWorker.enqueueOneTime(context)
         }
     }
 

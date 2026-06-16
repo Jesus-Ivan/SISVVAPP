@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 import com.example.sisvvapp.network.dto.productos.ItemCarritoDto
 
 data class VentaRequest(
+    @SerializedName("request_id") val requestId: String,
     @SerializedName("corte_caja")        val corteCaja: Int,
     @SerializedName("tipo_venta")        val tipoVenta: String,
     @SerializedName("id_socio")          val idSocio: Int?,
