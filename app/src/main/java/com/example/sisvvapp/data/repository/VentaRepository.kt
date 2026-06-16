@@ -1,6 +1,7 @@
 ﻿package com.example.sisvvapp.data.repository
 import android.util.Log
 import android.content.Context
+import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
 import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.entity.VentaColaEntity
@@ -279,9 +280,16 @@ class VentaRepository(
         
         // DISPARADOR PROACTIVO: Pedimos a Android que intente sincronizar en cuanto haya red
         SyncWorker.enqueueOneTime(context)
+
+        // Asegurar que el foreground service esté corriendo
+        SyncForegroundService.start(context)
     }
 
     suspend fun enviarVentaOffline(venta: VentaColaEntity): Result<Unit> = runCatching {
+        // Si el registro estaba atascado en SYNCING (proceso matado), reseteamos a PENDIENTE
+        if (venta.estado == "SYNCING") {
+            ventaColaDao.updateEstado(venta.idTemporal, "PENDIENTE")
+        }
         // 1. Marcar como SYNCING
         ventaColaDao.updateEstado(venta.idTemporal, "SYNCING")
 
@@ -335,6 +343,7 @@ class VentaRepository(
                     return Result.success(Unit)
                 } else {
                     val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                    Log.e("VentaRepo", "Error ${response.code()} al sincronizar venta ${venta.idTemporal}: $errorBody")
                     lastError = Exception("Error ${response.code()}: $errorBody")
                     
                     // Si es un error de cliente (4xx), no tiene sentido reintentar

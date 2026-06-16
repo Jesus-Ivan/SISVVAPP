@@ -15,7 +15,7 @@ interface VentaColaDao {
     @Query("SELECT * FROM ventas_cola")
     suspend fun getAll(): List<VentaColaEntity>
 
-    @Query("SELECT * FROM ventas_cola WHERE estado = 'PENDIENTE' OR estado = 'ERROR' ORDER BY fechaCreacion ASC")
+    @Query("SELECT * FROM ventas_cola WHERE estado IN ('PENDIENTE', 'ERROR', 'SYNCING') ORDER BY fechaCreacion ASC")
     suspend fun getParaSincronizar(): List<VentaColaEntity>
 
     @Query("SELECT * FROM ventas_cola WHERE estado = 'PENDIENTE' ORDER BY fechaCreacion ASC")
@@ -38,4 +38,7 @@ interface VentaColaDao {
 
     @Query("SELECT COUNT(*) FROM ventas_cola WHERE estado = 'PENDIENTE'")
     fun countPendientesFlow(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM ventas_cola WHERE estado IN ('PENDIENTE', 'ERROR', 'SYNCING')")
+    fun countAllPendientesFlow(): Flow<Int>
 }

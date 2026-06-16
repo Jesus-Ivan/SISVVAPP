@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import okhttp3.OkHttpClient
 
+import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
 
 class SisvvApplication : Application(), ImageLoaderFactory {
@@ -20,6 +21,9 @@ class SisvvApplication : Application(), ImageLoaderFactory {
         super.onCreate()
         // Configurar sincronización periódica en segundo plano
         SyncWorker.enqueuePeriodic(this)
+
+        // Iniciar foreground service para monitoreo de red en tiempo real
+        SyncForegroundService.start(this)
     }
 
     fun emitUnauthorized() {
