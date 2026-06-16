@@ -32,6 +32,7 @@ import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.monitor.NetworkMonitor
 import com.example.sisvvapp.data.repository.VentaRepository
+import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
 import com.example.sisvvapp.network.RetrofitClient
 import com.example.sisvvapp.network.dto.cajas.CajaDto
@@ -77,10 +78,15 @@ fun MainContainer(
     // ViewModel persistente para el flujo de ventas
     val globalCarritoViewModel: CarritoViewModel = viewModel(factory = factory)
 
-    // Sincronización automática de la cola al recuperar conexión
+    // Sincronización al montar la pantalla (app reabierta o primer inicio)
+    LaunchedEffect(Unit) {
+        SyncForegroundService.start(context)
+        SyncWorker.enqueueOneTime(context)
+    }
+
+    // Sincronización automática al recuperar conexión
     LaunchedEffect(isConnected) {
         if (isConnected) {
-            // Disparamos una sincronización inmediata al detectar conexión
             SyncWorker.enqueueOneTime(context)
         }
     }

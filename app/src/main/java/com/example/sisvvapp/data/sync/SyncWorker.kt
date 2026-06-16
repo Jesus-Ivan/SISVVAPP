@@ -1,11 +1,6 @@
 package com.example.sisvvapp.data.sync
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
-import android.content.pm.ServiceInfo
-import android.os.Build
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.work.*
 import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.SessionManager
@@ -22,15 +17,6 @@ class SyncWorker(
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
-        if (runAttemptCount > 5) return Result.failure()
-        
-
-        try {
-            setForeground(getForegroundInfo())
-        } catch (e: Exception) {
-            Log.w("SyncWorker", "No se pudo establecer primer plano, continuando normal")
-        }
-
         delay(1000)
         val db = AppDatabase.getInstance(applicationContext)
         val api = RetrofitClient.create(applicationContext)
@@ -77,52 +63,28 @@ class SyncWorker(
                 }
             }
 
-            // 4. Finalizar
+            // 4. Verificar cola y detener foreground service si está vacía
+            val restantes = ventaRepo.getParaSincronizar()
+            if (restantes.isEmpty()) {
+                Log.d("SyncWorker", "Cola vacía, deteniendo foreground service")
+                SyncForegroundService.stop(applicationContext)
+            } else {
+                SyncForegroundService.start(applicationContext)
+            }
+
+            // 5. Finalizar
             if (envioExitoso) {
                 SessionManager.getInstance(applicationContext)
                     .saveLastSyncDate(System.currentTimeMillis())
                 Log.d("SyncWorker", "Sync completado exitosamente")
                 Result.success()
             } else {
-                Result.retry() // Retentará con política exponencial configurada en companion
+                Result.retry()
             }
         } catch (e: Exception) {
             Log.e("SyncWorker", "Error general en sync", e)
             Result.retry()
         }
-    }
-    override suspend fun getForegroundInfo(): ForegroundInfo {
-        val channelId = "sync_channel"
-        val notificationId = 101
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Sincronización de Datos"
-            val descriptionText = "Mantiene las ventas sincronizadas con el servidor"
-            val importance = NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel(channelId, name, importance).apply {
-                description = descriptionText
-            }
-            val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val notification = NotificationCompat.Builder(applicationContext, channelId)
-            .setContentTitle("SISVV: Sincronizando")
-            .setContentText("Enviando ventas pendientes...")
-            .setSmallIcon(android.R.drawable.stat_notify_sync)
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build()
-
-        return ForegroundInfo(
-            notificationId,
-            notification,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            } else {
-                0
-            }
-        )
     }
 
     companion object {
@@ -134,7 +96,6 @@ class SyncWorker(
                 .build()
             val request = OneTimeWorkRequestBuilder<SyncWorker>()
                 .setConstraints(constraints)
-                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.SECONDS)
                 .build()
             WorkManager.getInstance(context)
@@ -145,7 +106,7 @@ class SyncWorker(
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
             val request = PeriodicWorkRequestBuilder<SyncWorker>(
-                15, TimeUnit.MINUTES // Frecuencia mínima permitida por Android
+                15, TimeUnit.MINUTES
             )
                 .setConstraints(constraints)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
@@ -153,7 +114,7 @@ class SyncWorker(
             WorkManager.getInstance(context)
                 .enqueueUniquePeriodicWork(
                     PERIODIC_WORK_NAME,
-                    ExistingPeriodicWorkPolicy.KEEP, // Mantener el existente para no resetear el cronómetro
+                    ExistingPeriodicWorkPolicy.KEEP,
                     request
                 )
         }
