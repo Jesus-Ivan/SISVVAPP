@@ -84,11 +84,6 @@ fun NuevaVentaConfigScreen(
                         val index = displayOptions.indexOf(nuevoDisplay)
                         val realType = if (index >= 0) tiposDeVenta[index] else "general"
                         onTipoVentaChange(realType)
-                        onNombreClienteChange("")
-                        if (realType != "socio" && realType != "invitado") {
-                            onSearchQueryChange("")
-                            onSocioSeleccionado(null)
-                        }
                     }
                 )
 

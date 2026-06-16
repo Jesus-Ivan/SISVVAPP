@@ -8,7 +8,10 @@ import com.example.sisvvapp.data.repository.SocioRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
@@ -17,8 +20,17 @@ class NuevaVentaViewModel(
     private val tipoVentaRepository: com.example.sisvvapp.data.repository.TipoVentaRepository
 ) : ViewModel() {
 
-    private val _tiposVenta = MutableStateFlow<List<String>>(emptyList())
-    val tiposVenta: StateFlow<List<String>> = _tiposVenta
+    private val _allTiposVenta = MutableStateFlow<List<String>>(emptyList())
+    private val _isRestricted = MutableStateFlow(false)
+    val isRestricted: StateFlow<Boolean> = _isRestricted
+
+    val tiposVenta: StateFlow<List<String>> = combine(_allTiposVenta, _isRestricted) { tipos, restricted ->
+        if (restricted) {
+            tipos.filter { it == "socio" || it == "invitado" }
+        } else {
+            tipos
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _tipoVenta = MutableStateFlow("socio")
     val tipoVenta: StateFlow<String> = _tipoVenta
@@ -27,9 +39,9 @@ class NuevaVentaViewModel(
         viewModelScope.launch {
             tipoVentaRepository.getTiposVentaFlow().take(1).collect { entities ->
                 val nombres = entities.map { it.nombre }
-                _tiposVenta.value = if (nombres.isNotEmpty()) nombres else listOf("socio", "invitado", "general", "empleado")
-                if (!_tiposVenta.value.contains(_tipoVenta.value)) {
-                    _tipoVenta.value = _tiposVenta.value.firstOrNull() ?: "socio"
+                _allTiposVenta.value = if (nombres.isNotEmpty()) nombres else listOf("socio", "invitado", "general", "empleado")
+                if (!tiposVenta.value.contains(_tipoVenta.value)) {
+                    _tipoVenta.value = tiposVenta.value.firstOrNull() ?: "socio"
                 }
             }
         }
@@ -53,8 +65,31 @@ class NuevaVentaViewModel(
     private var searchJob: Job? = null
 
     fun setTipoVenta(tipo: String) {
+        val previousType = _tipoVenta.value
         _tipoVenta.value = tipo
-        clearSocioSelection()
+
+        if (tipo != "socio" && tipo != "invitado") {
+            clearSocioSelection()
+        } else {
+            // Mantener la selección del socio si existe
+            val socio = _socioSeleccionado.value
+            if (socio != null) {
+                if (tipo == "socio") {
+                    _nombreCliente.value = "${socio.nombre} ${socio.apellidoP} ${socio.apellidoM ?: ""}".trim()
+                } else if (previousType == "socio") {
+                    // Solo limpiamos si venimos de "socio", para no borrar lo que el usuario haya escrito en "invitado"
+                    _nombreCliente.value = ""
+                }
+            }
+        }
+    }
+
+    fun setRestrictedMode(restricted: Boolean) {
+        _isRestricted.value = restricted
+        // Si entramos en modo restringido y el tipo actual no es permitido, reseteamos a "socio"
+        if (restricted && _tipoVenta.value != "socio" && _tipoVenta.value != "invitado") {
+            _tipoVenta.value = "socio"
+        }
     }
 
     fun selectSocioById(id: Int) {

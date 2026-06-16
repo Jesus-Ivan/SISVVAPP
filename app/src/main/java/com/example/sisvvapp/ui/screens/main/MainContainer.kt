@@ -187,7 +187,10 @@ fun MainContainer(
 
                         LaunchedEffect(socioIdArg) {
                             if (socioIdArg != -1) {
+                                nuevaVentaViewModel.setRestrictedMode(true)
                                 nuevaVentaViewModel.selectSocioById(socioIdArg)
+                            } else {
+                                nuevaVentaViewModel.setRestrictedMode(false)
                             }
                         }
 
