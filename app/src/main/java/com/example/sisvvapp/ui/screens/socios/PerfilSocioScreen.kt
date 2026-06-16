@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -36,6 +38,7 @@ fun PerfilSocioScreen(
     socio: SocioEntity,
     integrantes: List<IntegranteEntity>,
     isOnline: Boolean = true,
+    onNuevaVentaClick: (SocioEntity) -> Unit,
     onBackClick: () -> Unit
 ) {
     var photoToShow by remember { mutableStateOf<String?>(null) }
@@ -182,6 +185,22 @@ fun PerfilSocioScreen(
             hazeState = hazeState,
             onDismiss = { photoToShow = null }
         )
+
+        FloatingActionButton(
+            onClick = { onNuevaVentaClick(socio) },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.AddShoppingCart,
+                contentDescription = "Nueva Venta",
+                modifier = Modifier.size(28.dp)
+            )
+        }
     }
 }
 
@@ -247,6 +266,7 @@ fun PerfilSocioScreenPreview() {
         PerfilSocioScreen(
             socio = mockSocio,
             integrantes = mockIntegrantes,
+            onNuevaVentaClick = {},
             onBackClick = {}
         )
     }

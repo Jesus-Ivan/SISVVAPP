@@ -167,8 +167,12 @@ fun MainContainer(
                         )
                     }
 
-                    composable(ScreenRoutes.NUEVA_VENTA) { backStackEntry ->
+                    composable(
+                        route = ScreenRoutes.NUEVA_VENTA_CON_ARG,
+                        arguments = listOf(navArgument("socioId") { type = NavType.IntType; defaultValue = -1 })
+                    ) { backStackEntry ->
                         val nuevaVentaViewModel: NuevaVentaViewModel = viewModel(factory = factory)
+                        val socioIdArg = backStackEntry.arguments?.getInt("socioId") ?: -1
                         val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
                         val cajas by sharedCajaViewModel.cajas.collectAsState()
                         val cajaActiva = cajas.find { it.id == selectedCajaId }
@@ -180,6 +184,12 @@ fun MainContainer(
                         val searchQuery by nuevaVentaViewModel.searchQuery.collectAsState()
                         val sociosEncontrados by nuevaVentaViewModel.sociosEncontrados.collectAsState()
                         val socioSeleccionado by nuevaVentaViewModel.socioSeleccionado.collectAsState()
+
+                        LaunchedEffect(socioIdArg) {
+                            if (socioIdArg != -1) {
+                                nuevaVentaViewModel.selectSocioById(socioIdArg)
+                            }
+                        }
 
                         LaunchedEffect(tipoVenta, nombreCliente, cajaActiva?.corte) {
                             // Si el carrito ya tiene items, no sobreescribimos la config de la venta
@@ -266,7 +276,12 @@ fun MainContainer(
                             val result = sendResult
                             when (result) {
                                 is SendResult.Success -> {
-                                    navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
+                                    val popped = navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
+                                    if (!popped) {
+                                        navController.navigate(ScreenRoutes.VENTAS) {
+                                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                        }
+                                    }
                                     scope.launch {
                                         snackbarHostState.showSnackbar(
                                             message = "Venta realizada con éxito (Folio: ${result.folio})",
@@ -276,7 +291,12 @@ fun MainContainer(
                                     }
                                 }
                                 is SendResult.Offline -> {
-                                    navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
+                                    val popped = navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
+                                    if (!popped) {
+                                        navController.navigate(ScreenRoutes.VENTAS) {
+                                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                        }
+                                    }
                                     scope.launch {
                                         snackbarHostState.showSnackbar(
                                             message = "Venta guardada, se sincronizará al reconectar",
@@ -305,7 +325,12 @@ fun MainContainer(
                             onConfirmar = { globalCarritoViewModel.confirmarVenta() },
                             onVolver = {
                                 globalCarritoViewModel.clearState()
-                                navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
+                                val popped = navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
+                                if (!popped) {
+                                    navController.navigate(ScreenRoutes.VENTAS) {
+                                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                    }
+                                }
                             },
                             onBackClick = { navController.popBackStack() },
                             isOnline = isConnected
@@ -383,6 +408,7 @@ fun MainContainer(
                             onSearchQueryChange = { sociosVM.search(it) },
                             onMenuClick = { scope.launch { drawerState.open() } },
                             onSocioClick = { navController.navigate(ScreenRoutes.crearRutaPerfilSocio(it)) },
+                            onNuevaVentaClick = { navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) },
                             onRetry = { sociosVM.sync() },
                             onRefresh = { sociosVM.search(""); sociosVM.sync() }
                         )
@@ -396,7 +422,7 @@ fun MainContainer(
                         LaunchedEffect(socioId) { sociosVM.getIntegrantesPorSocio(socioId) }
 
                         val s = socio
-                        if (s != null) PerfilSocioScreen(s, integrantes, viewModel?.isOnline ?: true) { navController.popBackStack() }
+                        if (s != null) PerfilSocioScreen(s, integrantes, viewModel?.isOnline ?: true, onNuevaVentaClick = { navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) }) { navController.popBackStack() }
                         else Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator(color = VerdePrincipal) }
                     }
                 }

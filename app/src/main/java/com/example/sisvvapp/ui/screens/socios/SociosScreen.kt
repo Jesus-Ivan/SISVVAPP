@@ -41,6 +41,7 @@ fun SociosScreen(
     onSearchQueryChange: (String) -> Unit,
     onMenuClick: () -> Unit,
     onSocioClick: (Int) -> Unit,
+    onNuevaVentaClick: (SocioEntity) -> Unit,
     onRetry: () -> Unit = {},
     onRefresh: () -> Unit = {}
 ) {
@@ -136,7 +137,8 @@ fun SociosScreen(
                         socios = socios,
                         onSocioClick = { socio ->
                             onSocioClick(socio.id)
-                        }
+                        },
+                        onNuevaVentaClick = onNuevaVentaClick
                     )
                 }
             }
@@ -168,6 +170,7 @@ fun SociosScreenPreview() {
             onSearchQueryChange = {},
             onMenuClick = {},
             onSocioClick = {},
+            onNuevaVentaClick = {},
             nombreCaja = "Caja de Pruebas"
         )
     }

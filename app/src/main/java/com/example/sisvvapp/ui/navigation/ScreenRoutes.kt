@@ -8,6 +8,7 @@ object ScreenRoutes {
     const val SOCIOS = "socios"
     const val AJUSTES = "ajustes"
     const val NUEVA_VENTA = "nueva_venta"
+    const val NUEVA_VENTA_CON_ARG = "nueva_venta?socioId={socioId}"
     const val BUSCAR_PRODUCTOS = "buscar_productos"
     const val MODIFICADORES = "modificadores/{productoId}"
     const val RESUMEN_CARRITO = "resumen_carrito"
@@ -15,6 +16,7 @@ object ScreenRoutes {
 
     const val PERFIL_SOCIO = "perfil_socio/{socioId}"
 
+    fun crearRutaNuevaVenta(socioId: Int? = null) = if (socioId != null) "nueva_venta?socioId=$socioId" else "nueva_venta"
     fun crearRutaPerfilSocio(socioId: Int) = "perfil_socio/$socioId"
     fun crearRutaModificadores(productoId: Int) = "modificadores/$productoId"
     fun crearRutaDetalleVenta(id: String) = "detalle_venta/$id"

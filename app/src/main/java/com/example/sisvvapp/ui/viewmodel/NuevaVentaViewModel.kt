@@ -57,6 +57,16 @@ class NuevaVentaViewModel(
         clearSocioSelection()
     }
 
+    fun selectSocioById(id: Int) {
+        viewModelScope.launch {
+            val socio = socioRepository.getSocioById(id)
+            if (socio != null) {
+                _tipoVenta.value = "socio"
+                selectSocio(socio)
+            }
+        }
+    }
+
     fun searchSocios(query: String) {
         _searchQuery.value = query
         searchJob?.cancel()
