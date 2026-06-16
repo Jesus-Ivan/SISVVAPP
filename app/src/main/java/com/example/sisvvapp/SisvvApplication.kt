@@ -9,10 +9,18 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import okhttp3.OkHttpClient
 
+import com.example.sisvvapp.data.sync.SyncWorker
+
 class SisvvApplication : Application(), ImageLoaderFactory {
 
     private val _unauthorizedEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val unauthorizedEvent: SharedFlow<Unit> = _unauthorizedEvent
+
+    override fun onCreate() {
+        super.onCreate()
+        // Configurar sincronización periódica en segundo plano
+        SyncWorker.enqueuePeriodic(this)
+    }
 
     fun emitUnauthorized() {
         _unauthorizedEvent.tryEmit(Unit)

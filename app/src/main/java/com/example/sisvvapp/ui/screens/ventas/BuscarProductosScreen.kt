@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EditNote
@@ -55,6 +56,8 @@ import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
+import com.example.sisvvapp.ui.theme.Grey950
+import com.example.sisvvapp.ui.theme.OrangeSaaS
 import com.example.sisvvapp.ui.theme.Poppins
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.utils.DeviceType
@@ -144,27 +147,36 @@ fun BuscarProductosScreen(
                     onClick = onVerCarrito,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(16.dp),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    shape = MaterialTheme.shapes.medium
+                        .padding(16.dp)
+                        .size(80.dp),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    elevation = FloatingActionButtonDefaults.elevation(8.dp)
                 ) {
                     BadgedBox(
                         badge = {
                             if (carritoCount > 0) {
                                 Badge(
                                     containerColor = MaterialTheme.colorScheme.error,
-                                    contentColor = MaterialTheme.colorScheme.onError
+                                    contentColor = MaterialTheme.colorScheme.onError,
+                                    modifier = Modifier.padding(end = 4.dp, top = 4.dp)
                                 ) {
-                                    Text("$carritoCount")
+                                    Text(
+                                        text = carritoCount.toString(),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp
+                                    )
                                 }
                             }
                         }
                     ) {
                         Icon(
                             imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = stringResource(R.string.buscar_productos_carrito, carritoCount),
-                            modifier = Modifier.size(28.dp)
+                            contentDescription = stringResource(
+                                R.string.buscar_productos_carrito,
+                                carritoCount
+                            ),
+                            modifier = Modifier.size(40.dp)
                         )
                     }
                 }

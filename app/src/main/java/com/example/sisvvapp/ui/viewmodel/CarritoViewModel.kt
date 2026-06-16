@@ -256,7 +256,11 @@ class CarritoViewModel(
                 )
             }
 
+            // Generamos o usamos el ID temporal para el request_id
+            val idTemporal = _idTemporalExistente.value ?: java.util.UUID.randomUUID().toString()
+
             val request = VentaRequest(
+                requestId = idTemporal,
                 corteCaja = _corteCaja.value,
                 tipoVenta = _tipoVenta.value,
                 idSocio = _socioId.value,
@@ -268,7 +272,7 @@ class CarritoViewModel(
 
             if (_appendMode.value && _folioExistente.value != null && _folioExistente.value!! > 0) {
                 val folio = _folioExistente.value!!
-                val result = ventaRepository.appendProductos(folio, request, _idTemporalExistente.value)
+                val result = ventaRepository.appendProductos(folio, request, idTemporal)
                 result.fold(
                     onSuccess = {
                         Log.d("CarritoVM", "Productos agregados a venta $folio")
@@ -288,7 +292,7 @@ class CarritoViewModel(
                 ventaRepository.mergeIntoCola(request, _idTemporalExistente.value!!)
                 _sendResult.value = SendResult.Success(0)
             } else {
-                val result = ventaRepository.crearVenta(request)
+                val result = ventaRepository.crearVenta(request, idTemporal)
                 result.fold(
                     onSuccess = { response ->
                         Log.d("CarritoVM", "Venta creada: folio ${response.folio}")

@@ -1,5 +1,7 @@
 ﻿package com.example.sisvvapp.data.repository
 import android.util.Log
+import android.content.Context
+import com.example.sisvvapp.data.sync.SyncWorker
 import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.entity.VentaColaEntity
 import com.example.sisvvapp.data.local.entity.VentaRecibidaEntity
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.map
 class VentaRepository(
     private val api: ApiService,
     private val db: AppDatabase,
+    private val context: Context
 ) {
     private val ventaColaDao = db.ventaColaDao()
     private val ventaRecibidaDao = db.ventaRecibidaDao()
@@ -157,9 +160,10 @@ class VentaRepository(
             ApiResult.NetworkError("Error de conexión")
         }
     }
-    suspend fun crearVenta(request: VentaRequest): Result<com.example.sisvvapp.network.dto.ventas.VentaResponse> {
+    suspend fun crearVenta(request: VentaRequest, idTemporal: String): Result<com.example.sisvvapp.network.dto.ventas.VentaResponse> {
+        val requestConId = request.copy(requestId = idTemporal)
         return try {
-            val response = api.crearVenta(request)
+            val response = api.crearVenta(requestConId)
             if (response.isSuccessful) {
                 val body = response.body()!!
                 Log.d("VentaRepo", "Venta creada: folio ${body.folio}")
@@ -171,14 +175,17 @@ class VentaRepository(
             }
         } catch (e: Exception) {
             val msg = e.message?.lowercase() ?: ""
-            val isNetworkError = msg.contains("unable to resolve host") ||
+            val isNetworkError = e is ServerUnreachableException ||
+                    msg.contains("unable to resolve host") ||
                     msg.contains("timeout") ||
                     msg.contains("failed to connect") ||
                     msg.contains("network is unreachable") ||
-                    msg.contains("route to host")
+                    msg.contains("route to host") ||
+                    msg.contains("connection refused")
+            
             if (isNetworkError) {
-                Log.w("VentaRepo", "Sin conexión, encolando venta offline", e)
-                encolarVentaOffline(request, null)
+                Log.w("VentaRepo", "Sin conexión o servidor inalcanzable, encolando venta offline", e)
+                encolarVentaOffline(request, null, idTemporal)
                 Result.failure(Exception("offline"))
             } else {
                 Log.e("VentaRepo", "Error no recuperable al crear venta, no se encola", e)
@@ -188,8 +195,9 @@ class VentaRepository(
     }
 
     suspend fun appendProductos(folio: Int, request: VentaRequest, idTemporal: String? = null): Result<Unit> {
+        val requestConId = if (idTemporal != null) request.copy(requestId = idTemporal) else request
         return try {
-            val response = api.appendProductos(folio, request)
+            val response = api.appendProductos(folio, requestConId)
             if (response.isSuccessful) {
                 Log.d("VentaRepo", "Productos agregados a venta $folio")
                 Result.success(Unit)
@@ -200,13 +208,16 @@ class VentaRepository(
             }
         } catch (e: Exception) {
             val msg = e.message?.lowercase() ?: ""
-            val isNetworkError = msg.contains("unable to resolve host") ||
+            val isNetworkError = e is ServerUnreachableException ||
+                    msg.contains("unable to resolve host") ||
                     msg.contains("timeout") ||
                     msg.contains("failed to connect") ||
                     msg.contains("network is unreachable") ||
-                    msg.contains("route to host")
+                    msg.contains("route to host") ||
+                    msg.contains("connection refused")
+            
             if (isNetworkError) {
-                Log.w("VentaRepo", "Sin conexión, encolando append offline")
+                Log.w("VentaRepo", "Sin conexión o servidor inalcanzable, encolando append offline")
                 encolarVentaOffline(request, if (folio > 0) folio else null, idTemporal)
                 Result.failure(Exception("offline"))
             } else {
@@ -265,6 +276,9 @@ class VentaRepository(
             )
         }
         ventaColaDao.insert(entity)
+        
+        // DISPARADOR PROACTIVO: Pedimos a Android que intente sincronizar en cuanto haya red
+        SyncWorker.enqueueOneTime(context)
     }
 
     suspend fun enviarVentaOffline(venta: VentaColaEntity): Result<Unit> = runCatching {
@@ -280,6 +294,7 @@ class VentaRepository(
             emptyList()
         }
         val request = VentaRequest(
+            requestId = venta.idTemporal,
             corteCaja = actual.corteCaja,
             tipoVenta = actual.tipoVenta,
             idSocio = actual.idSocio,
@@ -293,7 +308,7 @@ class VentaRepository(
 
         for (attempt in 1..maxRetries) {
             try {
-                val response = if (actual.folioExistente != null) {
+                val response = if (actual.folioExistente != null && actual.folioExistente > 0) {
                     api.appendProductos(actual.folioExistente, request)
                 } else {
                     api.crearVenta(request)
@@ -313,6 +328,7 @@ class VentaRepository(
                         val fechaStr = java.time.LocalDate.now().toString()
                         syncVentas(fechaStr, venta.corteCaja)
                     } else {
+                        // Si es exitoso pero sin body (raro), igual removemos de la cola
                         ventaColaDao.deleteById(venta.idTemporal)
                     }
                     Log.d("VentaRepo", "Venta ${venta.idTemporal} sincronizada con éxito")
@@ -320,7 +336,10 @@ class VentaRepository(
                 } else {
                     val errorBody = response.errorBody()?.string() ?: "Error desconocido"
                     lastError = Exception("Error ${response.code()}: $errorBody")
-                    if (response.code() in listOf(400, 404, 409, 422)) {
+                    
+                    // Si es un error de cliente (4xx), no tiene sentido reintentar
+                    if (response.code() in 400..499) {
+                        Log.w("VentaRepo", "Error de cliente ${response.code()}, abortando reintentos")
                         break
                     }
                     Log.w("VentaRepo", "Intento $attempt/$maxRetries falló (${response.code()}), reintentando...")
@@ -328,6 +347,11 @@ class VentaRepository(
             } catch (e: Exception) {
                 lastError = e
                 Log.w("VentaRepo", "Intento $attempt/$maxRetries falló: ${e.message}, reintentando...")
+                
+                // Si no hay red, no seguimos intentando en este ciclo, el Worker o el MainContainer lo harán luego
+                val msg = e.message?.lowercase() ?: ""
+                val isNetworkError = e is ServerUnreachableException || msg.contains("host") || msg.contains("connect")
+                if (isNetworkError) break
             }
 
             if (attempt < maxRetries) {
@@ -335,6 +359,7 @@ class VentaRepository(
             }
         }
 
+        // Si llegamos aquí, fallaron todos los intentos o fue un error fatal
         ventaColaDao.updateEstado(venta.idTemporal, "ERROR")
         throw lastError ?: Exception("Error desconocido al sincronizar venta ${venta.idTemporal}")
     }
