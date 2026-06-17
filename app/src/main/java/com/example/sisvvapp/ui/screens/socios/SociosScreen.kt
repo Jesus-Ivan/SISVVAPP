@@ -2,6 +2,7 @@ package com.example.sisvvapp.ui.screens.socios
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
@@ -11,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -47,8 +49,15 @@ fun SociosScreen(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
+    val loadingListState = rememberLazyListState()
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
+    }
+    LaunchedEffect(Unit) {
+        snapshotFlow { loadingListState.isScrollInProgress }
+            .collect { scrolling ->
+                if (scrolling) keyboardController?.hide()
+            }
     }
     VistaVerdeScaffold(
         title = stringResource(R.string.title_socios),
@@ -87,6 +96,7 @@ fun SociosScreen(
                 if (isLoading) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
+                        state = loadingListState,
                         contentPadding = PaddingValues(bottom = 88.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {

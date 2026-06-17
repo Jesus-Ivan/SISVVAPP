@@ -5,12 +5,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -111,8 +115,17 @@ fun SociosList(
 ) {
     val deviceType = LocalDeviceType.current
     val isTablet = deviceType == DeviceType.TABLET
+    val gridState = rememberLazyGridState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    LaunchedEffect(Unit) {
+        snapshotFlow { gridState.isScrollInProgress }
+            .collect { scrolling ->
+                if (scrolling) keyboardController?.hide()
+            }
+    }
 
     LazyVerticalGrid(
+        state = gridState,
         columns = GridCells.Fixed(if (isTablet) 2 else 1),
         contentPadding = PaddingValues(vertical = 16.dp),
         // Espaciado vertical entre tarjetas

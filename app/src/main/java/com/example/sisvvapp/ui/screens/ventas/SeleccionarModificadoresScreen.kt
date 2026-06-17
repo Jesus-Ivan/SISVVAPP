@@ -86,7 +86,7 @@ fun SeleccionarModificadoresScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = producto.descripcion.uppercase(),
-                            style = if (isTablet) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineSmall,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary,
                         )
