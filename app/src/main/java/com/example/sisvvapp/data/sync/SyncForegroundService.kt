@@ -36,11 +36,16 @@ class SyncForegroundService : Service() {
         const val TAG = "SyncForegroundService"
 
         fun start(context: Context) {
-            val intent = Intent(context, SyncForegroundService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
+            try {
+                val intent = Intent(context, SyncForegroundService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }
+            } catch (e: Exception) {
+                // Captura ForegroundServiceStartNotAllowedException en Android 12+ y otras excepciones
+                Log.w(TAG, "No se puede iniciar SyncForegroundService desde background: ${e.message}")
             }
         }
 
@@ -120,6 +125,7 @@ class SyncForegroundService : Service() {
 
     private fun triggerSync() {
         serviceScope.launch {
+            delay(2000)
             val db = AppDatabase.getInstance(this@SyncForegroundService)
             val pendientes = db.ventaColaDao().getParaSincronizar()
             if (pendientes.isEmpty()) {

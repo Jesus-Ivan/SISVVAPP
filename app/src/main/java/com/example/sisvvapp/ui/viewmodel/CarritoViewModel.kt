@@ -289,8 +289,14 @@ class CarritoViewModel(
                 )
             } else if (_appendMode.value && _idTemporalExistente.value != null) {
                 // Venta offline sin folio real → merge local directo a la cola
-                ventaRepository.mergeIntoCola(request, _idTemporalExistente.value!!)
-                _sendResult.value = SendResult.Success(0)
+                val merged = ventaRepository.mergeIntoCola(request, _idTemporalExistente.value!!)
+                if (merged) {
+                    _sendResult.value = SendResult.Success(0)
+                } else {
+                    Log.w("CarritoVM", "Entity ${_idTemporalExistente.value} no encontrado en cola, creando nuevo registro offline")
+                    ventaRepository.encolarVentaOffline(request, _folioExistente.value, null)
+                    _sendResult.value = SendResult.Success(0)
+                }
             } else {
                 val result = ventaRepository.crearVenta(request, idTemporal)
                 result.fold(

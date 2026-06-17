@@ -6,6 +6,8 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 class NetworkMonitor(private val connectivityManager: ConnectivityManager) {
 
@@ -38,5 +40,5 @@ class NetworkMonitor(private val connectivityManager: ConnectivityManager) {
         awaitClose {
             connectivityManager.unregisterNetworkCallback(callback)
         }
-    }
+    }.conflate().distinctUntilChanged()
 }

@@ -11,6 +11,7 @@ import okhttp3.OkHttpClient
 
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
+import com.example.sisvvapp.data.sync.WatchdogWorker
 
 class SisvvApplication : Application(), ImageLoaderFactory {
 
@@ -24,6 +25,9 @@ class SisvvApplication : Application(), ImageLoaderFactory {
 
         // Iniciar foreground service para monitoreo de red en tiempo real
         SyncForegroundService.start(this)
+
+        // Watchdog para recuperar servicio después de force kill
+        WatchdogWorker.enqueue(this)
     }
 
     fun emitUnauthorized() {

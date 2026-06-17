@@ -285,6 +285,7 @@ fun MainContainer(
                             val result = sendResult
                             when (result) {
                                 is SendResult.Success -> {
+                                    globalCarritoViewModel.clearState()
                                     val popped = navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
                                     if (!popped) {
                                         navController.navigate(ScreenRoutes.VENTAS) {
@@ -296,10 +297,10 @@ fun MainContainer(
                                             message = "Venta realizada con éxito (Folio: ${result.folio})",
                                             duration = SnackbarDuration.Short
                                         )
-                                        globalCarritoViewModel.clearState()
                                     }
                                 }
                                 is SendResult.Offline -> {
+                                    globalCarritoViewModel.clearState()
                                     val popped = navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
                                     if (!popped) {
                                         navController.navigate(ScreenRoutes.VENTAS) {
@@ -311,7 +312,6 @@ fun MainContainer(
                                             message = "Venta guardada, se sincronizará al reconectar",
                                             duration = SnackbarDuration.Short
                                         )
-                                        globalCarritoViewModel.clearState()
                                     }
                                 }
                                 else -> {}

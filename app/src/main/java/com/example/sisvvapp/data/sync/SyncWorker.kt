@@ -27,17 +27,17 @@ class SyncWorker(
         val tipoVentaRepo = com.example.sisvvapp.data.repository.TipoVentaRepository(api, db.tipoVentaDao())
         val ventaRepo = VentaRepository(api, db, applicationContext)
         return try {
-            // Sync catálogos
-            socioRepo.sync()
-            productoRepo.sync()
-            cajaRepo.sync()
-            tipoPagoRepo.sync()
-            tipoVentaRepo.sync()
-            ventaRepo.syncVentas(java.time.LocalDate.now().toString())
+            val syncCatalogs = inputData.getBoolean("sync_catalogs", false)
 
-            // Sincronizar ventas del día y descargar detalles (Prefetch)
-            val today = java.time.LocalDate.now().toString()
-            ventaRepo.syncVentas(today)
+            if (syncCatalogs) {
+                socioRepo.sync()
+                productoRepo.sync()
+                cajaRepo.sync()
+                tipoPagoRepo.sync()
+                tipoVentaRepo.sync()
+            }
+
+            ventaRepo.syncVentas(java.time.LocalDate.now().toString())
 
             // Descargar fotos de socios e integrantes para uso offline
             try {
@@ -110,6 +110,7 @@ class SyncWorker(
             )
                 .setConstraints(constraints)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+                .setInputData(workDataOf("sync_catalogs" to true))
                 .build()
             WorkManager.getInstance(context)
                 .enqueueUniquePeriodicWork(

@@ -1,8 +1,9 @@
-﻿package com.example.sisvvapp.data.repository
+package com.example.sisvvapp.data.repository
 import android.util.Log
 import android.content.Context
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
+import com.example.sisvvapp.data.sync.WatchdogWorker
 import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.entity.VentaColaEntity
 import com.example.sisvvapp.data.local.entity.VentaRecibidaEntity
@@ -172,7 +173,12 @@ class VentaRepository(
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Error desconocido"
                 Log.w("VentaRepo", "Error al crear venta: ${response.code()} - $errorBody")
-                Result.failure(Exception("Error ${response.code()}: $errorBody"))
+                if (response.code() >= 500 || response.code() == 429) {
+                    encolarVentaOffline(request, null, idTemporal)
+                    Result.failure(Exception("offline"))
+                } else {
+                    Result.failure(Exception("Error ${response.code()}: $errorBody"))
+                }
             }
         } catch (e: Exception) {
             val msg = e.message?.lowercase() ?: ""
@@ -205,7 +211,12 @@ class VentaRepository(
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Error desconocido"
                 Log.w("VentaRepo", "Error al agregar productos: ${response.code()} - $errorBody")
-                Result.failure(Exception("Error ${response.code()}: $errorBody"))
+                if (response.code() >= 500 || response.code() == 429) {
+                    encolarVentaOffline(request, if (folio > 0) folio else null, idTemporal)
+                    Result.failure(Exception("offline"))
+                } else {
+                    Result.failure(Exception("Error ${response.code()}: $errorBody"))
+                }
             }
         } catch (e: Exception) {
             val msg = e.message?.lowercase() ?: ""
@@ -228,7 +239,7 @@ class VentaRepository(
         }
     }
 
-    private suspend fun encolarVentaOffline(request: VentaRequest, folioExistente: Int?, idTemporalExistente: String? = null) {
+    suspend fun encolarVentaOffline(request: VentaRequest, folioExistente: Int?, idTemporalExistente: String? = null) {
         val finalIdTemporal = idTemporalExistente ?: java.util.UUID.randomUUID().toString()
         
         // Buscamos si ya existe en la cola para no duplicar si es una edición
@@ -283,6 +294,9 @@ class VentaRepository(
 
         // Asegurar que el foreground service esté corriendo
         SyncForegroundService.start(context)
+
+        // Watchdog para monitoreo post-force-kill
+        WatchdogWorker.enqueue(context)
     }
 
     suspend fun enviarVentaOffline(venta: VentaColaEntity): Result<Unit> = runCatching {
@@ -325,32 +339,54 @@ class VentaRepository(
                 if (response.isSuccessful) {
                     val body = response.body()
                     if (body != null) {
-                        db.withTransaction {
-                            ventaRecibidaDao.deleteByFolio(venta.folioExistente ?: 0)
-                            ventaRecibidaDao.insertAll(listOf(body.toVentaRecibidaEntity()))
-                            ventaColaDao.deleteById(venta.idTemporal)
-                        }
                         if (venta.folioExistente != null && venta.folioExistente > 0) {
-                            getVentaDetalle(venta.folioExistente)
+                            // APPEND: response solo tiene {folio} — descargar datos completos
+                            val detalle = getVentaDetalle(venta.folioExistente)
+                            if (detalle != null) {
+                                db.withTransaction {
+                                    ventaRecibidaDao.deleteByFolio(venta.folioExistente)
+                                    ventaRecibidaDao.insertAll(listOf(detalle.toVentaRecibidaEntity()))
+                                    ventaColaDao.deleteById(venta.idTemporal)
+                                }
+                            } else {
+                                // No se pudo obtener detalle, pero append ya se aplicó en servidor
+                                // Mantener caché local intacta, solo remover de cola
+                                ventaColaDao.deleteById(venta.idTemporal)
+                            }
+                        } else {
+                            // NUEVA VENTA: insertar response y luego refrescar con detalles completos
+                            db.withTransaction {
+                                ventaRecibidaDao.deleteByFolio(0) // no-op para folio=0
+                                ventaRecibidaDao.insertAll(listOf(body.toVentaRecibidaEntity()))
+                                ventaColaDao.deleteById(venta.idTemporal)
+                            }
+                            getVentaDetalle(body.folio) // safeguard para poblar datos completos
                         }
                         val fechaStr = java.time.LocalDate.now().toString()
                         syncVentas(fechaStr, venta.corteCaja)
                     } else {
-                        // Si es exitoso pero sin body (raro), igual removemos de la cola
+                        // Éxito sin body — remover de cola, el servidor tiene los datos
                         ventaColaDao.deleteById(venta.idTemporal)
                     }
-                    Log.d("VentaRepo", "Venta ${venta.idTemporal} sincronizada con éxito")
+                    Log.d("VentaRepo", "Venta ${venta.idTemporal} Sincronizada con éxito")
                     return Result.success(Unit)
                 } else {
                     val errorBody = response.errorBody()?.string() ?: "Error desconocido"
                     Log.e("VentaRepo", "Error ${response.code()} al sincronizar venta ${venta.idTemporal}: $errorBody")
-                    lastError = Exception("Error ${response.code()}: $errorBody")
                     
-                    // Si es un error de cliente (4xx), no tiene sentido reintentar
-                    if (response.code() in 400..499) {
-                        Log.w("VentaRepo", "Error de cliente ${response.code()}, abortando reintentos")
-                        break
+                    if (response.code() == 409) {
+                        Log.d("VentaRepo", "Venta ${venta.idTemporal} ya existe en servidor, eliminando de cola")
+                        ventaColaDao.deleteById(venta.idTemporal)
+                        return Result.success(Unit)
                     }
+                    
+                    if (response.code() in 400..499 && response.code() != 429) {
+                        Log.w("VentaRepo", "Error de cliente ${response.code()}, marcando como ERROR_FATAL")
+                        ventaColaDao.updateEstado(venta.idTemporal, "ERROR_FATAL")
+                        throw Exception("Error ${response.code()}: $errorBody")
+                    }
+                    
+                    lastError = Exception("Error ${response.code()}: $errorBody")
                     Log.w("VentaRepo", "Intento $attempt/$maxRetries falló (${response.code()}), reintentando...")
                 }
             } catch (e: Exception) {
@@ -439,8 +475,8 @@ class VentaRepository(
         }
     }
 
-    suspend fun mergeIntoCola(request: VentaRequest, idTemporal: String) {
-        val existente = ventaColaDao.getById(idTemporal) ?: return
+    suspend fun mergeIntoCola(request: VentaRequest, idTemporal: String): Boolean {
+        val existente = ventaColaDao.getById(idTemporal) ?: return false
         val type = object : TypeToken<List<ItemCarritoDto>>() {}.type
         val existentes: List<ItemCarritoDto> = try {
             gson.fromJson(existente.productosJson, type)
@@ -460,6 +496,7 @@ class VentaRepository(
         )
         ventaColaDao.insert(updated)
         Log.d("VentaRepo", "Productos mergeados localmente en cola $idTemporal")
+        return true
     }
 }
 private fun VentaColaEntity.toVentaDto(): VentaDto {
@@ -617,5 +654,22 @@ private fun VentaRecibidaEntity.toVentaDto(): VentaDto {
         productos = productos,
         pagos = pagos,
         syncStatus = "RECIBIDA"
+    )
+}
+
+fun VentaDto.toVentaRecibidaEntity(): VentaRecibidaEntity {
+    val gson = Gson()
+    val fullFecha = if (!fecha.isNullOrBlank() && !hora.isNullOrBlank()) "$fecha $hora:00" else fecha ?: ""
+    return VentaRecibidaEntity(
+        folio = folio,
+        fecha = fullFecha,
+        total = total,
+        estado = estatus,
+        clienteNombre = nombreCliente,
+        socioId = socioId,
+        clavePuntoVenta = clavePuntoVenta,
+        corteCaja = cajaId ?: 0,
+        productosJson = gson.toJson(productos),
+        pagosJson = gson.toJson(pagos)
     )
 }
