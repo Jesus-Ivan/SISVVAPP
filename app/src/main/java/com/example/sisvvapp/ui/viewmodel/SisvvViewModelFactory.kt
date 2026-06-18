@@ -24,7 +24,7 @@ class SisvvViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(SisvvViewModel::class.java) ->
-                SisvvViewModel(context) as T
+                SisvvViewModel(context.applicationContext) as T
 
             modelClass.isAssignableFrom(SociosViewModel::class.java) ->
                 SociosViewModel(SocioRepository(api, db.socioDao(), context)) as T
