@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -18,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
+import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.*
@@ -29,9 +31,11 @@ fun AppNavigationDrawerContent(
     currentRoute: String,
     onNavigate: (String) -> Unit,
     onCloseDrawer: () -> Unit,
-    viewModel: SisvvViewModel? = null,
-    pendientesCount: Int = 0
+    viewModel: SisvvViewModel? = null
 ) {
+    val context = LocalContext.current
+    val db = AppDatabase.getInstance(context)
+    val pendientesCount by db.ventaColaDao().countPendientesFlow().collectAsState(initial = 0)
     val items = listOf(
         DrawerItem(ScreenRoutes.VENTAS, stringResource(R.string.menu_ventas), Icons.Default.ShoppingCart),
         DrawerItem(ScreenRoutes.SOCIOS, stringResource(R.string.menu_socios), Icons.Default.Person),

@@ -24,3 +24,5 @@ fun getDeviceType(): DeviceType {
 }
 
 val LocalDeviceType = staticCompositionLocalOf { DeviceType.MOBILE }
+
+val LocalIsConnected = staticCompositionLocalOf { true }

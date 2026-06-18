@@ -1,21 +1,22 @@
 package com.example.sisvvapp
 
+import android.content.Context
 import android.content.pm.ActivityInfo
+import android.net.ConnectivityManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.sisvvapp.data.monitor.NetworkMonitor
+import com.example.sisvvapp.data.sync.SyncWorker
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.navigation.Screen
 import com.example.sisvvapp.ui.screens.caja.CajaScreen
@@ -24,11 +25,11 @@ import com.example.sisvvapp.ui.screens.main.MainContainer
 import com.example.sisvvapp.ui.screens.splash.SplashScreen
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
-import com.example.sisvvapp.ui.viewmodel.CajaViewModel
-import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
-import com.example.sisvvapp.data.sync.SyncWorker
+import com.example.sisvvapp.ui.utils.LocalIsConnected
+import com.example.sisvvapp.ui.viewmodel.CajaViewModel
+import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 import kotlinx.coroutines.flow.collect
 
 class MainActivity : ComponentActivity() {
@@ -55,6 +56,10 @@ class MainActivity : ComponentActivity() {
                 else -> isSystemInDarkTheme() // Sistema (0)
             }
 
+            val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val networkMonitor = remember { NetworkMonitor(connectivityManager) }
+            val isConnected by networkMonitor.isConnected.collectAsState(initial = true)
+
             SISVVAPPTheme(darkTheme = isDarkTheme) {
                 val navController = rememberNavController()
 
@@ -74,7 +79,10 @@ class MainActivity : ComponentActivity() {
                         DeviceType.TABLET
                     }
 
-                CompositionLocalProvider(LocalDeviceType provides deviceType) {
+                CompositionLocalProvider(
+                    LocalDeviceType provides deviceType,
+                    LocalIsConnected provides isConnected
+                ) {
                     NavHost(
                         navController = navController,
                         startDestination = Screen.Splash.route

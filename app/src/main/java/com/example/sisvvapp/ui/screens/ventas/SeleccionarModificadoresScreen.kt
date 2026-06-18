@@ -119,7 +119,7 @@ fun SeleccionarModificadoresScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(end = 16.dp)
                     ) {
-                        items(gruposModificadores) { grupo ->
+                        items(gruposModificadores, key = { it.idGrupo }) { grupo ->
                             val isSelected = selectedGroupId == grupo.idGrupo
                             FilterChip(
                                 selected = isSelected,

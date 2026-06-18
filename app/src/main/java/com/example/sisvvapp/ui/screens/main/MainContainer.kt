@@ -1,7 +1,6 @@
 package com.example.sisvvapp.ui.screens.main
 
 import android.content.Context
-import android.net.ConnectivityManager
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -30,7 +29,6 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.SessionManager
-import com.example.sisvvapp.data.monitor.NetworkMonitor
 import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
@@ -49,6 +47,7 @@ import com.example.sisvvapp.ui.screens.ventas.*
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
+import com.example.sisvvapp.ui.utils.LocalIsConnected
 import com.example.sisvvapp.ui.viewmodel.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -64,13 +63,10 @@ fun MainContainer(
     val factory = SisvvViewModelFactory(context)
     val sharedCajaViewModel: CajaViewModel = viewModel(factory = factory)
     val db = AppDatabase.getInstance(context)
-    val pendientesCount by db.ventaColaDao().countPendientesFlow().collectAsState(initial = 0)
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val networkMonitor = remember { NetworkMonitor(connectivityManager) }
-    val isConnected by networkMonitor.isConnected.collectAsState(initial = true)
-    
+    val isConnected = LocalIsConnected.current
+
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -112,8 +108,7 @@ fun MainContainer(
                         }
                     },
                     onCloseDrawer = { scope.launch { drawerState.close() } },
-                    viewModel = viewModel,
-                    pendientesCount = pendientesCount
+                    viewModel = viewModel
                 )
             }
         ) {
@@ -124,13 +119,19 @@ fun MainContainer(
                         val uiState by ventasViewModel.uiState.collectAsState()
                         val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
                         val cajas by sharedCajaViewModel.cajas.collectAsState()
-                        val cajaActiva = cajas.find { it.id == selectedCajaId }
-                        val nombreCajaActiva = cajaActiva?.nombre ?: "Sin Caja"
-                        val corteCajaActivo = cajaActiva?.corte
+                        val cajaActiva by remember(selectedCajaId, cajas) {
+                            derivedStateOf { cajas.find { it.id == selectedCajaId } }
+                        }
+                        val nombreCajaActiva by remember(cajaActiva) {
+                            derivedStateOf { cajaActiva?.nombre ?: "Sin Caja" }
+                        }
+                        val corteCajaActivo by remember(cajaActiva) {
+                            derivedStateOf { cajaActiva?.corte }
+                        }
                         var searchQuery by remember { mutableStateOf("") }
                         var fechaActiva by remember { mutableStateOf("") }
 
-                        LaunchedEffect(selectedCajaId, cajas, isConnected) {
+                        LaunchedEffect(selectedCajaId, corteCajaActivo, isConnected) {
                             val today = java.time.LocalDate.now().toString()
                             fechaActiva = today
                             
