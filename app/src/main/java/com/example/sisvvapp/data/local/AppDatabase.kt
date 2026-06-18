@@ -77,6 +77,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "sisvv_db"
                 )
                     .addMigrations(MIGRATION_23_24)
+                    .fallbackToDestructiveMigration(true)
                     .build()
                     .also { INSTANCE = it }
             }
