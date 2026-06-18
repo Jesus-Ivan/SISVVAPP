@@ -1,9 +1,9 @@
 package com.example.sisvvapp.network
 
 import android.content.Context
-import android.content.pm.ApplicationInfo
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import com.example.sisvvapp.BuildConfig
 import com.example.sisvvapp.SisvvApplication
 import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.network.exceptions.ServerUnreachableException
@@ -17,7 +17,8 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    internal const val BASE_URL = "https://clear-toys-study.loca.lt/api/"
+    internal val BASE_URL: String
+        get() = BuildConfig.BASE_URL
 
     private var apiService: ApiService? = null
 
@@ -33,15 +34,12 @@ object RetrofitClient {
 
         val sessionManager = SessionManager.getInstance(context)
 
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-
         val bypassTunnelInterceptor = Interceptor { chain ->
-            val request = chain.request().newBuilder()
-                .addHeader("Bypass-Tunnel-Reminder", "true")
-                .build()
-            chain.proceed(request)
+            var builder = chain.request().newBuilder()
+            if (BuildConfig.DEBUG) {
+                builder = builder.addHeader("Bypass-Tunnel-Reminder", "true")
+            }
+            chain.proceed(builder.build())
         }
 
         val connectivityInterceptor = Interceptor { chain ->
@@ -81,14 +79,14 @@ object RetrofitClient {
             response
         }
 
-        val isDebug = context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
-
         val client = OkHttpClient.Builder()
             .addInterceptor(bypassTunnelInterceptor)
             .addInterceptor(connectivityInterceptor)
             .apply {
-                if (isDebug) {
-                    addInterceptor(logging)
+                if (BuildConfig.DEBUG) {
+                    addInterceptor(HttpLoggingInterceptor().apply {
+                        level = HttpLoggingInterceptor.Level.BODY
+                    })
                 }
             }
             .addInterceptor(authInterceptor)

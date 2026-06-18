@@ -62,7 +62,9 @@ object PhotoDownloader {
             val fullUrl = if (url.startsWith("http")) url else "$baseUrlWithSlash$relativeUrl"
 
             val requestBuilder = Request.Builder().url(fullUrl)
-            requestBuilder.addHeader("Bypass-Tunnel-Reminder", "true")
+            if (com.example.sisvvapp.BuildConfig.DEBUG) {
+                requestBuilder.addHeader("Bypass-Tunnel-Reminder", "true")
+            }
             val token = sessionManager.getToken()
             if (!token.isNullOrEmpty()) {
                 requestBuilder.addHeader("Authorization", "Bearer $token")
