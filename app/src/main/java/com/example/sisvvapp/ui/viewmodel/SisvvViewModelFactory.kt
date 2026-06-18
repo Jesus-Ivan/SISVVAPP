@@ -8,7 +8,6 @@ import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.repository.CajaRepository
 import com.example.sisvvapp.data.repository.ProductoRepository
 import com.example.sisvvapp.data.repository.SocioRepository
-import com.example.sisvvapp.data.repository.TipoPagoRepository
 import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.network.RetrofitClient
@@ -28,9 +27,6 @@ class SisvvViewModelFactory(
 
             modelClass.isAssignableFrom(SociosViewModel::class.java) ->
                 SociosViewModel(SocioRepository(api, db, db.socioDao(), context)) as T
-
-            modelClass.isAssignableFrom(ProductosViewModel::class.java) ->
-                ProductosViewModel(ProductoRepository(api, db, db.productoDao(), db.grupoModificadorDao())) as T
 
             modelClass.isAssignableFrom(CajaViewModel::class.java) ->
                 CajaViewModel(
