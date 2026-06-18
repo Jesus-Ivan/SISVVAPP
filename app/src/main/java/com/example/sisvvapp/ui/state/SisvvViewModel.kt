@@ -22,11 +22,12 @@ import java.net.UnknownHostException
 import javax.net.ssl.SSLException
 
 class SisvvViewModel(
-    private val context: Context
+    private val context: Context  // Siempre recibe applicationContext (ver factory)
 ) : ViewModel() {
 
     private val api: ApiService = RetrofitClient.create(context)
     private val sessionManager = SessionManager.getInstance(context)
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     // ── Network check ──────────────────────────────────────────────────────
 
@@ -68,11 +69,7 @@ class SisvvViewModel(
 
     init {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkRequest = android.net.NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .build()
-
-        connectivityManager.registerNetworkCallback(networkRequest, object : ConnectivityManager.NetworkCallback() {
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: android.net.Network) {
                 isOnline = true
             }
@@ -80,7 +77,17 @@ class SisvvViewModel(
             override fun onLost(network: android.net.Network) {
                 isOnline = false
             }
-        })
+        }
+        val networkRequest = android.net.NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        connectivityManager.registerNetworkCallback(networkRequest, networkCallback!!)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        networkCallback?.let { cm.unregisterNetworkCallback(it) }
     }
 
     // ── Logout ──────────────────────────────────────────────────────────────

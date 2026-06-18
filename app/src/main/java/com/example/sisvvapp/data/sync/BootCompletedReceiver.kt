@@ -15,7 +15,8 @@ class BootCompletedReceiver : BroadcastReceiver() {
         if (action == Intent.ACTION_BOOT_COMPLETED || action == "android.intent.action.QUICKBOOT_POWERON") {
             Log.d("BootReceiver", "Dispositivo encendido. Verificando comandas pendientes...")
             val appContext = context.applicationContext
-            
+            val pendingResult = goAsync()
+
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val db = AppDatabase.getInstance(appContext)
@@ -33,6 +34,8 @@ class BootCompletedReceiver : BroadcastReceiver() {
                     }
                 } catch (e: Exception) {
                     Log.e("BootReceiver", "Error al procesar el encendido", e)
+                } finally {
+                    pendingResult.finish()
                 }
             }
         }
