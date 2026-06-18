@@ -116,10 +116,12 @@ class VentaRepository(
             if (response.isSuccessful) {
                 val body = response.body() ?: emptyList()
                 
-                // 1. Preservamos productos locales si el servidor envía lista vacía
+                // 1. Pre-cargar locales en una sola query → O(1) lookup por folio
+                val foliosLocales = ventaRecibidaDao.getAllVentasSync().associateBy { it.folio }
+
                 val updatedEntities = body.map { remote ->
                     val remoteEntity = remote.toVentaRecibidaEntity()
-                    val localEntity = ventaRecibidaDao.getVentaPorFolio(remote.folio)
+                    val localEntity = foliosLocales[remote.folio]
                     
                     if (localEntity != null && remoteEntity.productosJson == "[]" && localEntity.productosJson != "[]") {
                         remoteEntity.copy(productosJson = localEntity.productosJson)

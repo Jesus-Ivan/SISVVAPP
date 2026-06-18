@@ -26,6 +26,9 @@ interface VentaRecibidaDao {
     @Query("SELECT * FROM ventas_recibidas ORDER BY folio DESC")
     fun getAllVentas(): Flow<List<VentaRecibidaEntity>>
 
+    @Query("SELECT * FROM ventas_recibidas")
+    suspend fun getAllVentasSync(): List<VentaRecibidaEntity>
+
     @Query("SELECT * FROM ventas_recibidas WHERE folio = :folio")
     suspend fun getVentaPorFolio(folio: Int): VentaRecibidaEntity?
 
