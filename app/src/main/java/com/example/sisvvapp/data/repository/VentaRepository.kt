@@ -97,10 +97,7 @@ class VentaRepository(
             if (response.isSuccessful) {
                 val dto = response.body()?.toVentaDto()
                 if (dto != null) {
-                    // Actualizamos caché local por si acaso
-                    db.withTransaction {
-                        ventaRecibidaDao.insertAll(listOf(response.body()!!.toVentaRecibidaEntity()))
-                    }
+                    ventaRecibidaDao.insertAll(listOf(response.body()!!.toVentaRecibidaEntity()))
                 }
                 dto
             } else {
