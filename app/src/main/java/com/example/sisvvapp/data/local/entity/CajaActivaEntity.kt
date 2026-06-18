@@ -1,9 +1,13 @@
 package com.example.sisvvapp.data.local.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "cajas_activas")
+@Entity(
+    tableName = "cajas_activas",
+    indices = [Index(value = ["activo"])]
+)
 data class CajaActivaEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: Int,
     @ColumnInfo(name = "nombre") val nombre: String,

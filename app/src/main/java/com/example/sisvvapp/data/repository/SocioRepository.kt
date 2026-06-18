@@ -2,6 +2,8 @@ package com.example.sisvvapp.data.repository
 
 import android.content.Context
 import android.util.Log
+import androidx.room.withTransaction
+import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.dao.SocioDao
 import com.example.sisvvapp.data.local.dao.SocioWithIntegrantes
 import com.example.sisvvapp.data.local.entity.SocioEntity
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 
 class SocioRepository(
     private val api: ApiService,
+    private val db: AppDatabase,
     private val socioDao: SocioDao,
     private val context: Context? = null
 ) {
@@ -31,9 +34,11 @@ class SocioRepository(
                 val sociosDto = response.body().orEmpty()
                 val sociosEnt = sociosDto.map { it.toSocioEntity() }
                 val integrantesEnt = sociosDto.flatMap { it.toIntegranteEntities() }
-                socioDao.deleteAll()
-                socioDao.insertAllSocios(sociosEnt)
-                socioDao.insertAllIntegrantes(integrantesEnt)
+                db.withTransaction {
+                    socioDao.deleteAll()
+                    socioDao.insertAllSocios(sociosEnt)
+                    socioDao.insertAllIntegrantes(integrantesEnt)
+                }
                 Log.d("SocioRepo", "Sincronizados ${sociosEnt.size} socios")
 
                 if (context != null) {

@@ -2,11 +2,16 @@ package com.example.sisvvapp.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-
-@Entity(tableName = "ventas_recibidas")
-
+@Entity(
+    tableName = "ventas_recibidas",
+    indices = [
+        Index(value = ["corte_caja"]),
+        Index(value = ["estado"])
+    ]
+)
 data class VentaRecibidaEntity(
     @PrimaryKey val folio: Int,
     val fecha: String,
