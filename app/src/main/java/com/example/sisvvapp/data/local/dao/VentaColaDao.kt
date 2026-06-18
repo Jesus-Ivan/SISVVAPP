@@ -33,6 +33,12 @@ interface VentaColaDao {
     @Query("UPDATE ventas_cola SET estado = :estado WHERE idTemporal = :id")
     suspend fun updateEstado(id: String, estado: String)
 
+    @Query("UPDATE ventas_cola SET intentos = intentos + 1 WHERE idTemporal = :id")
+    suspend fun incrementarIntentos(id: String)
+
+    @Query("UPDATE ventas_cola SET intentos = 0, estado = 'PENDIENTE' WHERE idTemporal = :id")
+    suspend fun resetearIntentos(id: String)
+
     @Query("DELETE FROM ventas_cola WHERE idTemporal = :id")
     suspend fun deleteById(id: String)
 
