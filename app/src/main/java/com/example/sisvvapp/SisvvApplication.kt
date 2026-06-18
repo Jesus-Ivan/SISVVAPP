@@ -38,10 +38,11 @@ class SisvvApplication : Application(), ImageLoaderFactory {
 
         val okHttpClient = OkHttpClient.Builder()
             .addInterceptor { chain ->
-                val request = chain.request().newBuilder()
-                    .addHeader("Bypass-Tunnel-Reminder", "true")
-                    .build()
-                chain.proceed(request)
+                var builder = chain.request().newBuilder()
+                if (BuildConfig.DEBUG) {
+                    builder = builder.addHeader("Bypass-Tunnel-Reminder", "true")
+                }
+                chain.proceed(builder.build())
             }
             .addInterceptor { chain ->
                 val token = sessionManager.getToken()

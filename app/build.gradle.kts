@@ -19,12 +19,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"https://fresh-symbols-listen.loca.lt/api/\"")
+        }
         release {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"https://fresh-symbols-listen.loca.lt/api/\"")
         }
     }
     compileOptions {
