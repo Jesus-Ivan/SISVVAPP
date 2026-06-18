@@ -1,6 +1,8 @@
 package com.example.sisvvapp.data.repository
 
 import android.util.Log
+import androidx.room.withTransaction
+import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.dao.GrupoModificadorDao
 import com.example.sisvvapp.data.local.dao.ProductoConModificadores
 import com.example.sisvvapp.data.local.dao.ProductoDao
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 
 class ProductoRepository(
     private val api: ApiService,
+    private val db: AppDatabase,
     private val productoDao: ProductoDao,
     private val grupoModificadorDao: GrupoModificadorDao
 ) {
@@ -27,24 +30,32 @@ class ProductoRepository(
     suspend fun getGruposPorProducto(claveProducto: Int): List<GrupoModificadorEntity> =
         grupoModificadorDao.getGruposPorProductoSync(claveProducto)
 
-    suspend fun sync(): Result<Unit> = runCatching {
-        val response = api.getProductos()
-        if (response.isSuccessful) {
-            val productosDto = response.body().orEmpty()
-            val productosEnt = productosDto.map { it.toProductoEntity() }
-            val modificadoresEnt = productosDto.flatMap { it.toModificadorEntities() }
-            val gruposEnt = productosDto.flatMap { it.toGrupoModificadorEntities() }
+    suspend fun sync(): Result<Unit> {
+        return try {
+            val response = api.getProductos()
+            if (response.isSuccessful) {
+                val productosDto = response.body().orEmpty()
+                val productosEnt = productosDto.map { it.toProductoEntity() }
+                val modificadoresEnt = productosDto.flatMap { it.toModificadorEntities() }
+                val gruposEnt = productosDto.flatMap { it.toGrupoModificadorEntities() }
 
-            productoDao.deleteAll()
-            grupoModificadorDao.deleteAll()
+                db.withTransaction {
+                    productoDao.deleteAll()
+                    grupoModificadorDao.deleteAll()
 
-            productoDao.insertAllProductos(productosEnt)
-            productoDao.insertAllModificadores(modificadoresEnt)
-            grupoModificadorDao.insertAll(gruposEnt)
+                    productoDao.insertAllProductos(productosEnt)
+                    productoDao.insertAllModificadores(modificadoresEnt)
+                    grupoModificadorDao.insertAll(gruposEnt)
+                }
 
-            Log.d("ProdRepo", "Sincronizados ${productosEnt.size} productos, ${gruposEnt.size} grupos")
-        } else {
-            Log.w("ProdRepo", "Error sync productos: ${response.code()}")
+                Log.d("ProdRepo", "Sincronizados ${productosEnt.size} productos, ${gruposEnt.size} grupos")
+            } else {
+                Log.w("ProdRepo", "Error sync productos: ${response.code()}")
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("ProdRepo", "Excepción en sync", e)
+            Result.failure(e)
         }
     }
 }

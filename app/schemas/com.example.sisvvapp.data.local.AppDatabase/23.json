@@ -1,0 +1,673 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 23,
+    "identityHash": "2ef854391cc0ce79b79f1f525fbaaffe",
+    "entities": [
+      {
+        "tableName": "socios",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `nombre` TEXT NOT NULL, `apellido_p` TEXT NOT NULL, `apellido_m` TEXT NOT NULL, `telefono` TEXT, `email` TEXT, `firma_autorizada` INTEGER NOT NULL, `estatus` TEXT NOT NULL, `foto_url` TEXT, `num_accion` INTEGER, `membresia_tipo` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apellidoP",
+            "columnName": "apellido_p",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apellidoM",
+            "columnName": "apellido_m",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "telefono",
+            "columnName": "telefono",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firmaAutorizada",
+            "columnName": "firma_autorizada",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estatus",
+            "columnName": "estatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fotoUrl",
+            "columnName": "foto_url",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "numAccion",
+            "columnName": "num_accion",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "membresiaTipo",
+            "columnName": "membresia_tipo",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "integrantes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `socio_id` INTEGER NOT NULL, `nombre` TEXT NOT NULL, `apellido_p` TEXT, `apellido_m` TEXT, `parentesco` TEXT NOT NULL, `foto_url` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`socio_id`) REFERENCES `socios`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "socioId",
+            "columnName": "socio_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apellidoP",
+            "columnName": "apellido_p",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "apellidoM",
+            "columnName": "apellido_m",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "parentesco",
+            "columnName": "parentesco",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fotoUrl",
+            "columnName": "foto_url",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_integrantes_socio_id",
+            "unique": false,
+            "columnNames": [
+              "socio_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_integrantes_socio_id` ON `${TABLE_NAME}` (`socio_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "socios",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "socio_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "productos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `clave` TEXT NOT NULL, `descripcion` TEXT NOT NULL, `precio` REAL NOT NULL, `categoria` TEXT NOT NULL, `imagen_url` TEXT, `forzar_captura` INTEGER NOT NULL, `modif_incluidos` INTEGER NOT NULL, `modif_maximos` INTEGER NOT NULL, `print_default` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clave",
+            "columnName": "clave",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descripcion",
+            "columnName": "descripcion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "precio",
+            "columnName": "precio",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoria",
+            "columnName": "categoria",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imagenUrl",
+            "columnName": "imagen_url",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "forzarCaptura",
+            "columnName": "forzar_captura",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifIncluidos",
+            "columnName": "modif_incluidos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifMaximos",
+            "columnName": "modif_maximos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "printDefault",
+            "columnName": "print_default",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "modificadores",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `producto_id` INTEGER NOT NULL, `clave_modificador` INTEGER NOT NULL, `nombre` TEXT NOT NULL, `tipo` TEXT NOT NULL, `precio` REAL NOT NULL, `grupo` TEXT NOT NULL, `incluido` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`producto_id`) REFERENCES `productos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productoId",
+            "columnName": "producto_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "claveModificador",
+            "columnName": "clave_modificador",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "precio",
+            "columnName": "precio",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "grupo",
+            "columnName": "grupo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "incluido",
+            "columnName": "incluido",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_modificadores_producto_id",
+            "unique": false,
+            "columnNames": [
+              "producto_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_modificadores_producto_id` ON `${TABLE_NAME}` (`producto_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "productos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "producto_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "grupos_modificador_producto",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_grupo` INTEGER NOT NULL, `clave_producto` INTEGER NOT NULL, `descripcion_grupo` TEXT NOT NULL, `modif_incluidos` INTEGER NOT NULL, `modif_maximos` INTEGER NOT NULL, `forzar_captura` INTEGER NOT NULL, FOREIGN KEY(`clave_producto`) REFERENCES `productos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idGrupo",
+            "columnName": "id_grupo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "claveProducto",
+            "columnName": "clave_producto",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descripcionGrupo",
+            "columnName": "descripcion_grupo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifIncluidos",
+            "columnName": "modif_incluidos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifMaximos",
+            "columnName": "modif_maximos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "forzarCaptura",
+            "columnName": "forzar_captura",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "productos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "clave_producto"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "cajas_activas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `nombre` TEXT NOT NULL, `fecha_apertura` TEXT NOT NULL, `fecha_cierre` TEXT, `activo` INTEGER NOT NULL, `mesero_id` INTEGER, `corte` INTEGER, `cambio_inicial` REAL, `clave_punto_venta` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaApertura",
+            "columnName": "fecha_apertura",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaCierre",
+            "columnName": "fecha_cierre",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "activo",
+            "columnName": "activo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "meseroId",
+            "columnName": "mesero_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "corte",
+            "columnName": "corte",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cambioInicial",
+            "columnName": "cambio_inicial",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "clavePuntoVenta",
+            "columnName": "clave_punto_venta",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "ventas_cola",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`idTemporal` TEXT NOT NULL, `tipoVenta` TEXT NOT NULL, `idSocio` INTEGER, `nombreCliente` TEXT NOT NULL, `corteCaja` INTEGER NOT NULL, `clavePuntoVenta` TEXT NOT NULL, `nombreCaja` TEXT NOT NULL, `productosJson` TEXT NOT NULL, `fechaCreacion` INTEGER NOT NULL, `totalVenta` REAL NOT NULL, `estado` TEXT NOT NULL, `folioExistente` INTEGER, `pagosJson` TEXT, PRIMARY KEY(`idTemporal`))",
+        "fields": [
+          {
+            "fieldPath": "idTemporal",
+            "columnName": "idTemporal",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipoVenta",
+            "columnName": "tipoVenta",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idSocio",
+            "columnName": "idSocio",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "nombreCliente",
+            "columnName": "nombreCliente",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "corteCaja",
+            "columnName": "corteCaja",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clavePuntoVenta",
+            "columnName": "clavePuntoVenta",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreCaja",
+            "columnName": "nombreCaja",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productosJson",
+            "columnName": "productosJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaCreacion",
+            "columnName": "fechaCreacion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalVenta",
+            "columnName": "totalVenta",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estado",
+            "columnName": "estado",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "folioExistente",
+            "columnName": "folioExistente",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "pagosJson",
+            "columnName": "pagosJson",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "idTemporal"
+          ]
+        }
+      },
+      {
+        "tableName": "ventas_recibidas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`folio` INTEGER NOT NULL, `fecha` TEXT NOT NULL, `total` REAL NOT NULL, `estado` TEXT NOT NULL, `cliente_nombre` TEXT, `socio_id` INTEGER, `clave_punto_venta` TEXT NOT NULL, `corte_caja` INTEGER NOT NULL, `productos_json` TEXT NOT NULL, `pagos_json` TEXT NOT NULL, `fecha_guardado` INTEGER NOT NULL, PRIMARY KEY(`folio`))",
+        "fields": [
+          {
+            "fieldPath": "folio",
+            "columnName": "folio",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "total",
+            "columnName": "total",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estado",
+            "columnName": "estado",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clienteNombre",
+            "columnName": "cliente_nombre",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "socioId",
+            "columnName": "socio_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "clavePuntoVenta",
+            "columnName": "clave_punto_venta",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "corteCaja",
+            "columnName": "corte_caja",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productosJson",
+            "columnName": "productos_json",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pagosJson",
+            "columnName": "pagos_json",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaGuardado",
+            "columnName": "fecha_guardado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "folio"
+          ]
+        }
+      },
+      {
+        "tableName": "tipos_pago",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `nombre` TEXT NOT NULL, `requiereSocio` INTEGER NOT NULL, `requiereFirma` INTEGER NOT NULL, `activo` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requiereSocio",
+            "columnName": "requiereSocio",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requiereFirma",
+            "columnName": "requiereFirma",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activo",
+            "columnName": "activo",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "tipos_venta",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nombre` TEXT NOT NULL, PRIMARY KEY(`nombre`))",
+        "fields": [
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "nombre"
+          ]
+        }
+      }
+    ],
+    "views": [
+      {
+        "viewName": "v_ventas_global",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n            folio as folio,\n            cliente_nombre as cliente,\n            total as total,\n            fecha as fecha,\n            fecha_guardado as timestamp,\n            'RECIBIDA' as syncStatus,\n            NULL as idTemporal,\n            corte_caja as corteCaja,\n            estado as estadoVenta,\n            socio_id as socioId,\n            SUBSTR(fecha, 1, 10) as fechaFiltro,\n            productos_json as productosJson\n        FROM ventas_recibidas\n        WHERE folio NOT IN (SELECT folioExistente FROM ventas_cola WHERE folioExistente > 0 AND (estado = 'PENDIENTE' OR estado = 'SYNCING'))\n        UNION ALL\n        SELECT \n            COALESCE(folioExistente, 0) as folio,\n            nombreCliente as cliente,\n            (totalVenta + COALESCE((SELECT total FROM ventas_recibidas WHERE folio = folioExistente AND folioExistente > 0), 0.0)) as total,\n            CAST(fechaCreacion AS TEXT) as fecha,\n            fechaCreacion as timestamp,\n            estado as syncStatus,\n            idTemporal as idTemporal,\n            corteCaja as corteCaja,\n            'Abierta' as estadoVenta,\n            idSocio as socioId,\n            COALESCE((SELECT SUBSTR(fecha, 1, 10) FROM ventas_recibidas WHERE folio = folioExistente AND folioExistente > 0), strftime('%Y-%m-%d', date(fechaCreacion/1000, 'unixepoch', 'localtime'))) as fechaFiltro,\n            productosJson as productosJson\n        FROM ventas_cola"
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2ef854391cc0ce79b79f1f525fbaaffe')"
+    ]
+  }
+}
