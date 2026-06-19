@@ -81,6 +81,12 @@ class CajaViewModel(
         Log.d("CajaVM", "Caja seleccionada manualmente: $nombre (id=$id)")
     }
 
+    fun clearSelectedCaja() {
+        _selectedCajaId.value = null
+        sessionManager.saveSelectedCaja(-1, "")
+        Log.d("CajaVM", "Selección de caja limpiada")
+    }
+
     fun sync() {
         viewModelScope.launch {
             _isLoading.value = true

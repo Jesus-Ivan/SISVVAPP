@@ -32,6 +32,7 @@ import androidx.navigation.navigation
 import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.repository.VentaRepository
+import com.example.sisvvapp.data.sync.SyncEventBus
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
 import com.example.sisvvapp.network.RetrofitClient
@@ -57,7 +58,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainContainer(
     viewModel: SisvvViewModel? = null,
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onCajaClosed: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val factory = SisvvViewModelFactory(context)
@@ -74,6 +76,8 @@ fun MainContainer(
     // ViewModel persistente para el flujo de ventas
     val globalCarritoViewModel: CarritoViewModel = viewModel(factory = factory)
 
+    var showCajaCerradaDialog by remember { mutableStateOf(false) }
+
     // Sincronización al montar la pantalla (app reabierta o primer inicio)
     LaunchedEffect(Unit) {
         SyncForegroundService.start(context)
@@ -84,6 +88,15 @@ fun MainContainer(
     LaunchedEffect(isConnected) {
         if (isConnected) {
             SyncWorker.enqueueOneTime(context)
+        }
+    }
+
+    // Detectar caja cerrada durante sync en segundo plano
+    LaunchedEffect(Unit) {
+        SyncEventBus.events.collect { event ->
+            if (event is SyncEventBus.SyncEvent.CajaCerrada && !showCajaCerradaDialog) {
+                showCajaCerradaDialog = true
+            }
         }
     }
 
@@ -532,6 +545,27 @@ fun MainContainer(
                     )
                 }
             }
+        }
+
+        if (showCajaCerradaDialog) {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text("Caja cerrada") },
+                text = {
+                    Text("La caja seleccionada fue cerrada en otro dispositivo. " +
+                            "Las ventas offline pendientes se descartaron porque ya no pueden sincronizarse.\n\n" +
+                            "Selecciona una caja activa para continuar.")
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showCajaCerradaDialog = false
+                        sharedCajaViewModel.clearSelectedCaja()
+                        onCajaClosed()
+                    }) {
+                        Text("Seleccionar otra caja")
+                    }
+                }
+            )
         }
     }
     }

@@ -283,6 +283,11 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate(Screen.Login.route) {
                                         popUpTo(0) { inclusive = true }
                                     }
+                                },
+                                onCajaClosed = {
+                                    navController.navigate(Screen.CajaInicial.route) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
                                 }
                             )
                         }
