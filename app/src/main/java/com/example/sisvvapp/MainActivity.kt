@@ -7,10 +7,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,7 +32,6 @@ import kotlinx.coroutines.flow.collect
 
 class MainActivity : ComponentActivity() {
 
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Forzamos vertical antes de cualquier otra cosa
@@ -60,7 +57,15 @@ class MainActivity : ComponentActivity() {
             val networkMonitor = remember { NetworkMonitor(connectivityManager) }
             val isConnected by networkMonitor.isConnected.collectAsState(initial = true)
 
-            SISVVAPPTheme(darkTheme = isDarkTheme) {
+            val configuration = LocalConfiguration.current
+            val deviceType =
+                if (configuration.smallestScreenWidthDp >= 600) {
+                    DeviceType.TABLET
+                } else {
+                    DeviceType.MOBILE
+                }
+
+            SISVVAPPTheme(darkTheme = isDarkTheme, isTablet = deviceType == DeviceType.TABLET) {
                 val navController = rememberNavController()
 
                 LaunchedEffect(Unit) {
@@ -70,14 +75,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-                val windowSizeClass = calculateWindowSizeClass(this)
-
-                val deviceType =
-                    if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
-                        DeviceType.MOBILE
-                    } else {
-                        DeviceType.TABLET
-                    }
 
                 CompositionLocalProvider(
                     LocalDeviceType provides deviceType,
@@ -157,7 +154,6 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.Main.route) {
                             MainContainer(
                                 viewModel = sisvvViewModel,
-                                windowWidthSizeClass = windowSizeClass.widthSizeClass,
                                 onLogout = {
                                     sisvvViewModel.logout()
                                     navController.navigate(Screen.Login.route) {

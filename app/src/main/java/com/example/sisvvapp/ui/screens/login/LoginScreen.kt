@@ -40,6 +40,8 @@ import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.Inter
 import com.example.sisvvapp.ui.theme.Poppins
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 
 @Composable
@@ -48,6 +50,7 @@ fun LoginScreen(
     serverError: String? = null,
     onLoginClick: (String, String) -> Unit = { _, _ -> }
 ) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var localError by remember { mutableStateOf("") }
@@ -76,7 +79,7 @@ fun LoginScreen(
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = 450.dp)
+                .widthIn(max = if (isTablet) 520.dp else 450.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -86,24 +89,24 @@ fun LoginScreen(
                 contentDescription = stringResource(id = R.string.login_logo_desc),
                 modifier = Modifier
                     .fillMaxWidth(1f)
-                    .padding(bottom = 50.dp)
+                    .padding(bottom = if (isTablet) 64.dp else 50.dp)
             )
             // TITULO PRINCIPAL
             Text(
                 text = stringResource(id = R.string.login_title),
                 fontFamily = Poppins,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 32.sp,
+                fontSize = if (isTablet) 40.sp else 32.sp,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = if (isTablet) 12.dp else 8.dp)
             )
             Text(
                 text = stringResource(id = R.string.login_subtitle),
                 fontFamily = Inter,
                 fontWeight = FontWeight.Normal,
-                fontSize = 14.sp,
+                fontSize = if (isTablet) 18.sp else 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = if (isTablet) 48.dp else 32.dp)
             )
             // INPUT EMAIL
             VistaVerdeTextField(
@@ -114,7 +117,7 @@ fun LoginScreen(
                 modifier = inputModifier,
                 bgColor = MaterialTheme.colorScheme.surface
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (isTablet) 24.dp else 16.dp))
 
             // INPUT PASSWORD
             VistaVerdeTextField(
@@ -125,7 +128,7 @@ fun LoginScreen(
                 modifier = inputModifier,
                 bgColor = MaterialTheme.colorScheme.surface
             )
-            Spacer(modifier = Modifier.height((32.dp)))
+            Spacer(modifier = Modifier.height(if (isTablet) 48.dp else 32.dp))
 
             val errorMsg = localError.ifEmpty { serverError ?: "" }
 
@@ -133,8 +136,8 @@ fun LoginScreen(
                 Text(
                     text = errorMsg,
                     color = MaterialTheme.colorScheme.error,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    fontSize = if (isTablet) 14.sp else 12.sp,
+                    modifier = Modifier.padding(bottom = if (isTablet) 24.dp else 16.dp)
                 )
             }
 

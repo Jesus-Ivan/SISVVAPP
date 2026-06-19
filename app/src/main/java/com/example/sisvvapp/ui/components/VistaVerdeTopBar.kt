@@ -2,6 +2,7 @@ package com.example.sisvvapp.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -22,8 +23,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.ui.theme.Inter
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,13 +40,15 @@ fun VistaVerdeTopBar(
     actions: @Composable RowScope.() -> Unit = {},
     showNavigationIcon: Boolean = true
 ) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
+
     CenterAlignedTopAppBar(
         title = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = title,
                     fontFamily = Inter,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = if (isTablet) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -62,6 +68,7 @@ fun VistaVerdeTopBar(
                     Icon(
                         imageVector = if (isBackButton) Icons.Default.ArrowBack else Icons.Default.Menu,
                         contentDescription = if (isBackButton) "Regresar" else "Menú principal",
+                        modifier = Modifier.size(if (isTablet) 32.dp else 24.dp),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }

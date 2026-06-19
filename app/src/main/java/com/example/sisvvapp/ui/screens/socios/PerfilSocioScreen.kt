@@ -30,6 +30,8 @@ import com.example.sisvvapp.data.local.entity.IntegranteEntity
 import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.ui.components.*
 import com.example.sisvvapp.ui.theme.*
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 
@@ -41,6 +43,7 @@ fun PerfilSocioScreen(
     onNuevaVentaClick: (SocioEntity) -> Unit,
     onBackClick: () -> Unit
 ) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     var photoToShow by remember { mutableStateOf<String?>(null) }
     val hazeState = remember { HazeState() }
 
@@ -80,7 +83,7 @@ fun PerfilSocioScreen(
                                     Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(vertical = 24.dp, horizontal = 16.dp),
+                                            .padding(vertical = if (isTablet) 28.dp else 24.dp, horizontal = if (isTablet) 20.dp else 16.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         VistaVerdeAvatar(
@@ -99,7 +102,7 @@ fun PerfilSocioScreen(
                                                 socio.apellidoM.takeIf { it.isNotBlank() }
                                             ).joinToString(" "),
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 18.sp,
+                                            fontSize = if (isTablet) 22.sp else 18.sp,
                                             color = MaterialTheme.colorScheme.onSurface,
                                             textAlign = TextAlign.Center
                                         )
@@ -108,7 +111,7 @@ fun PerfilSocioScreen(
 
                                         Text(
                                             text = "Estado membresia: ${socio.estatus}",
-                                            fontSize = 13.sp,
+                                            fontSize = if (isTablet) 15.sp else 13.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
 
@@ -116,7 +119,7 @@ fun PerfilSocioScreen(
 
                                         Text(
                                             text = "Tipo membresia: ${socio.membresiaTipo}",
-                                            fontSize = 13.sp,
+                                            fontSize = if (isTablet) 15.sp else 13.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
 
@@ -124,7 +127,7 @@ fun PerfilSocioScreen(
 
                                         Text(
                                             text = "No.Socio: ${socio.id}",
-                                            fontSize = 13.sp,
+                                            fontSize = if (isTablet) 15.sp else 13.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
 
@@ -150,7 +153,7 @@ fun PerfilSocioScreen(
                                                 stringResource(R.string.perfil_socio_firma_autorizada)
                                             else
                                                 stringResource(R.string.perfil_socio_firma_no_autorizada),
-                                            fontSize = 13.sp,
+                                            fontSize = if (isTablet) 15.sp else 13.sp,
                                             color = if (socio.firmaAutorizada) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                             fontWeight = if (socio.firmaAutorizada) FontWeight.Medium else FontWeight.Normal
                                         )
@@ -170,6 +173,7 @@ fun PerfilSocioScreen(
                             ) { integrante ->
                                 IntegranteCard(
                                     integrante = integrante,
+                                    isTablet = isTablet,
                                     onPhotoClick = { url -> photoToShow = url }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -207,13 +211,14 @@ fun PerfilSocioScreen(
 @Composable
 fun IntegranteCard(
     integrante: IntegranteEntity,
+    isTablet: Boolean = false,
     onPhotoClick: (String) -> Unit = {}
 ) {
     VistaVerdeBaseCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(if (isTablet) 20.dp else 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -226,15 +231,15 @@ fun IntegranteCard(
                 Text(
                     text = nombreCompleto,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
+                    fontSize = if (isTablet) 17.sp else 15.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(if (isTablet) 8.dp else 4.dp))
                 Text(
                     text = integrante.parentesco,
-                    fontSize = 13.sp,
+                    fontSize = if (isTablet) 15.sp else 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

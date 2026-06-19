@@ -2,8 +2,9 @@ package com.example.sisvvapp.ui.screens.caja
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,6 +16,8 @@ import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.ui.theme.*
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 
 @Composable
 fun VistaVerdeCajaCard(
@@ -22,25 +25,26 @@ fun VistaVerdeCajaCard(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     VistaVerdeBaseCard(
         modifier = Modifier.clickable { onClick() }
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "#${caja.id} - ${caja.nombre}",
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
+                    fontSize = if (isTablet) 17.sp else 15.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(if (isTablet) 8.dp else 4.dp))
                 Text(
                     text = "${caja.fechaApertura}",
                     fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp,
+                    fontSize = if (isTablet) 14.sp else 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -58,8 +62,11 @@ fun VistaVerdeCajaCard(
 
 @Composable
 fun CajasList(cajas: List<CajaDto>, selectedCajaId: Int?, onCajaClick: (CajaDto) -> Unit) {
-    LazyColumn(
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(if (isTablet) 2 else 1),
         contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(items = cajas, key = { caja -> caja.id }) { caja ->
