@@ -42,7 +42,8 @@ class VentasViewModel(
         combine(_corteCaja, _fecha) { corte, fecha -> Pair(corte, fecha) }
             .flatMapLatest { (corte, fecha) ->
                 ventaRepository.getVentasGlobales(corte, fecha)
-            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+            }.map { ventas -> ventas.filter { it.estatus.equals("Abierta", ignoreCase = true) } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val uiState: StateFlow<VentasUiState> = combine(_ventasData, _isLoading, _error, _isNetworkError) { data, loading, error, isNetError ->
         when {

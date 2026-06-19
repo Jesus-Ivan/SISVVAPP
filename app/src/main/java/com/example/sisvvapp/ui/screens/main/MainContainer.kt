@@ -18,6 +18,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -140,6 +143,20 @@ fun MainContainer(
                                 // Si perdemos internet, forzamos el refresco para que el VM cambie a modo local/offline
                                 ventasViewModel.refreshVentas(today, corteCajaActivo)
                             }
+                        }
+
+                        // Refrescar ventas al reanudar la app (vuelta de web, etc.)
+                        val lifecycleOwner = LocalLifecycleOwner.current
+                        DisposableEffect(lifecycleOwner) {
+                            val observer = LifecycleEventObserver { _, event ->
+                                if (event == Lifecycle.Event.ON_RESUME) {
+                                    val today = java.time.LocalDate.now().toString()
+                                    fechaActiva = today
+                                    ventasViewModel.refreshVentas(today, corteCajaActivo)
+                                }
+                            }
+                            lifecycleOwner.lifecycle.addObserver(observer)
+                            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
                         }
 
                         VentasScreen(
