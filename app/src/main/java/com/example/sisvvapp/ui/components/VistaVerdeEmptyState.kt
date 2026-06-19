@@ -14,6 +14,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 
 @Composable
 fun VistaVerdeEmptyState(
@@ -23,17 +25,18 @@ fun VistaVerdeEmptyState(
     actionText: String? = null,
     onActionClick: (() -> Unit)? = null
 ) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(32.dp),
+            .padding(if (isTablet) 48.dp else 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = "Estado vacío",
-            modifier = Modifier.size(80.dp),
+            modifier = Modifier.size(if (isTablet) 96.dp else 80.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
 

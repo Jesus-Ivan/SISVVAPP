@@ -63,13 +63,14 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun SISVVAPPTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    isTablet: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = if (isTablet) TabletTypography else Typography,
         content = content
     )
 }

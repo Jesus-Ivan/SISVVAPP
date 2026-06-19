@@ -28,6 +28,8 @@ import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.components.VistaVerdeSkeletonCard
 import com.example.sisvvapp.ui.screens.caja.VistaVerdeCajaCard
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 
 @Composable
 fun AjustesScreen(
@@ -44,6 +46,8 @@ fun AjustesScreen(
     onMenuClick: () -> Unit,
     onRefresh: () -> Unit = {}
 ) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
+
     VistaVerdeScaffold(
         title = stringResource(id = R.string.ajustes_title),
         subtitle = stringResource(id = R.string.ajustes_subtitle),
@@ -59,7 +63,7 @@ fun AjustesScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(if (isTablet) 20.dp else 16.dp)
             ) {
                 item { Spacer(modifier = Modifier.height(16.dp)) }
 
@@ -111,7 +115,7 @@ fun AjustesScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(if (isTablet) 20.dp else 16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -137,7 +141,7 @@ fun AjustesScreen(
                                 Text(
                                     text = stringResource(id = R.string.ajustes_btn_actualizar),
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp,
+                                    fontSize = if (isTablet) 17.sp else 15.sp,
                                     color = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
@@ -149,7 +153,7 @@ fun AjustesScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
-                                lineHeight = 18.sp
+                                lineHeight = if (isTablet) 22.sp else 18.sp
                             )
                         }
                     }
@@ -166,7 +170,7 @@ fun AjustesScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(if (isTablet) 20.dp else 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             ThemeOptionSmall(
@@ -214,7 +218,7 @@ fun AjustesScreen(
                             Text(
                                 text = stringResource(id = R.string.ajustes_btn_cerrar_sesion),
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 16.sp
+                                fontSize = if (isTablet) 18.sp else 16.sp
                             )
                         }
                     }

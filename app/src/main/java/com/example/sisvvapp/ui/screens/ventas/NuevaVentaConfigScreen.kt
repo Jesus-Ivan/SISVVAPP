@@ -28,6 +28,8 @@ import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
 import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.components.VistaVerdeTextField
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 import com.example.sisvvapp.ui.utils.normalizeName
 
 @Composable
@@ -50,6 +52,7 @@ fun NuevaVentaConfigScreen(
     numeroComensales: String = "",
     onNumeroComensalesChange: (String) -> Unit = {}
 ) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     val requiereSocio = tipoSeleccionado == "socio" || tipoSeleccionado == "invitado"
     val focusManager = LocalFocusManager.current
 
@@ -115,7 +118,7 @@ fun NuevaVentaConfigScreen(
                 if (requiereSocio) {
                     Text(
                         text = "ID/ Nombre Socio",
-                        fontSize = 14.sp,
+                        fontSize = if (isTablet) 16.sp else 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -146,6 +149,7 @@ fun NuevaVentaConfigScreen(
                             ) { socio ->
                                 VistaVerdeSocioResultItem(
                                     socio = socio,
+                                    isTablet = isTablet,
                                     onClick = {
                                         onSocioSeleccionado(socio)
                                         if (socio.estatus == "CAN") {
@@ -183,7 +187,7 @@ fun NuevaVentaConfigScreen(
                         Text(
                             text = "Membresia de socio ${socioSeleccionado.id} cancelada",
                             color = MaterialTheme.colorScheme.error,
-                            fontSize = 14.sp,
+                            fontSize = if (isTablet) 16.sp else 14.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
@@ -217,7 +221,7 @@ fun NuevaVentaConfigScreen(
                     Text(
                         text = "No hay cajas abiertas. Ve a Ajustes y selecciona una caja.",
                         color = MaterialTheme.colorScheme.error,
-                        fontSize = 13.sp,
+                        fontSize = if (isTablet) 15.sp else 13.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -241,25 +245,26 @@ fun NuevaVentaConfigScreen(
 @Composable
 private fun VistaVerdeSocioResultItem(
     socio: SocioEntity,
+    isTablet: Boolean = false,
     onClick: () -> Unit
 ) {
     VistaVerdeBaseCard(
         modifier = Modifier.clickable { onClick() }
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(if (isTablet) 16.dp else 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "${socio.nombre} ${socio.apellidoP} ${socio.apellidoM ?: ""}".trim(),
                     fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
+                    fontSize = if (isTablet) 16.sp else 14.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "ID: ${socio.id}",
-                    fontSize = 12.sp,
+                    fontSize = if (isTablet) 14.sp else 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

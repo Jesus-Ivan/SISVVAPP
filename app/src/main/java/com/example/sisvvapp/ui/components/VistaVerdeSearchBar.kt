@@ -26,6 +26,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 
 @Composable
 fun VistaVerdeSearchBar(
@@ -35,6 +37,7 @@ fun VistaVerdeSearchBar(
     placeholder: String = "Buscar..."
 
 ) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     val focusManager = LocalFocusManager.current
     BasicTextField(
         value = value,
@@ -50,7 +53,7 @@ fun VistaVerdeSearchBar(
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp),
+            .height(if (isTablet) 56.dp else 48.dp),
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier

@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,11 +51,9 @@ import com.example.sisvvapp.ui.viewmodel.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@Suppress("UNUSED_PARAMETER")
 @Composable
 fun MainContainer(
     viewModel: SisvvViewModel? = null,
-    windowWidthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
     onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current

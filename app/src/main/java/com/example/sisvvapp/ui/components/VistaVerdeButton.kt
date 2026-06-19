@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 
 @Composable
 fun VistaVerdeButton(
@@ -29,11 +31,12 @@ fun VistaVerdeButton(
     leftIcon: ImageVector? = null,
     rightIcon: ImageVector? = null
 ) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     Button(
        onClick = onClick,
         modifier = modifier
         .fillMaxWidth()
-        .height(56.dp),
+        .height(if (isTablet) 64.dp else 56.dp),
         enabled = enabled,
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
