@@ -1,6 +1,7 @@
 package com.example.sisvvapp.data.repository
 import android.util.Log
 import android.content.Context
+import com.example.sisvvapp.data.sync.SyncEventBus
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
 import com.example.sisvvapp.data.sync.WatchdogWorker
@@ -379,6 +380,13 @@ class VentaRepository(
                         return Result.success(Unit)
                     }
                     
+                    if (response.code() == 422 && errorBody?.contains("caja", ignoreCase = true) == true) {
+                        Log.w("VentaRepo", "Caja cerrada, descartando venta ${venta.idTemporal}: $errorBody")
+                        ventaColaDao.deleteById(venta.idTemporal)
+                        SyncEventBus.cajaCerrada(venta.idTemporal)
+                        return Result.success(Unit)
+                    }
+
                     if (response.code() in 400..499 && response.code() != 429) {
                         Log.w("VentaRepo", "Error de cliente ${response.code()}, marcando como ERROR_FATAL")
                         ventaColaDao.updateEstado(venta.idTemporal, "ERROR_FATAL")
