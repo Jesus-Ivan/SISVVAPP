@@ -191,6 +191,7 @@ fun MainContainer(
                         val searchQuery by nuevaVentaViewModel.searchQuery.collectAsState()
                         val sociosEncontrados by nuevaVentaViewModel.sociosEncontrados.collectAsState()
                         val socioSeleccionado by nuevaVentaViewModel.socioSeleccionado.collectAsState()
+                        val numeroComensales by nuevaVentaViewModel.numeroComensales.collectAsState()
 
                         LaunchedEffect(socioIdArg) {
                             if (socioIdArg != -1) {
@@ -220,6 +221,8 @@ fun MainContainer(
                             socioSeleccionado = socioSeleccionado,
                             nombreCliente = nombreCliente,
                             onNombreClienteChange = { nuevaVentaViewModel.setNombreCliente(it) },
+                            numeroComensales = numeroComensales,
+                            onNumeroComensalesChange = { nuevaVentaViewModel.setNumeroComensales(it) },
                             isOnline = isConnected,
                             onMenuClick = { navController.popBackStack() },
                             onContinuarClick = { navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS) },
