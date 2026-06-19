@@ -36,6 +36,7 @@ fun VistaVerdeTextField(
     label: String,
     modifier: Modifier = Modifier,
     placeholder: String? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
@@ -60,6 +61,7 @@ fun VistaVerdeTextField(
                 fontFamily = Inter
             )
         },
+        leadingIcon = leadingIcon,
         shape = RoundedCornerShape(12.dp),
         colors = TextFieldDefaults.colors(
             // Fondos
