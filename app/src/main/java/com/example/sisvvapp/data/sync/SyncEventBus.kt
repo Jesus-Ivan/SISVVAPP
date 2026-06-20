@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
 object SyncEventBus {
-    private val _events = MutableSharedFlow<SyncEvent>(extraBufferCapacity = 1, replay = 1)
+    private val _events = MutableSharedFlow<SyncEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<SyncEvent> = _events.asSharedFlow()
 
     fun cajaCerrada(ventaId: String) {

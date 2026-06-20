@@ -47,6 +47,7 @@ import com.example.sisvvapp.ui.utils.LocalDeviceType
 import com.example.sisvvapp.ui.utils.LocalIsConnected
 import com.example.sisvvapp.ui.viewmodel.CajaViewModel
 import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect
 
 class MainActivity : ComponentActivity() {
@@ -246,6 +247,7 @@ class MainActivity : ComponentActivity() {
                         // --- 2.1 PANTALLA DE SELECCIÓN DE CAJA INICIAL (POST-LOGIN OBLIGATORIO) ---
                         composable(Screen.CajaInicial.route) {
                             val cajaViewModel: CajaViewModel = viewModel(factory = SisvvViewModelFactory(this@MainActivity))
+                            val scope = rememberCoroutineScope()
 
                             val cajas by cajaViewModel.cajas.collectAsState()
                             val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
@@ -263,6 +265,7 @@ class MainActivity : ComponentActivity() {
                                 isFromSettings = false,
                                 onCajaClick = { id -> cajaViewModel.selectCaja(id) },
                                 onNavigationClick = {},
+                                onRetry = { scope.launch { cajaViewModel.refreshCajas() } },
                                 onContinueClick = { id ->
                                     val caja = cajas.firstOrNull { it.id == id }
                                     val sessionManager = com.example.sisvvapp.data.local.SessionManager.getInstance(this@MainActivity)

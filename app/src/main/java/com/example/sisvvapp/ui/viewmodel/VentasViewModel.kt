@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -41,7 +42,8 @@ class VentasViewModel(
     private val _ventasData: StateFlow<List<VentaDto>> =
         combine(_corteCaja, _fecha) { corte, fecha -> Pair(corte, fecha) }
             .flatMapLatest { (corte, fecha) ->
-                ventaRepository.getVentasGlobales(corte, fecha)
+                if (corte == null) flowOf(emptyList())
+                else ventaRepository.getVentasGlobales(corte, fecha)
             }.map { ventas -> ventas.filter { it.estatus.equals("Abierta", ignoreCase = true) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
