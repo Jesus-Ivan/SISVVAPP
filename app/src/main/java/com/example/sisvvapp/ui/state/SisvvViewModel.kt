@@ -52,6 +52,9 @@ class SisvvViewModel(
     var loginSuccess by mutableStateOf(false)
         private set
 
+    var logoutSuccess by mutableStateOf(false)
+        private set
+
     // ── Theme State ─────────────────────────────────────────────────────────
 
     var themeMode by mutableStateOf(sessionManager.getThemeMode())
@@ -102,8 +105,10 @@ class SisvvViewModel(
                 Log.e("LOGOUT", "Error al llamar logout API", e)
             } finally {
                 sessionManager.clearSession()
+                sessionManager.clearSelectedCaja() // Limpiar también la caja al cerrar sesión
                 loginSuccess = false
                 loginError = null
+                logoutSuccess = true
                 try {
                     WorkManager.getInstance(context).cancelAllWork()
                 } catch (e: Exception) {
@@ -111,6 +116,15 @@ class SisvvViewModel(
                 }
             }
         }
+    }
+
+    fun resetLogoutStatus() {
+        logoutSuccess = false
+    }
+
+    fun resetLoginStatus() {
+        loginSuccess = false
+        loginError = null
     }
 
     // ── Login Modificado ───────────────────────────────────────────────────

@@ -83,6 +83,10 @@ fun MainContainer(
     var showCajaCerradaDialog by remember { mutableStateOf(false) }
     var motivoCajaCerrada by remember { mutableStateOf("") }
     var hadCajas by remember { mutableStateOf(false) }
+    val isSessionExpired = remember { derivedStateOf { !isConnected && !com.example.sisvvapp.data.local.SessionManager.getInstance(context).isLoggedIn() } }
+    
+    // Conjunto para evitar spam de alertas de la misma caja
+    val cajasNotificadas = remember { mutableSetOf<Int>() }
 
     // Sincronización al montar la pantalla (app reabierta o primer inicio)
     LaunchedEffect(Unit) {
@@ -102,8 +106,12 @@ fun MainContainer(
     LaunchedEffect(Unit) {
         SyncEventBus.events.collect { event ->
             if (event is SyncEventBus.SyncEvent.CajaCerrada && !showCajaCerradaDialog) {
-                motivoCajaCerrada = "venta_offline"
-                showCajaCerradaDialog = true
+                // SOLO mostramos si la sesión aún es válida (prioridad)
+                val session = com.example.sisvvapp.data.local.SessionManager.getInstance(context)
+                if (session.isLoggedIn()) {
+                    motivoCajaCerrada = "venta_offline"
+                    showCajaCerradaDialog = true
+                }
             }
         }
     }

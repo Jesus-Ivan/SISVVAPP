@@ -182,10 +182,10 @@ fun NuevaVentaConfigScreen(
                         )
                     }
 
-                    if (socioSeleccionado?.estatus == "CAN") {
+                    if (socioSeleccionado != null && socioSeleccionado.estatus == "CANCELADO") {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Membresia de socio ${socioSeleccionado.id} cancelada",
+                            text = "Membresía de socio ${socioSeleccionado.id} cancelada (Acceso Denegado)",
                             color = MaterialTheme.colorScheme.error,
                             fontSize = if (isTablet) 16.sp else 14.sp,
                             fontWeight = FontWeight.Bold,

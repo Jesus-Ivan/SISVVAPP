@@ -380,16 +380,17 @@ class VentaRepository(
                         return Result.success(Unit)
                     }
                     
-                    if (response.code() == 422 && errorBody?.contains("caja", ignoreCase = true) == true) {
-                        Log.w("VentaRepo", "Caja cerrada, descartando venta ${venta.idTemporal}: $errorBody")
-                        ventaColaDao.deleteById(venta.idTemporal)
+                    if (response.code() == 422 && errorBody.contains("caja", ignoreCase = true)) {
+                        Log.w("VentaRepo", "Caja cerrada, descartando todas las ventas de la caja ${actual.corteCaja}")
+                        ventaColaDao.deleteByCorteCaja(actual.corteCaja)
                         SyncEventBus.cajaCerrada(venta.idTemporal)
                         return Result.success(Unit)
                     }
 
                     if (response.code() == 401) {
-                        Log.w("VentaRepo", "Token expirado, revirtiendo venta ${venta.idTemporal} a PENDIENTE")
-                        ventaColaDao.updateEstado(venta.idTemporal, "PENDIENTE")
+                        Log.w("VentaRepo", "Token expirado / Sesión inválida, descartando ventas de la caja ${actual.corteCaja}")
+                        ventaColaDao.deleteByCorteCaja(actual.corteCaja)
+                        SyncEventBus.cajaCerrada(venta.idTemporal)
                         return Result.success(Unit)
                     }
 

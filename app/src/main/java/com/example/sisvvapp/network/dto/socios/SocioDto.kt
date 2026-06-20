@@ -10,7 +10,7 @@ data class SocioDto(
     @SerializedName("num_accion") val numAccion: Int?,
     val firma: Boolean,
     @SerializedName("img_path")   val imgPath: String?,
-    val membresia: MembresiaDto?,
+    val membresias: List<MembresiaDto> = emptyList(),
     val integrantes: List<IntegranteDto> = emptyList()
 )
 

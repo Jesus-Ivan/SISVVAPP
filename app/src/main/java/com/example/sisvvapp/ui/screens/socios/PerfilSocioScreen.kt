@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
@@ -110,52 +111,81 @@ fun PerfilSocioScreen(
                                         Spacer(modifier = Modifier.height(12.dp))
 
                                         Text(
-                                            text = "Estado membresia: ${socio.estatus}",
-                                            fontSize = if (isTablet) 15.sp else 13.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-
-                                        Spacer(modifier = Modifier.height(4.dp))
-
-                                        Text(
-                                            text = "Tipo membresia: ${socio.membresiaTipo}",
-                                            fontSize = if (isTablet) 15.sp else 13.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-
-                                        Spacer(modifier = Modifier.height(4.dp))
-
-                                        Text(
                                             text = "No.Socio: ${socio.id}",
                                             fontSize = if (isTablet) 15.sp else 13.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
 
-                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Spacer(modifier = Modifier.height(16.dp))
 
-                                        if (socio.estatus == "CAN") {
-                                            VistaVerdeStatusBadge(
-                                                text = stringResource(R.string.perfil_socio_acceso_denegado),
-                                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                                textColor = MaterialTheme.colorScheme.onErrorContainer
-                                            )
+                                        // --- NUEVA SECCIÓN DE MEMBRESÍAS (HISTORIAL) ---
+                                        val gson = remember { com.google.gson.Gson() }
+                                        val membresias = remember(socio.membresiasJson) {
+                                            try {
+                                                val type = object : com.google.gson.reflect.TypeToken<List<com.example.sisvvapp.network.dto.socios.MembresiaDto>>() {}.type
+                                                gson.fromJson<List<com.example.sisvvapp.network.dto.socios.MembresiaDto>>(socio.membresiasJson, type) ?: emptyList()
+                                            } catch (e: Exception) {
+                                                emptyList()
+                                            }
+                                        }
+
+                                        if (membresias.isNotEmpty()) {
+                                            @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+                                            androidx.compose.foundation.layout.FlowRow(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                                maxItemsInEachRow = 2
+                                            ) {
+                                                membresias.filter { it.estado != "CAN" }.forEach { m ->
+                                                    MembresiaBadge(
+                                                        clave = m.clave ?: "???",
+                                                        estado = m.estado ?: "???",
+                                                        isTablet = isTablet
+                                                    )
+                                                }
+                                            }
                                         } else {
+                                            // Fallback si no hay JSON (compatibilidad con datos viejos)
+                                            MembresiaBadge(
+                                                clave = socio.membresiaTipo ?: "Sin membresía",
+                                                estado = socio.estatus,
+                                                isTablet = isTablet
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.height(20.dp))
+
+                                        if (socio.estatus == "MEN" || socio.estatus == "ANU") {
                                             VistaVerdeStatusBadge(
                                                 text = stringResource(R.string.perfil_socio_acceso_permitido),
                                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                                 textColor = MaterialTheme.colorScheme.onPrimaryContainer
                                             )
+                                        } else {
+                                            VistaVerdeStatusBadge(
+                                                text = stringResource(R.string.perfil_socio_acceso_denegado),
+                                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                                textColor = MaterialTheme.colorScheme.onErrorContainer
+                                            )
                                         }
 
                                         Spacer(modifier = Modifier.height(6.dp))
+                                        
+                                        val firmaColor = if (socio.firmaAutorizada) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.error
+                                        }
+                                        
                                         Text(
                                             text = if (socio.firmaAutorizada)
                                                 stringResource(R.string.perfil_socio_firma_autorizada)
                                             else
                                                 stringResource(R.string.perfil_socio_firma_no_autorizada),
                                             fontSize = if (isTablet) 15.sp else 13.sp,
-                                            color = if (socio.firmaAutorizada) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontWeight = if (socio.firmaAutorizada) FontWeight.Medium else FontWeight.Normal
+                                            color = firmaColor,
+                                            fontWeight = FontWeight.Medium
                                         )
                                     }
                                 }
@@ -247,6 +277,68 @@ fun IntegranteCard(
                 VistaVerdeAvatar(
                     fotoUrl = integrante.fotoUrl,
                     modifier = Modifier.clickable { onPhotoClick(integrante.fotoUrl) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MembresiaBadge(
+    clave: String,
+    estado: String,
+    isTablet: Boolean
+) {
+    val (containerColor, contentColor, label) = when (estado) {
+        "MEN", "ANU" -> Triple(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.onPrimaryContainer,
+            "ACTIVA"
+        )
+        "INA" -> Triple(
+            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.onSurfaceVariant,
+            "INACTIVA"
+        )
+        else -> Triple(
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+            MaterialTheme.colorScheme.onSurfaceVariant,
+            estado
+        )
+    }
+
+    Surface(
+        color = containerColor,
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            width = 1.dp,
+            color = contentColor.copy(alpha = 0.15f)
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(contentColor, CircleShape)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Text(
+                    text = clave,
+                    fontSize = if (isTablet) 14.sp else 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = contentColor,
+                    letterSpacing = 0.5.sp
+                )
+                Text(
+                    text = label,
+                    fontSize = if (isTablet) 11.sp else 9.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = contentColor.copy(alpha = 0.7f),
+                    lineHeight = 10.sp
                 )
             }
         }

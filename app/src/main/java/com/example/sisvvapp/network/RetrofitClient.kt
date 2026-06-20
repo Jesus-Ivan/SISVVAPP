@@ -3,6 +3,7 @@ package com.example.sisvvapp.network
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
 import com.example.sisvvapp.BuildConfig
 import com.example.sisvvapp.SisvvApplication
 import com.example.sisvvapp.data.local.SessionManager
@@ -33,6 +34,14 @@ object RetrofitClient {
         if (apiService != null) return apiService!!
 
         val sessionManager = SessionManager.getInstance(context)
+
+        val jsonAcceptInterceptor = Interceptor { chain ->
+            val request = chain.request().newBuilder()
+                .addHeader("Accept", "application/json")
+                .addHeader("X-Requested-With", "XMLHttpRequest")
+                .build()
+            chain.proceed(request)
+        }
 
         val bypassTunnelInterceptor = Interceptor { chain ->
             var builder = chain.request().newBuilder()
@@ -72,14 +81,36 @@ object RetrofitClient {
 
         val authResponseInterceptor = Interceptor { chain ->
             val response = chain.proceed(chain.request())
-            if (response.code == 401) {
+            
+            // Si el código es 429, el túnel está saturado. Cerramos y lanzamos excepción para que no ocupe pool
+            if (response.code == 429) {
+                response.close()
+                throw IOException("Servidor saturado (429)")
+            }
+
+            val contentType = response.body?.contentType()?.toString() ?: ""
+            
+            // Verificamos si existe un token para saber si realmente hay una sesión que pueda expirar
+            val hasToken = !sessionManager.getToken().isNullOrEmpty()
+
+            // Detectar 401 O contenido HTML inesperado SOLO si el usuario ya tenía una sesión activa
+            if ((response.code == 401 || contentType.contains("text/html")) && hasToken) {
+                Log.e("AuthCheck", "¡Sesión expirada detectada! Código: ${response.code}, Tipo: $contentType")
+                
                 sessionManager.clearSession()
                 (context.applicationContext as? SisvvApplication)?.emitUnauthorized()
+
+                // Si es HTML, cerramos y lanzamos excepción para evitar errores de parseo GSON
+                if (contentType.contains("text/html")) {
+                    response.close()
+                    throw IOException("Sesión expirada (Respuesta HTML interceptada)")
+                }
             }
             response
         }
 
         val client = OkHttpClient.Builder()
+            .addInterceptor(jsonAcceptInterceptor)
             .addInterceptor(bypassTunnelInterceptor)
             .addInterceptor(connectivityInterceptor)
             .apply {
