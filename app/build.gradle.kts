@@ -24,7 +24,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://brave-pets-clean.loca.lt/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://huge-wombats-run.loca.lt/api/\"")
         }
         release {
             isMinifyEnabled = true
@@ -32,7 +32,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://brave-pets-clean.loca.lt/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://huge-wombats-run.loca.lt/api/\"")
         }
     }
     compileOptions {

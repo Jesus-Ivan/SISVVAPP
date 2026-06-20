@@ -10,6 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.ui.window.Dialog
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -41,6 +44,7 @@ import com.example.sisvvapp.network.dto.ventas.ProductoVentaDto
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.AppNavigationDrawerContent
 import com.example.sisvvapp.ui.components.TransferirProductoDialog
+import com.example.sisvvapp.ui.components.VistaVerdeButton
 import com.example.sisvvapp.ui.navigation.NavGraphs
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.screens.ajustes.AjustesScreen
@@ -77,6 +81,8 @@ fun MainContainer(
     val globalCarritoViewModel: CarritoViewModel = viewModel(factory = factory)
 
     var showCajaCerradaDialog by remember { mutableStateOf(false) }
+    var motivoCajaCerrada by remember { mutableStateOf("") }
+    var hadCajas by remember { mutableStateOf(false) }
 
     // Sincronización al montar la pantalla (app reabierta o primer inicio)
     LaunchedEffect(Unit) {
@@ -87,16 +93,32 @@ fun MainContainer(
     // Sincronización automática al recuperar conexión
     LaunchedEffect(isConnected) {
         if (isConnected) {
+            sharedCajaViewModel.refreshCajas()
             SyncWorker.enqueueOneTime(context)
         }
     }
 
-    // Detectar caja cerrada durante sync en segundo plano
+    // Detectar caja cerrada durante sync en segundo plano (venta offline falló)
     LaunchedEffect(Unit) {
         SyncEventBus.events.collect { event ->
             if (event is SyncEventBus.SyncEvent.CajaCerrada && !showCajaCerradaDialog) {
+                motivoCajaCerrada = "venta_offline"
                 showCajaCerradaDialog = true
             }
+        }
+    }
+
+    // Detectar cuando todas las cajas se cerraron desde la web
+    val topCajas by sharedCajaViewModel.cajas.collectAsState()
+    val topCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
+    val isLoadingCajas by sharedCajaViewModel.isLoading.collectAsState()
+    LaunchedEffect(topCajas) {
+        if (topCajas.isNotEmpty()) hadCajas = true
+    }
+    LaunchedEffect(topCajas, topCajaId, isLoadingCajas) {
+        if (topCajas.isEmpty() && topCajaId != null && hadCajas && !isLoadingCajas && !showCajaCerradaDialog) {
+            motivoCajaCerrada = "cajas_vacias"
+            showCajaCerradaDialog = true
         }
     }
 
@@ -548,24 +570,93 @@ fun MainContainer(
         }
 
         if (showCajaCerradaDialog) {
-            AlertDialog(
-                onDismissRequest = {},
-                title = { Text("Caja cerrada") },
-                text = {
-                    Text("La caja seleccionada fue cerrada en otro dispositivo. " +
-                            "Las ventas offline pendientes se descartaron porque ya no pueden sincronizarse.\n\n" +
-                            "Selecciona una caja activa para continuar.")
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showCajaCerradaDialog = false
-                        sharedCajaViewModel.clearSelectedCaja()
-                        onCajaClosed()
-                    }) {
-                        Text("Seleccionar otra caja")
+            Dialog(onDismissRequest = {}) {
+                Card(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "Caja cerrada",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        if (motivoCajaCerrada == "cajas_vacias") {
+                            Text(
+                                text = "Todas las cajas fueron cerradas.\n\n" +
+                                        "No hay cajas activas disponibles. Reintenta más tarde o cuando se abra una nueva caja.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else {
+                            Text(
+                                text = "La caja seleccionada fue cerrada en otro dispositivo.\n\n" +
+                                        "Las ventas offline pendientes se descartaron porque ya no pueden sincronizarse.\n\n" +
+                                        "Selecciona una caja activa para continuar.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        if (motivoCajaCerrada == "cajas_vacias") {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = {
+                                        showCajaCerradaDialog = false
+                                        onLogout()
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text("Cerrar sesión")
+                                }
+                                VistaVerdeButton(
+                                    text = "Reintentar",
+                                    onClick = {
+                                        showCajaCerradaDialog = false
+                                        scope.launch { sharedCajaViewModel.refreshCajas() }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        } else {
+                            VistaVerdeButton(
+                                text = "Seleccionar otra caja",
+                                onClick = {
+                                    showCajaCerradaDialog = false
+                                    sharedCajaViewModel.clearSelectedCaja()
+                                    onCajaClosed()
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
-            )
+            }
         }
     }
     }
