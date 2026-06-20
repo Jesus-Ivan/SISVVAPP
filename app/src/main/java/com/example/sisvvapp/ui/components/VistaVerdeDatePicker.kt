@@ -5,6 +5,7 @@ import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -22,7 +23,23 @@ fun VistaVerdeDatePicker(
     onDateSelected: (String) -> Unit
 ) {
     if (showDialog) {
-        val datePickerState = rememberDatePickerState()
+        val datePickerState = rememberDatePickerState(
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val cal = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+                        set(java.util.Calendar.HOUR_OF_DAY, 0)
+                        set(java.util.Calendar.MINUTE, 0)
+                        set(java.util.Calendar.SECOND, 0)
+                        set(java.util.Calendar.MILLISECOND, 0)
+                    }
+                    val today = cal.timeInMillis
+                    cal.add(java.util.Calendar.DAY_OF_YEAR, -1)
+                    val yesterday = cal.timeInMillis
+                    return utcTimeMillis == today || utcTimeMillis == yesterday
+                }
+                override fun isSelectableYear(year: Int) = true
+            }
+        )
 
         DatePickerDialog(
             onDismissRequest = onDismiss,

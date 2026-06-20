@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import androidx.work.WorkManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -195,6 +196,7 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(Unit) {
                     app.unauthorizedEvent.collect {
+                        WorkManager.getInstance(this@MainActivity).cancelAllWork()
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }
