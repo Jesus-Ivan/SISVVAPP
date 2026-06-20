@@ -30,19 +30,35 @@ fun String?.toMembresiaDescripcion(): String? = when (this) {
     else -> this
 }
 
-fun SocioDto.toSocioEntity() = SocioEntity(
-    id = id,
-    nombre = nombre,
-    apellidoP = apellidoP ?: "",
-    apellidoM = apellidoM ?: "",
-    telefono = null,
-    email = null,
-    firmaAutorizada = firma,
-    estatus = membresia?.estado ?: "Inactivo",
-    fotoUrl = imgPath,
-    numAccion = numAccion,
-    membresiaTipo = membresia?.clave?.toMembresiaDescripcion() ?: "Sin membresía"
-)
+fun SocioDto.toSocioEntity(): SocioEntity {
+    val gson = com.google.gson.Gson()
+    
+    // Nueva lógica de prioridad:
+    // 1. Buscamos primero cualquier membresía ACTIVA (MEN o ANU)
+    // 2. Si no hay activas, buscamos una INACTIVA (INA)
+    // 3. Si no hay ninguna de las anteriores (solo hay CAN o lista vacía), el socio está bloqueado
+    val activa = membresias.find { it.estado == "MEN" || it.estado == "ANU" }
+    val inactiva = if (activa == null) membresias.find { it.estado == "INA" } else null
+    
+    val membresiaPrincipal = activa ?: inactiva
+    
+    return SocioEntity(
+        id = id,
+        nombre = nombre,
+        apellidoP = apellidoP ?: "",
+        apellidoM = apellidoM ?: "",
+        telefono = null,
+        email = null,
+        firmaAutorizada = firma,
+        // Guardamos el estado de la membresía que le da acceso (MEN, ANU o INA)
+        // Si no hay ninguna de esas, guardamos "CANCELADO" para bloquear la venta
+        estatus = membresiaPrincipal?.estado ?: "CANCELADO",
+        fotoUrl = imgPath,
+        numAccion = numAccion,
+        membresiaTipo = membresiaPrincipal?.clave?.toMembresiaDescripcion() ?: "Sin membresía",
+        membresiasJson = gson.toJson(membresias)
+    )
+}
 
 fun SocioDto.toIntegranteEntities(): List<IntegranteEntity> = integrantes.mapIndexed { index, int ->
     Log.d("MAPPER", "Integrante: id=${int.id}, nombre='${int.nombre}', apellidoP='${int.apellidoP}', apellidoM='${int.apellidoM}', parentesco='${int.parentesco}', fotoUrl=${int.fotoUrl}")

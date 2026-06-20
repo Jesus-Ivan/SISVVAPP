@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,25 +24,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.sisvvapp.R
 import com.example.sisvvapp.ui.components.VistaVerdeButton
 import com.example.sisvvapp.ui.components.VistaVerdeTextField
-import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.Inter
 import com.example.sisvvapp.ui.theme.Poppins
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.utils.DeviceType
 import com.example.sisvvapp.ui.utils.LocalDeviceType
-import com.example.sisvvapp.ui.viewmodel.SisvvViewModelFactory
 
 @Composable
 fun LoginScreen(
@@ -54,6 +53,7 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var localError by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
 
 
     val inputModifier = Modifier
@@ -67,6 +67,18 @@ fun LoginScreen(
     val errorEmptyFields = stringResource(id = R.string.error_empty_fields)
     val errorInvalidEmail = stringResource(id = R.string.error_invalid_email)
     val errorShortPassword = stringResource(id = R.string.error_short_password)
+
+    val attemptLogin = {
+        localError = when {
+            email.isBlank() || password.isBlank() -> errorEmptyFields
+            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> errorInvalidEmail
+            password.length < 8 -> errorShortPassword
+            else -> {
+                onLoginClick(email, password)
+                ""
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -114,6 +126,10 @@ fun LoginScreen(
                 onValueChange = { email = it; localError = "" },
                 label = stringResource(id = R.string.login_email_label),
                 keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next,
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
                 modifier = inputModifier,
                 bgColor = MaterialTheme.colorScheme.surface
             )
@@ -125,6 +141,13 @@ fun LoginScreen(
                 onValueChange = { password = it; localError = "" },
                 label = stringResource(id = R.string.login_password_label),
                 isPassword = true,
+                imeAction = ImeAction.Done,
+                keyboardActions = KeyboardActions(
+                    onDone = { 
+                        focusManager.clearFocus()
+                        attemptLogin() 
+                    }
+                ),
                 modifier = inputModifier,
                 bgColor = MaterialTheme.colorScheme.surface
             )
@@ -145,17 +168,7 @@ fun LoginScreen(
             VistaVerdeButton(
                 text = stringResource(id = R.string.login_button),
                 enabled = !isLoading,
-                onClick = {
-                    localError = when {
-                        email.isBlank() || password.isBlank() -> errorEmptyFields
-                        !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> errorInvalidEmail
-                        password.length < 8 -> errorShortPassword
-                        else -> {
-                            onLoginClick(email, password)
-                            ""
-                        }
-                    }
-                }
+                onClick = attemptLogin
             )
         }
     }

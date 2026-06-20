@@ -33,7 +33,9 @@ fun VistaVerdeSocioCard(
     onNuevaVentaClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isActive = socio.estatus != "CAN"
+    // Es "PERMITIDO" si tiene una membresía activa (MEN o ANU)
+    // El Mapper ya se encarga de que estatus sea MEN o ANU si hay alguna activa
+    val isActive = socio.estatus == "MEN" || socio.estatus == "ANU"
     val membresiaTexto = socio.membresiaTipo ?: "Sin membresía"
 
     VistaVerdeBaseCard(modifier = modifier) {

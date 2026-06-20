@@ -42,6 +42,9 @@ interface VentaColaDao {
     @Query("DELETE FROM ventas_cola WHERE idTemporal = :id")
     suspend fun deleteById(id: String)
 
+    @Query("DELETE FROM ventas_cola WHERE corteCaja = :corteCaja")
+    suspend fun deleteByCorteCaja(corteCaja: Int)
+
     @Query("SELECT COUNT(*) FROM ventas_cola WHERE estado = 'PENDIENTE'")
     fun countPendientesFlow(): Flow<Int>
 

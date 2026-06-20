@@ -15,4 +15,14 @@ class Converters {
         val type = object : TypeToken<List<String>>() {}.type
         return gson.fromJson(value, type)
     }
+
+    @TypeConverter
+    fun fromMembresiaList(value: List<com.example.sisvvapp.network.dto.socios.MembresiaDto>?): String? = gson.toJson(value)
+
+    @TypeConverter
+    fun toMembresiaList(value: String?): List<com.example.sisvvapp.network.dto.socios.MembresiaDto>? {
+        if (value == null) return null
+        val type = object : TypeToken<List<com.example.sisvvapp.network.dto.socios.MembresiaDto>>() {}.type
+        return gson.fromJson(value, type)
+    }
 }

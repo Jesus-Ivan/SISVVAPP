@@ -3,6 +3,7 @@ package com.example.sisvvapp.ui.components
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -20,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -39,6 +41,8 @@ fun VistaVerdeTextField(
     leadingIcon: @Composable (() -> Unit)? = null,
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
     singleLine: Boolean = true,
     minLines: Int = 1,
@@ -88,8 +92,10 @@ fun VistaVerdeTextField(
 
         keyboardOptions = KeyboardOptions(
             keyboardType = keyboardType,
-            capitalization = capitalization
+            capitalization = capitalization,
+            imeAction = imeAction
         ),
+        keyboardActions = keyboardActions,
         visualTransformation = if(isPassword && !passwordVisible) {
             PasswordVisualTransformation()
         } else {

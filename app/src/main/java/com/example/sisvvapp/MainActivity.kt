@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -15,6 +16,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -91,6 +93,8 @@ class MainActivity : ComponentActivity() {
 
                 // Lógica de Permisos de Notificaciones
                 var showPermissionRationale by remember { mutableStateOf(false) }
+                var showSessionExpiredDialog by remember { mutableStateOf(false) }
+
                 val permissionLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestPermission(),
                     onResult = { isGranted ->
@@ -194,12 +198,96 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                LaunchedEffect(Unit) {
-                    app.unauthorizedEvent.collect {
-                        WorkManager.getInstance(this@MainActivity).cancelAllWork()
+                if (showSessionExpiredDialog) {
+                    Dialog(onDismissRequest = { /* No permitir cerrar fuera */ }) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.size(64.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.Default.Lock,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                Text(
+                                    text = "Sesión Expirada / Caja Cerrada",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text(
+                                    text = "Tu sesión ha expirado por seguridad o la caja ha sido cerrada.\n\n" +
+                                            "Las ventas locales pendientes han sido descartadas ya que no pueden sincronizarse.\n\n" +
+                                            "Por favor, inicia sesión de nuevo para continuar.",
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    lineHeight = 20.sp
+                                )
+
+                                Spacer(modifier = Modifier.height(32.dp))
+
+                                VistaVerdeButton(
+                                    text = "Ir al Login",
+                                    onClick = {
+                                        showSessionExpiredDialog = false
+                                        sisvvViewModel.resetLoginStatus() // Doble seguridad
+                                        WorkManager.getInstance(this@MainActivity).cancelAllWork()
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                val logoutSuccess = sisvvViewModel.logoutSuccess
+                LaunchedEffect(logoutSuccess) {
+                    if (logoutSuccess) {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }
+                        sisvvViewModel.resetLogoutStatus()
+                    }
+                }
+
+                LaunchedEffect(Unit) {
+                    app.unauthorizedEvent.collect {
+                        Log.d("MainActivity", "Sesión expirada detectada, limpiando y mostrando diálogo")
+                        // Limpieza inmediata para romper el bucle
+                        com.example.sisvvapp.data.local.SessionManager.getInstance(this@MainActivity).clearSession()
+                        sisvvViewModel.resetLoginStatus()
+                        showSessionExpiredDialog = true
                     }
                 }
 
@@ -285,9 +373,6 @@ class MainActivity : ComponentActivity() {
                                 viewModel = sisvvViewModel,
                                 onLogout = {
                                     sisvvViewModel.logout()
-                                    navController.navigate(Screen.Login.route) {
-                                        popUpTo(0) { inclusive = true }
-                                    }
                                 },
                                 onCajaClosed = {
                                     navController.navigate(Screen.CajaInicial.route) {

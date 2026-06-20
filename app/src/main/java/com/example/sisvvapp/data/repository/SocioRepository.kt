@@ -41,12 +41,8 @@ class SocioRepository(
                 }
                 Log.d("SocioRepo", "Sincronizados ${sociosEnt.size} socios")
 
-                if (context != null) {
-                    val allFotoUrls = sociosEnt.mapNotNull { it.fotoUrl } +
-                            integrantesEnt.mapNotNull { it.fotoUrl }
-                    PhotoDownloader.downloadAll(context, allFotoUrls)
-                }
-
+                // La descarga de fotos ya no debe bloquear el sync de datos
+                // El SyncWorker se encargará de bajarlas gradualmente en segundo plano
                 Result.success(Unit)
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Sin detalle"

@@ -172,6 +172,17 @@ class SessionManager private constructor(context: Context) {
 
     fun hasSelectedCaja(): Boolean = getSelectedCajaId() != -1
 
+    fun clearSelectedCaja() {
+        try {
+            prefs.edit()
+                .remove(KEY_SELECTED_CAJA_ID)
+                .remove(KEY_SELECTED_CAJA_NOMBRE)
+                .apply()
+        } catch (e: Exception) {
+            Log.e("SessionManager", "Error al limpiar caja seleccionada", e)
+        }
+    }
+
     companion object {
         @Volatile
         private var INSTANCE: SessionManager? = null

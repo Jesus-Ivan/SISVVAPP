@@ -16,5 +16,6 @@ data class SocioEntity(
     @ColumnInfo(name = "estatus") val estatus: String,
     @ColumnInfo(name = "foto_url") val fotoUrl: String?,
     @ColumnInfo(name = "num_accion") val numAccion: Int?,
-    @ColumnInfo(name = "membresia_tipo") val membresiaTipo: String?
+    @ColumnInfo(name = "membresia_tipo") val membresiaTipo: String?,
+    @ColumnInfo(name = "membresias_json") val membresiasJson: String? = null
 )

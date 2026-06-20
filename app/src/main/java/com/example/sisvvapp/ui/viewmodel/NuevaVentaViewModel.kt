@@ -184,7 +184,8 @@ class NuevaVentaViewModel(
         val requiereSocio = _tipoVenta.value == "socio" || _tipoVenta.value == "invitado"
         if (requiereSocio) {
             val socio = _socioSeleccionado.value
-            if (socio == null || socio.estatus == "CAN") {
+            // Solo bloqueamos si el estatus mapeado es "CANCELADO" (no se halló ninguna válida)
+            if (socio == null || socio.estatus == "CANCELADO") {
                 return false
             }
         }

@@ -39,15 +39,26 @@ class SyncWorker(
 
             ventaRepo.syncVentas(java.time.LocalDate.now().toString())
 
-            // Descargar fotos de socios e integrantes para uso offline
+            // Descargar fotos de forma limitada para no saturar el túnel
             try {
                 val socios = db.socioDao().getAllSociosSync()
                 val integrantes = db.socioDao().getAllIntegrantesSync()
                 val fotoUrls = (socios.mapNotNull { it.fotoUrl } + integrantes.mapNotNull { it.fotoUrl })
                     .filter { it.isNotBlank() }
-                PhotoDownloader.downloadAll(applicationContext, fotoUrls)
+                    .distinct()
+                
+                // Solo descargamos un máximo de 40 fotos por cada ciclo de sync
+                // Esto permite que se vayan bajando gradualmente sin bloquear el túnel
+                val limit = 40
+                val photosDir = java.io.File(applicationContext.filesDir, "photos")
+                val pending = fotoUrls.filter { !java.io.File(photosDir, it).exists() }.take(limit)
+                
+                if (pending.isNotEmpty()) {
+                    Log.d("SyncWorker", "Descarga gradual: ${pending.size} fotos pendientes de bajar en este ciclo")
+                    PhotoDownloader.downloadAll(applicationContext, pending)
+                }
             } catch (e: Exception) {
-                Log.w("SyncWorker", "Error descargando fotos", e)
+                Log.w("SyncWorker", "Error descargando fotos (sync parcial)", e)
             }
             // 3. Enviar ventas offline
             val pendientes = ventaRepo.getParaSincronizar()

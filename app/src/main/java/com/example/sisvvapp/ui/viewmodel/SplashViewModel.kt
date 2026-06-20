@@ -32,6 +32,8 @@ class SplashViewModel(
                     Screen.CajaInicial.route
                 }
             } else {
+                // Si no hay sesión, siempre al login, limpiando caja si existiera
+                sessionManager.clearSelectedCaja()
                 Screen.Login.route
             }
 
