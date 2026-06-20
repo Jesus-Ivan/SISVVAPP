@@ -387,6 +387,12 @@ class VentaRepository(
                         return Result.success(Unit)
                     }
 
+                    if (response.code() == 401) {
+                        Log.w("VentaRepo", "Token expirado, revirtiendo venta ${venta.idTemporal} a PENDIENTE")
+                        ventaColaDao.updateEstado(venta.idTemporal, "PENDIENTE")
+                        return Result.success(Unit)
+                    }
+
                     if (response.code() in 400..499 && response.code() != 429) {
                         Log.w("VentaRepo", "Error de cliente ${response.code()}, marcando como ERROR_FATAL")
                         ventaColaDao.updateEstado(venta.idTemporal, "ERROR_FATAL")
