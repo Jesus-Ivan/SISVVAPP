@@ -234,20 +234,21 @@ fun ResumenVentaRow(
     value: String,
     modifier: Modifier = Modifier
 ) {
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     Row(
-        modifier = modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = modifier.fillMaxWidth().padding(vertical = if (isTablet) 6.dp else 4.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = label,
-            fontSize = 14.sp,
+            fontSize = if (isTablet) 16.sp else 14.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(end = 16.dp)
         )
         Text(
             text = value,
-            fontSize = 14.sp,
+            fontSize = if (isTablet) 16.sp else 14.sp,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.End,

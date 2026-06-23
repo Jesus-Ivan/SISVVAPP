@@ -23,6 +23,8 @@ import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.state.SisvvViewModel
 import com.example.sisvvapp.ui.theme.*
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 
 data class DrawerItem(val route: String, val title: String, val icon: ImageVector)
 
@@ -36,6 +38,7 @@ fun AppNavigationDrawerContent(
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val pendientesCount by db.ventaColaDao().countPendientesFlow().collectAsState(initial = 0)
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     val items = listOf(
         DrawerItem(ScreenRoutes.VENTAS, stringResource(R.string.menu_ventas), Icons.Default.ShoppingCart),
         DrawerItem(ScreenRoutes.SOCIOS, stringResource(R.string.menu_socios), Icons.Default.Person),
@@ -43,14 +46,14 @@ fun AppNavigationDrawerContent(
     )
 
     ModalDrawerSheet(
-        modifier = Modifier.width(300.dp),
+        modifier = Modifier.width(if (isTablet) 380.dp else 300.dp),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerContentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(24.dp)
+                .padding(if (isTablet) 32.dp else 24.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
@@ -58,11 +61,11 @@ fun AppNavigationDrawerContent(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = if (isTablet) 12.dp else 8.dp)
             )
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(if (isTablet) 32.dp else 24.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 items.forEach { item ->
@@ -80,7 +83,7 @@ fun AppNavigationDrawerContent(
                                     style = TextStyle(
                                         fontFamily = Inter,
                                         fontWeight = FontWeight.SemiBold,
-                                        fontSize = 15.sp
+                                        fontSize = if (isTablet) 18.sp else 15.sp
                                     )
                                 )
                                 if (pendientesCount > 0 && item.route == ScreenRoutes.VENTAS) {
@@ -96,7 +99,7 @@ fun AppNavigationDrawerContent(
                             selectedTextColor = MaterialTheme.colorScheme.primary,
                             unselectedTextColor = MaterialTheme.colorScheme.onSurface
                         ),
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        modifier = Modifier.padding(vertical = if (isTablet) 8.dp else 4.dp)
                     )
                 }
             }
@@ -111,10 +114,10 @@ fun AppNavigationDrawerContent(
                     style = TextStyle(
                         fontFamily = Inter,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp,
+                        fontSize = if (isTablet) 16.sp else 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(bottom = if (isTablet) 16.dp else 12.dp)
                 )
 
                 val themeMode = viewModel.themeMode
@@ -156,16 +159,17 @@ fun ThemeOptionSmall(
     val containerColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
     val contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
 
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     FilledIconButton(
         onClick = onClick,
         colors = IconButtonDefaults.filledIconButtonColors(
             containerColor = containerColor,
             contentColor = contentColor
         ),
-        modifier = modifier.height(40.dp),
+        modifier = modifier.height(if (isTablet) 48.dp else 40.dp),
         shape = MaterialTheme.shapes.small
     ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+        Icon(icon, contentDescription = null, modifier = Modifier.size(if (isTablet) 24.dp else 20.dp))
     }
 }
 

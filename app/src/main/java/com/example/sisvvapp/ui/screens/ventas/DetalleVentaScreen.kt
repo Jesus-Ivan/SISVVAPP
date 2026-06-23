@@ -21,6 +21,8 @@ import com.example.sisvvapp.network.dto.ventas.ProductoVentaDto
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.*
 import com.example.sisvvapp.ui.theme.Poppins
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 import java.util.Locale
 
 @Composable
@@ -162,8 +164,9 @@ fun DetalleVentaScreen(
 @Composable
 private fun DetalleHeaderCard(venta: VentaDto) {
     val esAbierta = venta.estatus.equals("Abierta", ignoreCase = true)
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     VistaVerdeBaseCard {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(if (isTablet) 24.dp else 16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -172,7 +175,7 @@ private fun DetalleHeaderCard(venta: VentaDto) {
                 Text(
                     text = if (venta.syncStatus != "RECIBIDA" && venta.folio == 0) "Folio: PENDIENTE" else "Folio: ${venta.folio}",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
+                    fontSize = if (isTablet) 26.sp else 20.sp
                 )
                 VistaVerdeStatusBadge(
                     text = if (esAbierta) "Abierta" else "Cerrada",
@@ -180,37 +183,37 @@ private fun DetalleHeaderCard(venta: VentaDto) {
                     textColor = if (esAbierta) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            DetalleRow("Cliente", venta.nombreCliente.replace(Regex("\\s+"), " ").trim().uppercase())
+            Spacer(modifier = Modifier.height(if (isTablet) 16.dp else 12.dp))
+            DetalleRow("Cliente", venta.nombreCliente.replace(Regex("\\s+"), " ").trim().uppercase(), isTablet)
             if (venta.socioId != null && venta.socioId != 0) {
-                DetalleRow("ID Socio", venta.socioId.toString())
+                DetalleRow("ID Socio", venta.socioId.toString(), isTablet)
             } else {
-                DetalleRow("ID Socio", "N/A")
+                DetalleRow("ID Socio", "N/A", isTablet)
             }
             if (venta.tipoCliente != null) {
-                DetalleRow("Tipo", venta.tipoCliente)
+                DetalleRow("Tipo", venta.tipoCliente, isTablet)
             }
-            DetalleRow("Fecha/Hora", "${venta.fecha ?: ""} · ${venta.hora}")
-            DetalleRow("Comensales", venta.numComensales?.toString() ?: "N/A")
+            DetalleRow("Fecha/Hora", "${venta.fecha ?: ""} · ${venta.hora}", isTablet)
+            DetalleRow("Comensales", venta.numComensales?.toString() ?: "N/A", isTablet)
         }
     }
 }
 
 @Composable
-private fun DetalleRow(label: String, value: String) {
+private fun DetalleRow(label: String, value: String, isTablet: Boolean = false) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = if (isTablet) 4.dp else 2.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = label,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 13.sp
+            fontSize = if (isTablet) 16.sp else 13.sp
         )
         Text(
             text = value,
             fontWeight = FontWeight.Medium,
-            fontSize = 13.sp
+            fontSize = if (isTablet) 16.sp else 13.sp
         )
     }
 }
