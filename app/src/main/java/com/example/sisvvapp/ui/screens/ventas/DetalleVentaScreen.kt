@@ -190,10 +190,8 @@ private fun DetalleHeaderCard(venta: VentaDto) {
             if (venta.tipoCliente != null) {
                 DetalleRow("Tipo", venta.tipoCliente)
             }
-            if (venta.fecha != null) {
-                DetalleRow("Fecha", venta.fecha)
-            }
-            DetalleRow("Hora", venta.hora)
+            DetalleRow("Fecha/Hora", "${venta.fecha ?: ""} · ${venta.hora}")
+            DetalleRow("Comensales", venta.numComensales?.toString() ?: "N/A")
         }
     }
 }

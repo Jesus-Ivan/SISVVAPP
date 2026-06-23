@@ -284,7 +284,8 @@ class VentaRepository(
                 totalVenta = request.total ?: 0.0,
                 estado = "PENDIENTE",
                 folioExistente = folioExistente,
-                pagosJson = null
+                pagosJson = null,
+                numComensales = request.numComensales
             )
         }
         ventaColaDao.insert(entity)
@@ -551,6 +552,7 @@ private fun VentaColaEntity.toVentaDto(): VentaDto {
         tipoCliente = tipoVenta,
         fecha = displayDate,
         clavePuntoVenta = clavePuntoVenta,
+        numComensales = numComensales,
         productos = productosVenta,
         syncStatus = estado,
         idTemporal = idTemporal
@@ -613,6 +615,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
         socioId = if (socioId == 0) null else socioId,
         tipoCliente = null,
         fecha = displayDate,
+        numComensales = numComensales,
         productos = productos,
         syncStatus = syncStatus,
         idTemporal = idTemporal
@@ -636,6 +639,7 @@ private fun com.example.sisvvapp.network.dto.ventas.VentaResponse.toVentaRecibid
         socioId = idSocio,
         clavePuntoVenta = clavePuntoVenta ?: "",
         corteCaja = corteCaja ?: 0,
+        numComensales = numComensales,
         productosJson = gson.toJson(productos ?: emptyList<ProductoVentaDto>()),
         pagosJson = gson.toJson(pagos ?: emptyList<PagoDto>())
     )
@@ -665,6 +669,7 @@ private fun VentaRecibidaEntity.toVentaDto(): VentaDto {
         socioId = socioId,
         tipoCliente = null,
         fecha = date,
+        numComensales = numComensales,
         productos = productos,
         pagos = pagos,
         syncStatus = "RECIBIDA"
@@ -683,6 +688,7 @@ fun VentaDto.toVentaRecibidaEntity(): VentaRecibidaEntity {
         socioId = socioId,
         clavePuntoVenta = clavePuntoVenta,
         corteCaja = cajaId ?: 0,
+        numComensales = numComensales,
         productosJson = gson.toJson(productos),
         pagosJson = gson.toJson(pagos)
     )
