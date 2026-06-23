@@ -32,16 +32,23 @@ fun String?.toMembresiaDescripcion(): String? = when (this) {
 
 fun SocioDto.toSocioEntity(): SocioEntity {
     val gson = com.google.gson.Gson()
-    
-    // Nueva lógica de prioridad:
+
+    // Normalizamos la lista de membresías para asegurar comparaciones limpias
+    val membresiasLimpia = (membresias ?: emptyList()).map {
+        it.copy(estado = it.estado?.trim()?.uppercase())
+    }
+
+    // Nueva lógica de prioridad con normalización:
     // 1. Buscamos primero cualquier membresía ACTIVA (MEN o ANU)
+    val activa = membresiasLimpia.find { it.estado == "MEN" || it.estado == "ANU" }
+
     // 2. Si no hay activas, buscamos una INACTIVA (INA)
-    // 3. Si no hay ninguna de las anteriores (solo hay CAN o lista vacía), el socio está bloqueado
-    val activa = membresias.find { it.estado == "MEN" || it.estado == "ANU" }
-    val inactiva = if (activa == null) membresias.find { it.estado == "INA" } else null
-    
+    val inactiva = if (activa == null) membresiasLimpia.find { it.estado == "INA" } else null
+
     val membresiaPrincipal = activa ?: inactiva
-    
+
+    Log.d("SocioMapper", "Socio ID ${id}: Activa=${activa?.clave}, Inactiva=${inactiva?.clave}, Final=${membresiaPrincipal?.estado}")
+
     return SocioEntity(
         id = id,
         nombre = nombre,
@@ -51,16 +58,16 @@ fun SocioDto.toSocioEntity(): SocioEntity {
         email = null,
         firmaAutorizada = firma,
         // Guardamos el estado de la membresía que le da acceso (MEN, ANU o INA)
-        // Si no hay ninguna de esas, guardamos "CANCELADO" para bloquear la venta
+        // Solo si realmente no hay NINGUNA válida, ponemos CANCELADO
         estatus = membresiaPrincipal?.estado ?: "CANCELADO",
         fotoUrl = imgPath,
         numAccion = numAccion,
         membresiaTipo = membresiaPrincipal?.clave?.toMembresiaDescripcion() ?: "Sin membresía",
-        membresiasJson = gson.toJson(membresias)
+        membresiasJson = gson.toJson(membresias ?: emptyList<com.example.sisvvapp.network.dto.socios.MembresiaDto>())
     )
 }
 
-fun SocioDto.toIntegranteEntities(): List<IntegranteEntity> = integrantes.mapIndexed { index, int ->
+fun SocioDto.toIntegranteEntities(): List<IntegranteEntity> = (integrantes ?: emptyList()).mapIndexed { index, int ->
     Log.d("MAPPER", "Integrante: id=${int.id}, nombre='${int.nombre}', apellidoP='${int.apellidoP}', apellidoM='${int.apellidoM}', parentesco='${int.parentesco}', fotoUrl=${int.fotoUrl}")
     IntegranteEntity(
         id = int.id ?: -(index + 1),
