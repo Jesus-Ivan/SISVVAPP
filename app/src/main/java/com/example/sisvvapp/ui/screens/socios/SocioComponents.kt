@@ -33,9 +33,9 @@ fun VistaVerdeSocioCard(
     onNuevaVentaClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Es "PERMITIDO" si tiene una membresía activa (MEN o ANU)
-    // El Mapper ya se encarga de que estatus sea MEN o ANU si hay alguna activa
-    val isActive = socio.estatus == "MEN" || socio.estatus == "ANU"
+    // Es "PERMITIDO" si tiene una membresía MEN, ANU o INA
+    // Solo bloqueamos ("DENEGADO") si el estatus es exactamente "CANCELADO"
+    val isDenied = socio.estatus == "CANCELADO"
     val membresiaTexto = socio.membresiaTipo ?: "Sin membresía"
 
     VistaVerdeBaseCard(modifier = modifier) {
@@ -100,9 +100,9 @@ fun VistaVerdeSocioCard(
                 VistaVerdeAvatar(fotoUrl = socio.fotoUrl)
                 Spacer(modifier = Modifier.height(8.dp))
                 VistaVerdeStatusBadge(
-                    text = if (isActive) "PERMITIDO" else "DENEGADO",
-                    containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer,
-                    textColor = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
+                    text = if (!isDenied) "PERMITIDO" else "DENEGADO",
+                    containerColor = if (!isDenied) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer,
+                    textColor = if (!isDenied) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
                 )
             }
         }
