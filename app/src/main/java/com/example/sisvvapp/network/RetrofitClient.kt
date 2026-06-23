@@ -93,14 +93,14 @@ object RetrofitClient {
             // Verificamos si existe un token para saber si realmente hay una sesión que pueda expirar
             val hasToken = !sessionManager.getToken().isNullOrEmpty()
 
-            // Detectar 401 O contenido HTML inesperado SOLO si el usuario ya tenía una sesión activa
-            if ((response.code == 401 || contentType.contains("text/html")) && hasToken) {
+            // Solo cerramos sesión en 401 real (no en errores 500+ que devuelvan HTML)
+            if (response.code == 401 && hasToken) {
                 Log.e("AuthCheck", "¡Sesión expirada detectada! Código: ${response.code}, Tipo: $contentType")
                 
                 sessionManager.clearSession()
                 (context.applicationContext as? SisvvApplication)?.emitUnauthorized()
 
-                // Si es HTML, cerramos y lanzamos excepción para evitar errores de parseo GSON
+                // Si el 401 vino como HTML, cerramos y lanzamos excepción para evitar errores de parseo GSON
                 if (contentType.contains("text/html")) {
                     response.close()
                     throw IOException("Sesión expirada (Respuesta HTML interceptada)")
