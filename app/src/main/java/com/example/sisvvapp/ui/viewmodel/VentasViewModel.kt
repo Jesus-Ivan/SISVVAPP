@@ -49,8 +49,8 @@ class VentasViewModel(
 
     val uiState: StateFlow<VentasUiState> = combine(_ventasData, _isLoading, _error, _isNetworkError) { data, loading, error, isNetError ->
         when {
-            // Caso 1: Está cargando y no hay datos locales (Primer arranque)
-            loading && data.isEmpty() -> VentasUiState.Loading
+            // Caso 1: Está cargando (primer arranque o recarga manual)
+            loading -> VentasUiState.Loading
             
             // Caso 2: Hubo un error de red específico (Offline)
             isNetError -> VentasUiState.NetworkError(error ?: "Error de red", data)

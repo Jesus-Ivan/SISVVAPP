@@ -166,15 +166,15 @@ fun VentasScreen(
                     onClick = onNuevaVentaClick,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .size(80.dp),
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    shape = RoundedCornerShape(12.dp)
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = stringResource(R.string.ventas_new_sale_desc),
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(40.dp)
                     )
                 }
             }

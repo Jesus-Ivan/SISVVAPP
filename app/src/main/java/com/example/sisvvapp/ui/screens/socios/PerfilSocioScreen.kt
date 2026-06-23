@@ -224,15 +224,15 @@ fun PerfilSocioScreen(
             onClick = { onNuevaVentaClick(socio) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp),
+                .padding(16.dp)
+                .size(80.dp),
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            shape = RoundedCornerShape(12.dp)
+            contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
             Icon(
                 imageVector = Icons.Default.AddShoppingCart,
                 contentDescription = "Nueva Venta",
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(40.dp)
             )
         }
     }

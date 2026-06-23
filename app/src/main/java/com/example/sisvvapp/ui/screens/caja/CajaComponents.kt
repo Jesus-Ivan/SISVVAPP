@@ -62,9 +62,8 @@ fun VistaVerdeCajaCard(
 
 @Composable
 fun CajasList(cajas: List<CajaDto>, selectedCajaId: Int?, onCajaClick: (CajaDto) -> Unit) {
-    val isTablet = LocalDeviceType.current == DeviceType.TABLET
     LazyVerticalGrid(
-        columns = GridCells.Fixed(if (isTablet) 2 else 1),
+        columns = GridCells.Fixed(1),
         contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)

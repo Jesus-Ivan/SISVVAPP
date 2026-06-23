@@ -157,9 +157,10 @@ fun SplashScreen(
 
             GolfBallLoader(
                 progress = ballProgress.value,
+                isTablet = isTablet,
                 modifier = Modifier
-                    .width(if (isTablet) 320.dp else 220.dp)
-                    .height(48.dp)
+                    .width(if (isTablet) 380.dp else 220.dp)
+                    .height(if (isTablet) 64.dp else 48.dp)
                     .alpha(if (ballProgress.value > 0f) 1f else 0f)
             )
 
@@ -187,16 +188,16 @@ fun SplashScreen(
 }
 
 @Composable
-fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
+fun GolfBallLoader(progress: Float, isTablet: Boolean = false, modifier: Modifier = Modifier) {
     val bounceY = abs(sin(progress * PI.toFloat() * 3f))
 
     Canvas(modifier = modifier) {
         val trackY = size.height
-        val trackH = 5.dp.toPx()
-        val ballR = 14.dp.toPx()
+        val trackH = (if (isTablet) 6.dp else 5.dp).toPx()
+        val ballR = (if (isTablet) 20.dp else 14.dp).toPx()
         val trackW = size.width
         val ballX = progress * (trackW - ballR * 2f) + ballR
-        val maxBounce = 22.dp.toPx()
+        val maxBounce = (if (isTablet) 32.dp else 22.dp).toPx()
         val ballY = trackY - trackH - ballR - bounceY * maxBounce
 
         // ── Césped ──
@@ -261,7 +262,7 @@ fun GolfBallLoader(progress: Float, modifier: Modifier = Modifier) {
         // Hoyuelos (patrón hexagonal)
         val dimpleColor = Color.Black.copy(alpha = 0.07f)
         val dimpleHighlight = Color.White.copy(alpha = 0.15f)
-        val dimpleR = 1.2.dp.toPx()
+        val dimpleR = (if (isTablet) 1.6.dp else 1.2.dp).toPx()
         val spacing = ballR * 0.32f
 
         val dimpleOffsets = listOf(
