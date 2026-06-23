@@ -156,7 +156,7 @@ fun PerfilSocioScreen(
 
                                         Spacer(modifier = Modifier.height(20.dp))
 
-                                        if (socio.estatus == "MEN" || socio.estatus == "ANU") {
+                                        if (socio.estatus != "CANCELADO") {
                                             VistaVerdeStatusBadge(
                                                 text = stringResource(R.string.perfil_socio_acceso_permitido),
                                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
