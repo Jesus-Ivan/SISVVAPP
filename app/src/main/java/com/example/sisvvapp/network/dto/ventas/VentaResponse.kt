@@ -13,7 +13,8 @@ data class VentaResponse(
     @SerializedName("corte_caja")     val corteCaja: Int? = null,
     @SerializedName("clave_punto_venta") val clavePuntoVenta: String? = null,
     val productos: List<ProductoVentaDto>? = null,
-    val pagos: List<PagoDto>? = null
+    val pagos: List<PagoDto>? = null,
+    @SerializedName("num_comensales") val numComensales: Int? = null
 ) {
     fun toVentaDto(): VentaDto {
         val (date, time) = fechaApertura?.split(" ")?.let {
@@ -39,6 +40,7 @@ data class VentaResponse(
             tipoCliente = tipoVenta,
             fecha = date,
             clavePuntoVenta = clavePuntoVenta ?: "",
+            numComensales = numComensales,
             productos = productos ?: emptyList(),
             pagos = pagos ?: emptyList()
         )

@@ -17,7 +17,8 @@ import androidx.room.DatabaseView
             estado as estadoVenta,
             socio_id as socioId,
             SUBSTR(fecha, 1, 10) as fechaFiltro,
-            productos_json as productosJson
+            productos_json as productosJson,
+            num_comensales as numComensales
         FROM ventas_recibidas
         WHERE folio NOT IN (SELECT folioExistente FROM ventas_cola WHERE folioExistente > 0 AND (estado = 'PENDIENTE' OR estado = 'SYNCING'))
         UNION ALL
@@ -33,7 +34,8 @@ import androidx.room.DatabaseView
             'Abierta' as estadoVenta,
             idSocio as socioId,
             COALESCE((SELECT SUBSTR(fecha, 1, 10) FROM ventas_recibidas WHERE folio = folioExistente AND folioExistente > 0), strftime('%Y-%m-%d', date(fechaCreacion/1000, 'unixepoch', 'localtime'))) as fechaFiltro,
-            productosJson as productosJson
+            productosJson as productosJson,
+            numComensales as numComensales
         FROM ventas_cola
     """
 )
@@ -49,5 +51,6 @@ data class VentaGlobalView(
     val estadoVenta: String,
     val socioId: Int?,
     val fechaFiltro: String,
-    val productosJson: String
+    val productosJson: String,
+    val numComensales: Int? = null
 )
