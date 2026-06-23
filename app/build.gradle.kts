@@ -24,7 +24,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://beige-houses-pump.loca.lt/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://polite-ducks-sin.loca.lt/api/\"")
         }
         release {
             isMinifyEnabled = true
@@ -32,7 +32,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://beige-houses-pump.loca.lt/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://polite-ducks-sin.loca.lt/api/\"")
         }
     }
     compileOptions {
