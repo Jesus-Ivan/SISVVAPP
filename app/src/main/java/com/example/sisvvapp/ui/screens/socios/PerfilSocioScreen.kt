@@ -89,8 +89,9 @@ fun PerfilSocioScreen(
                                     ) {
                                         VistaVerdeAvatar(
                                             fotoUrl = socio.fotoUrl,
+                                            size = if (isTablet) 96.dp else 57.dp,
                                             modifier = Modifier
-                                                .size(114.dp)
+                                                .size(if (isTablet) 140.dp else 114.dp)
                                                 .clickable { photoToShow = socio.fotoUrl }
                                         )
 
@@ -133,9 +134,8 @@ fun PerfilSocioScreen(
                                             @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
                                             androidx.compose.foundation.layout.FlowRow(
                                                 modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                                maxItemsInEachRow = 2
+                                                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                                                verticalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
                                                 membresias.filter { it.estado != "CAN" }.forEach { m ->
                                                     MembresiaBadge(
@@ -225,14 +225,14 @@ fun PerfilSocioScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
-                .size(80.dp),
+                .size(if (isTablet) 80.dp else 56.dp),
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
             Icon(
                 imageVector = Icons.Default.AddShoppingCart,
                 contentDescription = "Nueva Venta",
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(if (isTablet) 40.dp else 24.dp)
             )
         }
     }
@@ -274,10 +274,11 @@ fun IntegranteCard(
                 )
             }
             if (!integrante.fotoUrl.isNullOrBlank()) {
-                VistaVerdeAvatar(
-                    fotoUrl = integrante.fotoUrl,
-                    modifier = Modifier.clickable { onPhotoClick(integrante.fotoUrl) }
-                )
+                                            VistaVerdeAvatar(
+                                                fotoUrl = integrante.fotoUrl,
+                                                size = if (isTablet) 96.dp else 57.dp,
+                                                modifier = Modifier.clickable { onPhotoClick(integrante.fotoUrl) }
+                                            )
             }
         }
     }
@@ -316,7 +317,7 @@ fun MembresiaBadge(
         )
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -324,23 +325,21 @@ fun MembresiaBadge(
                     .size(6.dp)
                     .background(contentColor, CircleShape)
             )
-            Spacer(modifier = Modifier.width(10.dp))
-            Column {
-                Text(
-                    text = clave,
-                    fontSize = if (isTablet) 14.sp else 12.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = contentColor,
-                    letterSpacing = 0.5.sp
-                )
-                Text(
-                    text = label,
-                    fontSize = if (isTablet) 11.sp else 9.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = contentColor.copy(alpha = 0.7f),
-                    lineHeight = 10.sp
-                )
-            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = clave,
+                fontSize = if (isTablet) 14.sp else 12.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = contentColor,
+                letterSpacing = 0.5.sp
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = label,
+                fontSize = if (isTablet) 13.sp else 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = contentColor.copy(alpha = 0.7f)
+            )
         }
     }
 }
