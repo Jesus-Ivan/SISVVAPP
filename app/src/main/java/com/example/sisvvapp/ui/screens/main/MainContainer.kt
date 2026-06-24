@@ -32,9 +32,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.SessionManager
-import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.data.sync.SyncEventBus
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
@@ -68,7 +66,6 @@ fun MainContainer(
     val context = LocalContext.current
     val factory = SisvvViewModelFactory(context)
     val sharedCajaViewModel: CajaViewModel = viewModel(factory = factory)
-    val db = AppDatabase.getInstance(context)
 
     val snackbarHostState = remember { SnackbarHostState() }
     val isConnected = LocalIsConnected.current
@@ -506,6 +503,7 @@ fun MainContainer(
                         LaunchedEffect(currentRoute) { if (currentRoute == ScreenRoutes.AJUSTES) sharedCajaViewModel.refreshCajas() }
                         val sessionManager = SessionManager.getInstance(context)
                         val lastSyncText = if (sessionManager.getLastSyncDate() > 0) java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date(sessionManager.getLastSyncDate())) else "Pendiente"
+                        var currentBaseUrl by remember { mutableStateOf(sessionManager.getBaseUrl()) }
                         AjustesScreen(
                             cajas = cajas.map { CajaDto(it.id, it.nombre, it.fechaApertura, it.fechaCierre, it.activo, it.meseroId) },
                             selectedCajaId = selectedCajaId,
@@ -513,7 +511,13 @@ fun MainContainer(
                             isLoading = isLoading,
                             isOnline = viewModel?.isOnline ?: true,
                             themeMode = viewModel?.themeMode ?: 0,
+                            baseUrl = currentBaseUrl,
                             onThemeModeChange = { viewModel?.updateThemeMode(it) },
+                            onBaseUrlChange = { newUrl ->
+                                currentBaseUrl = newUrl
+                                RetrofitClient.updateBaseUrl(context, newUrl)
+                                android.widget.Toast.makeText(context, "URL actualizada. La app usará la nueva URL en la próxima conexión.", android.widget.Toast.LENGTH_LONG).show()
+                            },
                             onCajaClick = { sharedCajaViewModel.selectCaja(it.id, it.nombre) },
                             onSyncClick = { SyncWorker.enqueueOneTime(context); android.widget.Toast.makeText(context, "Sincronizando...", android.widget.Toast.LENGTH_SHORT).show() },
                             onLogoutClick = { onLogout() },

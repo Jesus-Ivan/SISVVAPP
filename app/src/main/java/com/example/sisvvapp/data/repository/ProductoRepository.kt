@@ -10,7 +10,9 @@ import com.example.sisvvapp.data.local.entity.GrupoModificadorEntity
 import com.example.sisvvapp.data.local.entity.ModificadorEntity
 import com.example.sisvvapp.data.local.entity.ProductoEntity
 import com.example.sisvvapp.network.ApiService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class ProductoRepository(
     private val api: ApiService,
@@ -35,9 +37,9 @@ class ProductoRepository(
             val response = api.getProductos()
             if (response.isSuccessful) {
                 val productosDto = response.body().orEmpty()
-                val productosEnt = productosDto.map { it.toProductoEntity() }
-                val modificadoresEnt = productosDto.flatMap { it.toModificadorEntities() }
-                val gruposEnt = productosDto.flatMap { it.toGrupoModificadorEntities() }
+                val productosEnt = withContext(Dispatchers.Default) { productosDto.map { it.toProductoEntity() } }
+                val modificadoresEnt = withContext(Dispatchers.Default) { productosDto.flatMap { it.toModificadorEntities() } }
+                val gruposEnt = withContext(Dispatchers.Default) { productosDto.flatMap { it.toGrupoModificadorEntities() } }
 
                 db.withTransaction {
                     productoDao.deleteAll()

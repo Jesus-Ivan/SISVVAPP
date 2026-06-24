@@ -8,8 +8,11 @@ import com.example.sisvvapp.BuildConfig
 import com.example.sisvvapp.SisvvApplication
 import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.network.exceptions.ServerUnreachableException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -18,10 +21,10 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    internal val BASE_URL: String
-        get() = BuildConfig.BASE_URL
+    internal var BASE_URL: String = BuildConfig.BASE_URL
+        private set
 
-    private var apiService: ApiService? = null
+    private var okHttpClient: OkHttpClient? = null
 
     private fun isNetworkAvailable(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -30,110 +33,131 @@ object RetrofitClient {
         return actNw.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
-    fun create(context: Context): ApiService {
-        if (apiService != null) return apiService!!
+    private fun getOrBuildOkHttpClient(context: Context): OkHttpClient {
+        if (okHttpClient == null) {
+            val sessionManager = SessionManager.getInstance(context)
 
-        val sessionManager = SessionManager.getInstance(context)
-
-        val jsonAcceptInterceptor = Interceptor { chain ->
-            val request = chain.request().newBuilder()
-                .addHeader("Accept", "application/json")
-                .addHeader("X-Requested-With", "XMLHttpRequest")
-                .build()
-            chain.proceed(request)
-        }
-
-        val bypassTunnelInterceptor = Interceptor { chain ->
-            var builder = chain.request().newBuilder()
-            if (BuildConfig.DEBUG) {
-                builder = builder.addHeader("Bypass-Tunnel-Reminder", "true")
-            }
-            chain.proceed(builder.build())
-        }
-
-        val connectivityInterceptor = Interceptor { chain ->
-            try {
-                val response = chain.proceed(chain.request())
-                response
-            } catch (e: IOException) {
-                if (isNetworkAvailable(context)) {
-                    // Hay internet, pero la petición falló -> Servidor caído
-                    throw ServerUnreachableException("El servidor no responde (loca.lt)")
-                } else {
-                    // No hay internet
-                    throw e
-                }
-            }
-        }
-
-        val authInterceptor = Interceptor { chain ->
-            val token = sessionManager.getToken()
-            val request = chain.request()
-            .newBuilder()
-            .apply {
-                if (!token.isNullOrEmpty()) {
-                    addHeader("Authorization", "Bearer $token")
-                }
-            }
-            .build()
-            chain.proceed(request)
-        }
-
-        val authResponseInterceptor = Interceptor { chain ->
-            val response = chain.proceed(chain.request())
-            
-            // Si el código es 429, el túnel está saturado. Cerramos y lanzamos excepción para que no ocupe pool
-            if (response.code == 429) {
-                response.close()
-                throw IOException("Servidor saturado (429)")
+            val jsonAcceptInterceptor = Interceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Accept", "application/json")
+                    .addHeader("X-Requested-With", "XMLHttpRequest")
+                    .build()
+                chain.proceed(request)
             }
 
-            val contentType = response.body?.contentType()?.toString() ?: ""
-            
-            // Verificamos si existe un token para saber si realmente hay una sesión que pueda expirar
-            val hasToken = !sessionManager.getToken().isNullOrEmpty()
-
-            // Solo cerramos sesión en 401 real (no en errores 500+ que devuelvan HTML)
-            if (response.code == 401 && hasToken) {
-                Log.e("AuthCheck", "¡Sesión expirada detectada! Código: ${response.code}, Tipo: $contentType")
-                
-                sessionManager.clearSession()
-                (context.applicationContext as? SisvvApplication)?.emitUnauthorized()
-
-                // Si el 401 vino como HTML, cerramos y lanzamos excepción para evitar errores de parseo GSON
-                if (contentType.contains("text/html")) {
-                    response.close()
-                    throw IOException("Sesión expirada (Respuesta HTML interceptada)")
-                }
-            }
-            response
-        }
-
-        val client = OkHttpClient.Builder()
-            .addInterceptor(jsonAcceptInterceptor)
-            .addInterceptor(bypassTunnelInterceptor)
-            .addInterceptor(connectivityInterceptor)
-            .apply {
+            val bypassTunnelInterceptor = Interceptor { chain ->
+                var builder = chain.request().newBuilder()
                 if (BuildConfig.DEBUG) {
-                    addInterceptor(HttpLoggingInterceptor().apply {
-                        level = HttpLoggingInterceptor.Level.BODY
-                    })
+                    builder = builder.addHeader("Bypass-Tunnel-Reminder", "true")
+                }
+                chain.proceed(builder.build())
+            }
+
+            val connectivityInterceptor = Interceptor { chain ->
+                try {
+                    val response = chain.proceed(chain.request())
+                    response
+                } catch (e: IOException) {
+                    if (isNetworkAvailable(context)) {
+                        throw ServerUnreachableException("El servidor no responde: $BASE_URL")
+                    } else {
+                        throw e
+                    }
                 }
             }
-            .addInterceptor(authInterceptor)
-            .addInterceptor(authResponseInterceptor)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .writeTimeout(15, TimeUnit.SECONDS)
-            .build()
 
+            val authInterceptor = Interceptor { chain ->
+                val token = sessionManager.getToken()
+                val request = chain.request()
+                    .newBuilder()
+                    .apply {
+                        if (!token.isNullOrEmpty()) {
+                            addHeader("Authorization", "Bearer $token")
+                        }
+                    }
+                    .build()
+                chain.proceed(request)
+            }
+
+            val authResponseInterceptor = Interceptor { chain ->
+                val response = chain.proceed(chain.request())
+
+                if (response.code == 429) {
+                    response.close()
+                    throw IOException("Servidor saturado (429)")
+                }
+
+                val contentType = response.body?.contentType()?.toString() ?: ""
+                val hasToken = !sessionManager.getToken().isNullOrEmpty()
+
+                if (response.code == 401 && hasToken) {
+                    Log.e("AuthCheck", "Sesion expirada detectada! Codigo: ${response.code}, Tipo: $contentType")
+                    sessionManager.clearSession()
+                    (context.applicationContext as? SisvvApplication)?.emitUnauthorized()
+                    if (contentType.contains("text/html")) {
+                        response.close()
+                        throw IOException("Sesion expirada (Respuesta HTML interceptada)")
+                    }
+                }
+                response
+            }
+
+            okHttpClient = OkHttpClient.Builder()
+                .addInterceptor(jsonAcceptInterceptor)
+                .addInterceptor(bypassTunnelInterceptor)
+                .addInterceptor(connectivityInterceptor)
+                .apply {
+                    if (BuildConfig.DEBUG) {
+                        addInterceptor(HttpLoggingInterceptor().apply {
+                            level = HttpLoggingInterceptor.Level.BODY
+                        })
+                    }
+                }
+                .addInterceptor(authInterceptor)
+                .addInterceptor(authResponseInterceptor)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .writeTimeout(15, TimeUnit.SECONDS)
+                .build()
+        }
+        return okHttpClient!!
+    }
+
+    fun create(context: Context): ApiService {
+        val sessionManager = SessionManager.getInstance(context)
+        BASE_URL = sessionManager.getBaseUrl()
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(client)
+            .client(getOrBuildOkHttpClient(context))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+        return retrofit.create(ApiService::class.java)
+    }
 
-        apiService = retrofit.create(ApiService::class.java)
-        return apiService!!
+    fun updateBaseUrl(context: Context, newUrl: String) {
+        val sessionManager = SessionManager.getInstance(context)
+        sessionManager.saveBaseUrl(newUrl)
+        BASE_URL = newUrl
+    }
+
+    suspend fun testConnection(url: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val testUrl = if (url.endsWith("/")) url else "$url/"
+            val client = OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .followRedirects(true)
+                .build()
+            val request = Request.Builder()
+                .url(testUrl)
+                .method("GET", null)
+                .addHeader("Accept", "application/json")
+                .build()
+            val response = client.newCall(request).execute()
+            response.close()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

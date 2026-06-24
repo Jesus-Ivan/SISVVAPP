@@ -25,7 +25,7 @@ class SisvvViewModel(
     private val context: Context  // Siempre recibe applicationContext (ver factory)
 ) : ViewModel() {
 
-    private val api: ApiService = RetrofitClient.create(context)
+    private val api: ApiService get() = RetrofitClient.create(context)
     private val sessionManager = SessionManager.getInstance(context)
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
@@ -82,7 +82,6 @@ class SisvvViewModel(
             }
         }
         val networkRequest = android.net.NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
         connectivityManager.registerNetworkCallback(networkRequest, networkCallback!!)
     }
