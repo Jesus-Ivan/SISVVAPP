@@ -23,7 +23,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
 
 class SyncForegroundService : Service() {
 
@@ -31,9 +30,9 @@ class SyncForegroundService : Service() {
     private lateinit var connectivityManager: ConnectivityManager
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var pendingCountJob: Job? = null
-    private val isSyncing = AtomicBoolean(false)
 
     companion object {
+        private const val STOP_COOLDOWN_MS = 30_000L
         const val CHANNEL_ID = "sync_foreground_channel"
         const val NOTIFICATION_ID = 202
         const val TAG = "SyncForegroundService"
@@ -47,7 +46,6 @@ class SyncForegroundService : Service() {
                     context.startService(intent)
                 }
             } catch (e: Exception) {
-                // Captura ForegroundServiceStartNotAllowedException en Android 12+ y otras excepciones
                 Log.w(TAG, "No se puede iniciar SyncForegroundService desde background: ${e.message}")
             }
         }
@@ -119,11 +117,9 @@ class SyncForegroundService : Service() {
     }
 
     private fun triggerSync() {
-        if (!isSyncing.compareAndSet(false, true)) {
-            Log.d(TAG, "Sync ya en curso, ignorando")
-            return
-        }
         serviceScope.launch {
+            if (!SyncCoordinator.requestSync("SyncForegroundService")) return@launch
+
             try {
                 delay(2000)
                 val db = AppDatabase.getInstance(this@SyncForegroundService)
@@ -150,13 +146,6 @@ class SyncForegroundService : Service() {
                             Log.e(TAG, "Error enviando venta ${venta.idTemporal}", e)
                         }
                     }
-
-                    val restantes = db.ventaColaDao().getParaSincronizar()
-                    if (restantes.isEmpty()) {
-                        Log.d(TAG, "Cola vacía después de sync directo")
-                        stopForeground(STOP_FOREGROUND_REMOVE)
-                        stopSelf()
-                    }
                 } else {
                     Log.d(TAG, "Sin red disponible, delegando a WorkManager para Doze")
                     SyncWorker.enqueueOneTime(this@SyncForegroundService)
@@ -164,7 +153,7 @@ class SyncForegroundService : Service() {
             } catch (e: Exception) {
                 Log.e(TAG, "Error en sync", e)
             } finally {
-                isSyncing.set(false)
+                SyncCoordinator.onSyncComplete()
             }
         }
     }
@@ -179,10 +168,10 @@ class SyncForegroundService : Service() {
                 notificationManager.notify(NOTIFICATION_ID, notification)
 
                 if (count == 0) {
-                    delay(5000)
+                    delay(STOP_COOLDOWN_MS)
                     val finalCount = db.ventaColaDao().getParaSincronizar().size
                     if (finalCount == 0) {
-                        Log.d(TAG, "Cola vacía confirmada, deteniendo servicio")
+                        Log.d(TAG, "Cola vacía durante $STOP_COOLDOWN_MS ms, deteniendo servicio")
                         stopForeground(STOP_FOREGROUND_REMOVE)
                         stopSelf()
                     }

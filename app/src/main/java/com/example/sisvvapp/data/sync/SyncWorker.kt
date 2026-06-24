@@ -17,16 +17,22 @@ class SyncWorker(
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
-        delay(1000)
-        val db = AppDatabase.getInstance(applicationContext)
-        val api = RetrofitClient.create(applicationContext)
-        val socioRepo = SocioRepository(api, db, db.socioDao(), applicationContext)
-        val productoRepo = ProductoRepository(api, db, db.productoDao(), db.grupoModificadorDao())
-        val cajaRepo = CajaRepository(api, db, db.cajaActivaDao())
-        val tipoPagoRepo = TipoPagoRepository(api, db, db.tipoPagoDao())
-        val tipoVentaRepo = com.example.sisvvapp.data.repository.TipoVentaRepository(api, db, db.tipoVentaDao())
-        val ventaRepo = VentaRepository(api, db, applicationContext)
+        if (!SyncCoordinator.requestSync("SyncWorker")) {
+            Log.d("SyncWorker", "Sync ya en curso por otro componente, saltando")
+            return Result.success()
+        }
+
         return try {
+            delay(1000)
+            val db = AppDatabase.getInstance(applicationContext)
+            val api = RetrofitClient.create(applicationContext)
+            val socioRepo = SocioRepository(api, db, db.socioDao(), applicationContext)
+            val productoRepo = ProductoRepository(api, db, db.productoDao(), db.grupoModificadorDao())
+            val cajaRepo = CajaRepository(api, db, db.cajaActivaDao())
+            val tipoPagoRepo = TipoPagoRepository(api, db, db.tipoPagoDao())
+            val tipoVentaRepo = com.example.sisvvapp.data.repository.TipoVentaRepository(api, db, db.tipoVentaDao())
+            val ventaRepo = VentaRepository(api, db, applicationContext)
+
             val syncCatalogs = inputData.getBoolean("sync_catalogs", false)
 
             if (syncCatalogs) {
@@ -47,8 +53,6 @@ class SyncWorker(
                     .filter { it.isNotBlank() }
                     .distinct()
                 
-                // Solo descargamos un máximo de 40 fotos por cada ciclo de sync
-                // Esto permite que se vayan bajando gradualmente sin bloquear el túnel
                 val limit = 40
                 val photosDir = java.io.File(applicationContext.filesDir, "photos")
                 val pending = fotoUrls.filter { !java.io.File(photosDir, it).exists() }.take(limit)
@@ -60,7 +64,8 @@ class SyncWorker(
             } catch (e: Exception) {
                 Log.w("SyncWorker", "Error descargando fotos (sync parcial)", e)
             }
-            // 3. Enviar ventas offline
+
+            // Enviar ventas offline
             val pendientes = ventaRepo.getParaSincronizar()
             var envioExitoso = true
             for (venta in pendientes) {
@@ -74,7 +79,7 @@ class SyncWorker(
                 }
             }
 
-            // 4. Verificar cola y detener foreground service si está vacía
+            // Verificar cola y detener foreground service si está vacía
             val restantes = ventaRepo.getParaSincronizar()
             if (restantes.isEmpty()) {
                 Log.d("SyncWorker", "Cola vacía, deteniendo foreground service")
@@ -83,7 +88,7 @@ class SyncWorker(
                 SyncForegroundService.start(applicationContext)
             }
 
-            // 5. Finalizar
+            // Finalizar
             if (envioExitoso) {
                 SessionManager.getInstance(applicationContext)
                     .saveLastSyncDate(System.currentTimeMillis())
@@ -95,6 +100,8 @@ class SyncWorker(
         } catch (e: Exception) {
             Log.e("SyncWorker", "Error general en sync", e)
             Result.retry()
+        } finally {
+            SyncCoordinator.onSyncComplete()
         }
     }
 

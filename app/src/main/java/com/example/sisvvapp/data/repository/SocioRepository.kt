@@ -9,7 +9,9 @@ import com.example.sisvvapp.data.local.dao.SocioWithIntegrantes
 import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.data.sync.PhotoDownloader
 import com.example.sisvvapp.network.ApiService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class SocioRepository(
     private val api: ApiService,
@@ -32,8 +34,8 @@ class SocioRepository(
             val response = api.getSocios()
             if (response.isSuccessful) {
                 val sociosDto = response.body().orEmpty()
-                val sociosEnt = sociosDto.map { it.toSocioEntity() }
-                val integrantesEnt = sociosDto.flatMap { it.toIntegranteEntities() }
+                val sociosEnt = withContext(Dispatchers.Default) { sociosDto.map { it.toSocioEntity() } }
+                val integrantesEnt = withContext(Dispatchers.Default) { sociosDto.flatMap { it.toIntegranteEntities() } }
                 db.withTransaction {
                     socioDao.deleteAll()
                     socioDao.insertAllSocios(sociosEnt)
