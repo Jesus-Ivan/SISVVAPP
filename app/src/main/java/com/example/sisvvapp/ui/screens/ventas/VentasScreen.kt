@@ -26,6 +26,8 @@ import com.example.sisvvapp.R
 import com.example.sisvvapp.network.dto.ventas.VentaDto
 import com.example.sisvvapp.ui.components.*
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 import com.example.sisvvapp.ui.viewmodel.VentasUiState
 
 @Composable
@@ -44,6 +46,7 @@ fun VentasScreen(
     onClearDate: () -> Unit = {}
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
 
     VistaVerdeScaffold(
         title = stringResource(R.string.ventas_title),
@@ -167,14 +170,14 @@ fun VentasScreen(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp)
-                        .size(80.dp),
+                        .size(if (isTablet) 80.dp else 56.dp),
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = stringResource(R.string.ventas_new_sale_desc),
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(if (isTablet) 40.dp else 24.dp)
                     )
                 }
             }
