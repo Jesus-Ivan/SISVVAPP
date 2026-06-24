@@ -517,6 +517,7 @@ fun MainContainer(
                         LaunchedEffect(currentRoute) { if (currentRoute == ScreenRoutes.AJUSTES) sharedCajaViewModel.refreshCajas() }
                         val sessionManager = SessionManager.getInstance(context)
                         val lastSyncText = if (sessionManager.getLastSyncDate() > 0) java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date(sessionManager.getLastSyncDate())) else "Pendiente"
+                        var currentBaseUrl by remember { mutableStateOf(sessionManager.getBaseUrl()) }
                         AjustesScreen(
                             cajas = cajas.map { CajaDto(it.id, it.nombre, it.fechaApertura, it.fechaCierre, it.activo, it.meseroId) },
                             selectedCajaId = selectedCajaId,
@@ -524,7 +525,13 @@ fun MainContainer(
                             isLoading = isLoading,
                             isOnline = viewModel?.isOnline ?: true,
                             themeMode = viewModel?.themeMode ?: 0,
+                            baseUrl = currentBaseUrl,
                             onThemeModeChange = { viewModel?.updateThemeMode(it) },
+                            onBaseUrlChange = { newUrl ->
+                                currentBaseUrl = newUrl
+                                RetrofitClient.updateBaseUrl(context, newUrl)
+                                android.widget.Toast.makeText(context, "URL actualizada. La app usará la nueva URL en la próxima conexión.", android.widget.Toast.LENGTH_LONG).show()
+                            },
                             onCajaClick = { sharedCajaViewModel.selectCaja(it.id, it.nombre) },
                             onSyncClick = { SyncWorker.enqueueOneTime(context); android.widget.Toast.makeText(context, "Sincronizando...", android.widget.Toast.LENGTH_SHORT).show() },
                             onLogoutClick = { onLogout() },

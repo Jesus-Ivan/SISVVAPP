@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.example.sisvvapp.BuildConfig
 import java.io.File
 import java.sql.Timestamp
 
@@ -172,6 +173,21 @@ class SessionManager private constructor(context: Context) {
 
     fun hasSelectedCaja(): Boolean = getSelectedCajaId() != -1
 
+    fun saveBaseUrl(url: String) {
+        try {
+            prefs.edit().putString(KEY_BASE_URL, url).apply()
+        } catch (e: Exception) {
+            Log.e("SessionManager", "Error al guardar baseUrl", e)
+        }
+    }
+
+    fun getBaseUrl(): String = try {
+        prefs.getString(KEY_BASE_URL, BuildConfig.BASE_URL) ?: BuildConfig.BASE_URL
+    } catch (e: Exception) {
+        Log.e("SessionManager", "Error al leer baseUrl", e)
+        BuildConfig.BASE_URL
+    }
+
     fun clearSelectedCaja() {
         try {
             prefs.edit()
@@ -197,6 +213,7 @@ class SessionManager private constructor(context: Context) {
         private const val KEY_SELECTED_CAJA_ID = "selected_caja_id"
         private const val KEY_SELECTED_CAJA_NOMBRE = "selected_caja_nombre"
 
+        private const val KEY_BASE_URL = "base_url"
         private const val KEY_LAST_SYNC_DATE = "last_sync_date"
 
         fun getInstance(context: Context): SessionManager =

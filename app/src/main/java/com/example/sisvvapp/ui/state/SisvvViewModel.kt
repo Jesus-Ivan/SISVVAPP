@@ -25,7 +25,7 @@ class SisvvViewModel(
     private val context: Context  // Siempre recibe applicationContext (ver factory)
 ) : ViewModel() {
 
-    private val api: ApiService = RetrofitClient.create(context)
+    private val api: ApiService get() = RetrofitClient.create(context)
     private val sessionManager = SessionManager.getInstance(context)
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
 

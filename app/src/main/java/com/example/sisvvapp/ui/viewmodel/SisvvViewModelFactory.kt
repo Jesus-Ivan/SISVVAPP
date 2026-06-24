@@ -16,7 +16,7 @@ class SisvvViewModelFactory(
     private val context: Context
 ) : ViewModelProvider.Factory {
 
-    private val api = RetrofitClient.create(context)
+    private val api get() = RetrofitClient.create(context)
     private val db = AppDatabase.getInstance(context)
 
     @Suppress("UNCHECKED_CAST")
