@@ -58,7 +58,7 @@ object RetrofitClient {
             } catch (e: IOException) {
                 if (isNetworkAvailable(context)) {
                     // Hay internet, pero la petición falló -> Servidor caído
-                    throw ServerUnreachableException("El servidor no responde (loca.lt)")
+                    throw ServerUnreachableException("El servidor no responde: $BASE_URL")
                 } else {
                     // No hay internet
                     throw e

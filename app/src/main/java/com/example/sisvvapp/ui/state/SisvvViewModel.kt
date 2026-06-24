@@ -82,7 +82,6 @@ class SisvvViewModel(
             }
         }
         val networkRequest = android.net.NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
         connectivityManager.registerNetworkCallback(networkRequest, networkCallback!!)
     }
