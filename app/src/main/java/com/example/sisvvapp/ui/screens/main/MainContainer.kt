@@ -99,6 +99,17 @@ fun MainContainer(
         if (isConnected) {
             sharedCajaViewModel.refreshCajas()
             SyncWorker.enqueueOneTime(context)
+            scope.launch {
+                try {
+                    val db = AppDatabase.getInstance(context)
+                    val api = com.example.sisvvapp.network.RetrofitClient.create(context)
+                    val ventaRepo = com.example.sisvvapp.data.repository.VentaRepository(api, db, context)
+                    ventaRepo.syncVentas(java.time.LocalDate.now().toString())
+                    for (venta in ventaRepo.getParaSincronizar()) {
+                        ventaRepo.enviarVentaOffline(venta)
+                    }
+                } catch (_: Exception) { }
+            }
         }
     }
 

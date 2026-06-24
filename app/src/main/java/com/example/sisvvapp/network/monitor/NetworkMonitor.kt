@@ -19,22 +19,16 @@ class NetworkMonitor(private val connectivityManager: ConnectivityManager) {
             override fun onLost(network: Network) {
                 trySend(false)
             }
-            override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
-                val connected = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                trySend(connected)
-            }
         }
 
         val request = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
 
         connectivityManager.registerNetworkCallback(request, callback)
 
         // Emitir estado inicial
         val activeNetwork = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
-        val initialStatus = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+        val initialStatus = activeNetwork != null
         trySend(initialStatus)
 
         awaitClose {

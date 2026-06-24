@@ -301,8 +301,8 @@ class VentaRepository(
     }
 
     suspend fun enviarVentaOffline(venta: VentaColaEntity): Result<Unit> = runCatching {
-        // Si el registro estaba atascado en SYNCING (proceso matado), reseteamos a PENDIENTE
-        if (venta.estado == "SYNCING") {
+        // Si el registro estaba atascado en SYNCING o ERROR, reseteamos a PENDIENTE
+        if (venta.estado == "SYNCING" || venta.estado == "ERROR") {
             ventaColaDao.updateEstado(venta.idTemporal, "PENDIENTE")
         }
         // 1. Marcar como SYNCING

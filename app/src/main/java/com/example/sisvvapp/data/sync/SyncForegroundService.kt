@@ -8,13 +8,14 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
-import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.sisvvapp.data.local.AppDatabase
+import com.example.sisvvapp.data.repository.VentaRepository
+import com.example.sisvvapp.network.RetrofitClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,6 +23,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 class SyncForegroundService : Service() {
 
@@ -29,6 +31,7 @@ class SyncForegroundService : Service() {
     private lateinit var connectivityManager: ConnectivityManager
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var pendingCountJob: Job? = null
+    private val isSyncing = AtomicBoolean(false)
 
     companion object {
         const val CHANNEL_ID = "sync_foreground_channel"
@@ -103,20 +106,12 @@ class SyncForegroundService : Service() {
                 triggerSync()
             }
 
-            override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
-                if (capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-                    Log.d(TAG, "Internet disponible")
-                    triggerSync()
-                }
-            }
-
             override fun onLost(network: Network) {
                 Log.d(TAG, "Red perdida")
             }
         }
 
         val request = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
 
         connectivityManager.registerNetworkCallback(request, callback)
@@ -124,16 +119,53 @@ class SyncForegroundService : Service() {
     }
 
     private fun triggerSync() {
+        if (!isSyncing.compareAndSet(false, true)) {
+            Log.d(TAG, "Sync ya en curso, ignorando")
+            return
+        }
         serviceScope.launch {
-            delay(2000)
-            val db = AppDatabase.getInstance(this@SyncForegroundService)
-            val pendientes = db.ventaColaDao().getParaSincronizar()
-            if (pendientes.isEmpty()) {
-                Log.d(TAG, "Sin ventas pendientes, no se dispara sync")
-                return@launch
+            try {
+                delay(2000)
+                val db = AppDatabase.getInstance(this@SyncForegroundService)
+                val pendientes = db.ventaColaDao().getParaSincronizar()
+                if (pendientes.isEmpty()) {
+                    Log.d(TAG, "Sin ventas pendientes, no se dispara sync")
+                    return@launch
+                }
+
+                val activeNetwork = connectivityManager.activeNetwork
+                val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
+                val hayRed = activeNetwork != null && capabilities != null
+
+                if (hayRed) {
+                    Log.d(TAG, "Red disponible, sync directo (${pendientes.size} pendientes)")
+                    val api = RetrofitClient.create(this@SyncForegroundService)
+                    val ventaRepo = VentaRepository(api, db, this@SyncForegroundService)
+                    ventaRepo.syncVentas(java.time.LocalDate.now().toString())
+
+                    for (venta in pendientes) {
+                        try {
+                            ventaRepo.enviarVentaOffline(venta)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error enviando venta ${venta.idTemporal}", e)
+                        }
+                    }
+
+                    val restantes = db.ventaColaDao().getParaSincronizar()
+                    if (restantes.isEmpty()) {
+                        Log.d(TAG, "Cola vacía después de sync directo")
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                        stopSelf()
+                    }
+                } else {
+                    Log.d(TAG, "Sin red disponible, delegando a WorkManager para Doze")
+                    SyncWorker.enqueueOneTime(this@SyncForegroundService)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error en sync", e)
+            } finally {
+                isSyncing.set(false)
             }
-            Log.d(TAG, "Disparando sync desde foreground service (${pendientes.size} pendientes)")
-            SyncWorker.enqueueOneTime(this@SyncForegroundService)
         }
     }
 
