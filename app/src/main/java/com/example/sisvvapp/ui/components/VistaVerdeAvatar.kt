@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.sisvvapp.ui.utils.ImageUtils
@@ -23,7 +24,8 @@ import com.example.sisvvapp.ui.utils.ImageUtils
 @Composable
 fun VistaVerdeAvatar(
     fotoUrl: String? = null,
-    modifier: Modifier = Modifier.size(57.dp)
+    modifier: Modifier = Modifier,
+    size: Dp = 57.dp
 ) {
     val context = LocalContext.current
     val model = remember(fotoUrl) {
@@ -41,13 +43,13 @@ fun VistaVerdeAvatar(
             contentDescription = "Avatar",
             contentScale = ContentScale.Crop,
             modifier = modifier
-                .size(57.dp)
+                .size(size)
                 .clip(CircleShape)
         )
     } else {
         Box(
             modifier = modifier
-                .size(57.dp)
+                .size(size)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
@@ -56,7 +58,7 @@ fun VistaVerdeAvatar(
                 imageVector = Icons.Outlined.Person,
                 contentDescription = "Avatar",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(35.dp)
+                modifier = Modifier.size(size * 0.61f)
             )
         }
     }
