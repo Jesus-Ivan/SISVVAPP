@@ -32,9 +32,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.sisvvapp.data.local.AppDatabase
 import com.example.sisvvapp.data.local.SessionManager
-import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.data.sync.SyncEventBus
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
@@ -68,7 +66,6 @@ fun MainContainer(
     val context = LocalContext.current
     val factory = SisvvViewModelFactory(context)
     val sharedCajaViewModel: CajaViewModel = viewModel(factory = factory)
-    val db = AppDatabase.getInstance(context)
 
     val snackbarHostState = remember { SnackbarHostState() }
     val isConnected = LocalIsConnected.current
@@ -99,17 +96,6 @@ fun MainContainer(
         if (isConnected) {
             sharedCajaViewModel.refreshCajas()
             SyncWorker.enqueueOneTime(context)
-            scope.launch {
-                try {
-                    val db = AppDatabase.getInstance(context)
-                    val api = com.example.sisvvapp.network.RetrofitClient.create(context)
-                    val ventaRepo = com.example.sisvvapp.data.repository.VentaRepository(api, db, context)
-                    ventaRepo.syncVentas(java.time.LocalDate.now().toString())
-                    for (venta in ventaRepo.getParaSincronizar()) {
-                        ventaRepo.enviarVentaOffline(venta)
-                    }
-                } catch (_: Exception) { }
-            }
         }
     }
 
