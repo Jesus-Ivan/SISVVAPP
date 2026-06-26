@@ -146,7 +146,7 @@ object RetrofitClient {
             val client = OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .readTimeout(5, TimeUnit.SECONDS)
-                .followRedirects(true)
+                .followRedirects(false)
                 .build()
             val request = Request.Builder()
                 .url(testUrl)
@@ -154,7 +154,15 @@ object RetrofitClient {
                 .addHeader("Accept", "application/json")
                 .build()
             val response = client.newCall(request).execute()
+            val code = response.code
             response.close()
+
+            if (code >= 500) {
+                return@withContext Result.failure(Exception("HTTP $code — Error interno del servidor"))
+            }
+            if (code == 429) {
+                return@withContext Result.failure(Exception("HTTP 429 — Servidor saturado, intente más tarde"))
+            }
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

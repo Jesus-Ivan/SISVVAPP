@@ -24,15 +24,16 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.0.101/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://puny-facts-feel.loca.lt/api/\"")
         }
         release {
             isMinifyEnabled = true
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"http://192.168.0.101/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://puny-facts-feel.loca.lt/api/\"")
         }
     }
     compileOptions {

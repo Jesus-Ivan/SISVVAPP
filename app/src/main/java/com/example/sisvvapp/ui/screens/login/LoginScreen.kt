@@ -4,16 +4,22 @@ import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Dns
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
+import com.example.sisvvapp.ui.components.CambiarUrlDialog
 import com.example.sisvvapp.ui.components.VistaVerdeButton
 import com.example.sisvvapp.ui.components.VistaVerdeTextField
 import com.example.sisvvapp.ui.theme.Inter
@@ -47,14 +54,16 @@ import com.example.sisvvapp.ui.utils.LocalDeviceType
 fun LoginScreen(
     isLoading: Boolean = false,
     serverError: String? = null,
+    baseUrl: String = "",
+    onBaseUrlChange: (String) -> Unit = {},
     onLoginClick: (String, String) -> Unit = { _, _ -> }
 ) {
     val isTablet = LocalDeviceType.current == DeviceType.TABLET
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var localError by remember { mutableStateOf("") }
+    var showUrlDialog by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-
 
     val inputModifier = Modifier
         .shadow(
@@ -80,95 +89,127 @@ fun LoginScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 24.dp)
-            .wrapContentWidth(Alignment.CenterHorizontally),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = if (isTablet) 520.dp else 450.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+                .wrapContentWidth(Alignment.CenterHorizontally),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            // LOGO
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = stringResource(id = R.string.login_logo_desc),
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(1f)
-                    .padding(bottom = if (isTablet) 64.dp else 50.dp)
-            )
-            // TITULO PRINCIPAL
-            Text(
-                text = stringResource(id = R.string.login_title),
-                fontFamily = Poppins,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = if (isTablet) 40.sp else 32.sp,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = if (isTablet) 12.dp else 8.dp)
-            )
-            Text(
-                text = stringResource(id = R.string.login_subtitle),
-                fontFamily = Inter,
-                fontWeight = FontWeight.Normal,
-                fontSize = if (isTablet) 18.sp else 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = if (isTablet) 48.dp else 32.dp)
-            )
-            // INPUT EMAIL
-            VistaVerdeTextField(
-                value = email,
-                onValueChange = { email = it; localError = "" },
-                label = stringResource(id = R.string.login_email_label),
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next,
-                keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                ),
-                modifier = inputModifier,
-                bgColor = MaterialTheme.colorScheme.surface
-            )
-            Spacer(modifier = Modifier.height(if (isTablet) 24.dp else 16.dp))
-
-            // INPUT PASSWORD
-            VistaVerdeTextField(
-                value = password,
-                onValueChange = { password = it; localError = "" },
-                label = stringResource(id = R.string.login_password_label),
-                isPassword = true,
-                imeAction = ImeAction.Done,
-                keyboardActions = KeyboardActions(
-                    onDone = { 
-                        focusManager.clearFocus()
-                        attemptLogin() 
-                    }
-                ),
-                modifier = inputModifier,
-                bgColor = MaterialTheme.colorScheme.surface
-            )
-            Spacer(modifier = Modifier.height(if (isTablet) 48.dp else 32.dp))
-
-            val errorMsg = localError.ifEmpty { serverError ?: "" }
-
-            if (errorMsg.isNotEmpty()) {
+                    .widthIn(max = if (isTablet) 520.dp else 450.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // LOGO
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = stringResource(id = R.string.login_logo_desc),
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .padding(bottom = if (isTablet) 64.dp else 50.dp)
+                )
+                // TITULO PRINCIPAL
                 Text(
-                    text = errorMsg,
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = if (isTablet) 14.sp else 12.sp,
-                    modifier = Modifier.padding(bottom = if (isTablet) 24.dp else 16.dp)
+                    text = stringResource(id = R.string.login_title),
+                    fontFamily = Poppins,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = if (isTablet) 40.sp else 32.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = if (isTablet) 12.dp else 8.dp)
+                )
+                Text(
+                    text = stringResource(id = R.string.login_subtitle),
+                    fontFamily = Inter,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = if (isTablet) 18.sp else 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = if (isTablet) 48.dp else 32.dp)
+                )
+                // INPUT EMAIL
+                VistaVerdeTextField(
+                    value = email,
+                    onValueChange = { email = it; localError = "" },
+                    label = stringResource(id = R.string.login_email_label),
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next,
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    modifier = inputModifier,
+                    bgColor = MaterialTheme.colorScheme.surface
+                )
+                Spacer(modifier = Modifier.height(if (isTablet) 24.dp else 16.dp))
+
+                // INPUT PASSWORD
+                VistaVerdeTextField(
+                    value = password,
+                    onValueChange = { password = it; localError = "" },
+                    label = stringResource(id = R.string.login_password_label),
+                    isPassword = true,
+                    imeAction = ImeAction.Done,
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                            attemptLogin()
+                        }
+                    ),
+                    modifier = inputModifier,
+                    bgColor = MaterialTheme.colorScheme.surface
+                )
+                Spacer(modifier = Modifier.height(if (isTablet) 48.dp else 32.dp))
+
+                val errorMsg = localError.ifEmpty { serverError ?: "" }
+
+                if (errorMsg.isNotEmpty()) {
+                    Text(
+                        text = errorMsg,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = if (isTablet) 14.sp else 12.sp,
+                        modifier = Modifier.padding(bottom = if (isTablet) 24.dp else 16.dp)
+                    )
+                }
+
+                // BOTÓN
+                VistaVerdeButton(
+                    text = stringResource(id = R.string.login_button),
+                    enabled = !isLoading,
+                    onClick = attemptLogin
                 )
             }
+        }
 
-            // BOTÓN
-            VistaVerdeButton(
-                text = stringResource(id = R.string.login_button),
-                enabled = !isLoading,
-                onClick = attemptLogin
+        // Icono de servidor en la esquina superior derecha
+        IconButton(
+            onClick = { showUrlDialog = true },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = if (isTablet) 80.dp else 56.dp, end = if (isTablet) 24.dp else 16.dp)
+                .size(if (isTablet) 48.dp else 40.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Dns,
+                contentDescription = "Configurar servidor",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                modifier = Modifier.size(if (isTablet) 28.dp else 24.dp)
+            )
+        }
+
+        if (showUrlDialog) {
+            CambiarUrlDialog(
+                currentUrl = baseUrl,
+                onDismiss = { showUrlDialog = false },
+                onConfirm = { newUrl ->
+                    onBaseUrlChange(newUrl)
+                    showUrlDialog = false
+                }
             )
         }
     }
