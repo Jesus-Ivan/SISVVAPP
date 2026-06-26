@@ -82,12 +82,7 @@ fun CambiarUrlDialog(
                 OutlinedTextField(
                     value = editUrl,
                     onValueChange = { newVal ->
-                        val apiSuffix = "/api/"
-                        editUrl = if (!newVal.endsWith(apiSuffix) && newVal.length < editUrl.length) {
-                            newVal + apiSuffix
-                        } else {
-                            newVal
-                        }
+                        editUrl = newVal
                         verifyError = null
                     },
                     label = { Text("URL Base") },
