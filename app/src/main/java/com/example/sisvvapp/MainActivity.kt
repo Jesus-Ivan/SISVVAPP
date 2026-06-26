@@ -35,7 +35,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sisvvapp.data.monitor.NetworkMonitor
+import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.sync.SyncWorker
+import com.example.sisvvapp.network.RetrofitClient
 import com.example.sisvvapp.network.dto.cajas.CajaDto
 import com.example.sisvvapp.ui.components.VistaVerdeButton
 import com.example.sisvvapp.ui.navigation.Screen
@@ -316,6 +318,8 @@ class MainActivity : ComponentActivity() {
                             val loginSuccess = sisvvViewModel.loginSuccess
                             val loginError =
                                 sisvvViewModel.loginError ?: sisvvViewModel.networkError
+                            val sessionManager = SessionManager.getInstance(this@MainActivity)
+                            var currentBaseUrl by remember { mutableStateOf(sessionManager.getBaseUrl()) }
 
                             LaunchedEffect(loginSuccess) {
                                 if (loginSuccess) {
@@ -328,6 +332,11 @@ class MainActivity : ComponentActivity() {
                             LoginScreen(
                                 isLoading = isLoading,
                                 serverError = loginError,
+                                baseUrl = currentBaseUrl,
+                                onBaseUrlChange = { newUrl ->
+                                    currentBaseUrl = newUrl
+                                    RetrofitClient.updateBaseUrl(this@MainActivity, newUrl)
+                                },
                                 onLoginClick = { email, password ->
                                     sisvvViewModel.login(email, password)
                                 }

@@ -95,14 +95,16 @@ class SessionManager private constructor(context: Context) {
     }
 
     fun clearSession() {
-        // Al limpiar sesión, queremos mantener la preferencia del tema
+        // Al limpiar sesión, mantener preferencias del usuario (tema, URL)
         val currentTheme = getThemeMode()
+        val savedBaseUrl = getBaseUrl()
         try {
             prefs.edit().clear().commit()
         } catch (e: Exception) {
             Log.e("SessionManager", "Error al limpiar sesión", e)
         }
         saveThemeMode(currentTheme)
+        saveBaseUrl(savedBaseUrl)
     }
 
     fun saveThemeMode(mode: Int) {
