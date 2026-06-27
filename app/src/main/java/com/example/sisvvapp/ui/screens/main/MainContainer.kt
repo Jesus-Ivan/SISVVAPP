@@ -211,6 +211,7 @@ fun MainContainer(
                                 ventasViewModel.refreshVentas(fechaActiva, corteCajaActivo) 
                             },
                             nombreCaja = nombreCajaActiva,
+                            onVentasPendientesClick = { navController.navigate(ScreenRoutes.VENTAS_PENDIENTES) },
                             onVentaClick = { venta ->
                                 val id = if (venta.syncStatus == "RECIBIDA") venta.folio.toString() else (venta.idTemporal ?: "0")
                                 navController.navigate(ScreenRoutes.crearRutaDetalleVenta(id))
@@ -449,7 +450,33 @@ fun MainContainer(
                                     navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
                                 }
                             },
+                            onDescartarVenta = { idTemporal ->
+                                ventasViewModel.descartarVentaPendiente(idTemporal) { result ->
+                                    if (result.isSuccess) {
+                                        android.widget.Toast.makeText(context, "Venta descartada", android.widget.Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            },
                             onTransferirProducto = null
+                        )
+                    }
+
+                    composable(ScreenRoutes.VENTAS_PENDIENTES) {
+                        val pendientesVM: VentasPendientesViewModel = viewModel(factory = factory)
+                        val ventas by pendientesVM.ventasPendientes.collectAsState()
+                        
+                        VentasPendientesScreen(
+                            ventas = ventas,
+                            onBackClick = { navController.popBackStack() },
+                            onDescartar = { id ->
+                                pendientesVM.descartarVenta(id) { result ->
+                                    if (result.isSuccess) {
+                                        android.widget.Toast.makeText(context, "Venta descartada", android.widget.Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            },
+                            onPausarSync = { pendientesVM.pausarSincronizacion() },
+                            onReanudarSync = { pendientesVM.reanudarSincronizacion() }
                         )
                     }
                 }
@@ -519,6 +546,7 @@ fun MainContainer(
                                 android.widget.Toast.makeText(context, "URL actualizada. La app usará la nueva URL en la próxima conexión.", android.widget.Toast.LENGTH_LONG).show()
                             },
                             onCajaClick = { sharedCajaViewModel.selectCaja(it.id, it.nombre) },
+                            onVentasPendientesClick = { navController.navigate(ScreenRoutes.VENTAS_PENDIENTES) },
                             onSyncClick = { SyncWorker.enqueueOneTime(context); android.widget.Toast.makeText(context, "Sincronizando...", android.widget.Toast.LENGTH_SHORT).show() },
                             onLogoutClick = { onLogout() },
                             onMenuClick = { scope.launch { drawerState.open() } },

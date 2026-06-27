@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.AddShoppingCart
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
@@ -32,19 +33,34 @@ fun DetalleVentaScreen(
     isOnline: Boolean,
     onBackClick: () -> Unit,
     onAgregarProductos: () -> Unit,
+    onDescartarVenta: ((String) -> Unit)? = null,
     onTransferirProducto: ((ProductoVentaDto) -> Unit)? = null
 ) {
     val syncStatus = venta?.syncStatus ?: "RECIBIDA"
     val isSyncing = syncStatus == "SYNCING"
+    val isOffline = syncStatus != "RECIBIDA"
     val deviceType = com.example.sisvvapp.ui.utils.LocalDeviceType.current
     val isTablet = deviceType == com.example.sisvvapp.ui.utils.DeviceType.TABLET
+    
+    var showConfirmDescartar by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         VistaVerdeScaffold(
             title = "Detalle de Venta",
             onMenuClick = onBackClick,
             isBackButton = true,
-            isOnline = if (isSyncing) true else isOnline
+            isOnline = if (isSyncing) true else isOnline,
+            actions = {
+                if (isOffline && !isSyncing) {
+                    IconButton(onClick = { showConfirmDescartar = true }) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteOutline,
+                            contentDescription = "Descartar cambios locales",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
         ) {
             ResponsiveContainer {
                 if (isLoading) {
@@ -157,6 +173,25 @@ fun DetalleVentaScreen(
                     }
                 }
             }
+        }
+
+        if (showConfirmDescartar && venta != null) {
+            DescartarVentaDialog(
+                montoTotal = if ((venta.folio ?: 0) > 0) {
+                     // Si es edición, el valor "perdido" es solo lo nuevo, 
+                     // pero para simplificar mostramos el total de lo local que se va a borrar
+                     venta.productos.filter { it.idEstado == "0" }.sumOf { it.subtotal }
+                } else {
+                    venta.total
+                },
+                esEdicion = (venta.folio ?: 0) > 0,
+                onConfirm = {
+                    onDescartarVenta?.invoke(venta.idTemporal ?: "")
+                    showConfirmDescartar = false
+                    onBackClick()
+                },
+                onDismiss = { showConfirmDescartar = false }
+            )
         }
     }
 }

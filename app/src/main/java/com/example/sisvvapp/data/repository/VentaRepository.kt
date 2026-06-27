@@ -35,6 +35,7 @@ class VentaRepository(
 
     private val gson = Gson()
     fun getPendientesCountFlow(): Flow<Int> = ventaColaDao.countPendientesFlow()
+    fun getParaSincronizarFlow(): Flow<List<VentaColaEntity>> = ventaColaDao.getParaSincronizarFlow()
     suspend fun getPendientes(): List<VentaColaEntity> = ventaColaDao.getPendientes()
     suspend fun getParaSincronizar(): List<VentaColaEntity> = ventaColaDao.getParaSincronizar()
     fun getVentasGlobales(corteCaja: Int? = null, fecha: String): Flow<List<VentaDto>> {
@@ -447,6 +448,18 @@ class VentaRepository(
 
     suspend fun getVentaRecibidaPorFolio(folio: Int): VentaRecibidaEntity? {
         return ventaRecibidaDao.getVentaPorFolio(folio)
+    }
+
+    suspend fun descartarVentaPendiente(idTemporal: String): Result<Unit> = runCatching {
+        val venta = ventaColaDao.getById(idTemporal) ?: throw Exception("Venta no encontrada en cola")
+        
+        // No permitir borrar si se está sincronizando activamente (Safety Check)
+        if (venta.estado == "SYNCING") {
+            throw Exception("No se puede descartar una venta mientras se está enviando")
+        }
+        
+        ventaColaDao.deleteById(idTemporal)
+        Log.d("VentaRepo", "Venta descartada manualmente: $idTemporal")
     }
 
     suspend fun transferirProducto(

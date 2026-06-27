@@ -24,7 +24,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://puny-facts-feel.loca.lt/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://public-bottles-happen.loca.lt/api/\"")
         }
         release {
             isMinifyEnabled = true
@@ -33,7 +33,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://puny-facts-feel.loca.lt/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://public-bottles-happen.loca.lt/api/\"")
         }
     }
     compileOptions {
