@@ -1,6 +1,7 @@
 package com.example.sisvvapp.ui.screens.ajustes
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,11 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -52,10 +49,16 @@ fun AjustesScreen(
     onCajaClick: (CajaDto) -> Unit,
     onSyncClick: () -> Unit,
     onLogoutClick: () -> Unit,
+    onVentasPendientesClick: () -> Unit = {},
     onMenuClick: () -> Unit,
     onRefresh: () -> Unit = {}
 ) {
     val isTablet = LocalDeviceType.current == DeviceType.TABLET
+
+    // Conteo para la tarjeta de cola
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val db = remember { com.example.sisvvapp.data.local.AppDatabase.getInstance(context) }
+    val pendientesCount by db.ventaColaDao().countAllPendientesFlow().collectAsState(initial = 0)
 
     VistaVerdeScaffold(
         title = stringResource(id = R.string.ajustes_title),
@@ -163,6 +166,58 @@ fun AjustesScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
                                 lineHeight = if (isTablet) 22.sp else 18.sp
+                            )
+                        }
+                    }
+                }
+
+                // --- 2.5 SECCIÓN: COLA DE SINCRONIZACIÓN (Nueva) ---
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    VistaVerdeSectionHeader(text = "Operaciones Fuera de Línea")
+                }
+
+                item {
+                    VistaVerdeBaseCard(
+                        modifier = Modifier.fillMaxWidth().clickable { onVentasPendientesClick() }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Surface(
+                                color = if (pendientesCount > 0) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.size(if (isTablet) 56.dp else 48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.CloudQueue,
+                                        contentDescription = null,
+                                        tint = if (pendientesCount > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            
+                            Spacer(modifier = Modifier.width(16.dp))
+                            
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Cola de Sincronización",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = if (pendientesCount > 0) "$pendientesCount pedidos esperando conexión" else "No hay pedidos pendientes",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.outline
                             )
                         }
                     }

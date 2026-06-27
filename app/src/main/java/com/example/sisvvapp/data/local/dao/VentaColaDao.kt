@@ -16,6 +16,9 @@ interface VentaColaDao {
     suspend fun getAll(): List<VentaColaEntity>
 
     @Query("SELECT * FROM ventas_cola WHERE estado IN ('PENDIENTE', 'ERROR', 'SYNCING') ORDER BY fechaCreacion ASC")
+    fun getParaSincronizarFlow(): Flow<List<VentaColaEntity>>
+
+    @Query("SELECT * FROM ventas_cola WHERE estado IN ('PENDIENTE', 'ERROR', 'SYNCING') ORDER BY fechaCreacion ASC")
     suspend fun getParaSincronizar(): List<VentaColaEntity>
 
     @Query("SELECT * FROM ventas_cola WHERE estado = 'PENDIENTE' ORDER BY fechaCreacion ASC")

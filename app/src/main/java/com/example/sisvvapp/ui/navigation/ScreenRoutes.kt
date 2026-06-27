@@ -13,6 +13,7 @@ object ScreenRoutes {
     const val MODIFICADORES = "modificadores/{productoId}"
     const val RESUMEN_CARRITO = "resumen_carrito"
     const val DETALLE_VENTA = "detalle_venta/{id}"
+    const val VENTAS_PENDIENTES = "ventas_pendientes"
 
     const val PERFIL_SOCIO = "perfil_socio/{socioId}"
 

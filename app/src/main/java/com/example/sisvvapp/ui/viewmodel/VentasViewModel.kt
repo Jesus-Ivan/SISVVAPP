@@ -134,4 +134,11 @@ class VentasViewModel(
             onResult(result)
         }
     }
+
+    fun descartarVentaPendiente(idTemporal: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            val result = ventaRepository.descartarVentaPendiente(idTemporal)
+            onResult(result)
+        }
+    }
 }

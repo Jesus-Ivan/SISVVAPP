@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Refresh
@@ -42,11 +43,17 @@ fun VentasScreen(
     nombreCaja: String,
     onVentaClick: (VentaDto) -> Unit = {},
     onNuevaVentaClick: () -> Unit = {},
+    onVentasPendientesClick: () -> Unit = {},
     onDateSelected: (String) -> Unit = {},
     onClearDate: () -> Unit = {}
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     val isTablet = LocalDeviceType.current == DeviceType.TABLET
+
+    // Conteo de ventas pendientes para el badge
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val db = remember { com.example.sisvvapp.data.local.AppDatabase.getInstance(context) }
+    val pendientesCount by db.ventaColaDao().countAllPendientesFlow().collectAsState(initial = 0)
 
     VistaVerdeScaffold(
         title = stringResource(R.string.ventas_title),
@@ -54,6 +61,21 @@ fun VentasScreen(
         subtitle = "Caja: $nombreCaja",
         isOnline = isOnline,
         actions = {
+            if (pendientesCount > 0) {
+                IconButton(onClick = onVentasPendientesClick) {
+                    BadgedBox(
+                        badge = {
+                            Badge { Text("$pendientesCount") }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CloudQueue,
+                            contentDescription = "Ventas pendientes",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
             IconButton(onClick = { showDatePicker = true }) {
                 Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.ventas_filter_date_desc))
             }
