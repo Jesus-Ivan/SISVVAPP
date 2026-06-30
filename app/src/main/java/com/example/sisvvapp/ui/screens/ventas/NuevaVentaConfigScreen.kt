@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -101,7 +102,15 @@ fun NuevaVentaConfigScreen(
                     )
                     Switch(
                         checked = paraLlevar,
-                        onCheckedChange = onParaLlevarChange
+                        onCheckedChange = onParaLlevarChange,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.surface,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                            uncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                            uncheckedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            checkedBorderColor = Color.Transparent
+                        )
                     )
                 }
 
