@@ -50,7 +50,9 @@ fun NuevaVentaConfigScreen(
     cajasDisponibles: Boolean = true,
     isFormValid: Boolean = true,
     numeroComensales: String = "",
-    onNumeroComensalesChange: (String) -> Unit = {}
+    onNumeroComensalesChange: (String) -> Unit = {},
+    paraLlevar: Boolean = false,
+    onParaLlevarChange: (Boolean) -> Unit = {}
 ) {
     val isTablet = LocalDeviceType.current == DeviceType.TABLET
     val requiereSocio = tipoSeleccionado == "socio" || tipoSeleccionado == "invitado"
@@ -84,19 +86,39 @@ fun NuevaVentaConfigScreen(
                 VistaVerdeSectionHeader(text = "Seleccione tipo de venta")
                 Spacer(modifier = Modifier.height(24.dp))
 
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "¿Es para llevar?",
+                        fontSize = if (isTablet) 18.sp else 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Switch(
+                        checked = paraLlevar,
+                        onCheckedChange = onParaLlevarChange
+                    )
+                }
+
                 VistaVerdeTextField(
-                    value = numeroComensales,
+                    value = if (paraLlevar) "Para llevar" else numeroComensales,
                     onValueChange = onNumeroComensalesChange,
                     label = "Número de Comensales",
                     keyboardType = KeyboardType.Number,
+                    enabled = !paraLlevar,
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Groups,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = if (paraLlevar) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary
                         )
                     },
-                    bgColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                    bgColor = if (paraLlevar) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -289,6 +311,8 @@ fun NuevaVentaConfigScreenPreview() {
             onNombreClienteChange = {},
             onMenuClick = {},
             onContinuarClick = {},
+            paraLlevar = true,
+            onParaLlevarChange = {},
             isOnline = true
         )
     }
