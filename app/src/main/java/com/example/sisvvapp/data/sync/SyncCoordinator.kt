@@ -56,11 +56,12 @@ object SyncCoordinator {
         }
     }
 
-    fun onSyncComplete() {
-        // Solo resetear si no fue pausado manualmente durante el proceso
-        if (_state == SyncState.SYNCING) {
-            _state = SyncState.IDLE
-            Log.d(TAG, "Sync completado, estado restablecido a IDLE")
+    suspend fun onSyncComplete() {
+        mutex.withLock {
+            if (_state == SyncState.SYNCING) {
+                _state = SyncState.IDLE
+                Log.d(TAG, "Sync completado, estado restablecido a IDLE")
+            }
         }
     }
 

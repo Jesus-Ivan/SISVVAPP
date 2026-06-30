@@ -23,6 +23,6 @@ data class VentaRecibidaEntity(
     @ColumnInfo(name = "corte_caja") val corteCaja: Int,
     @ColumnInfo(name = "productos_json") val productosJson: String,
     @ColumnInfo(name = "pagos_json") val pagosJson: String = "[]",
-    @ColumnInfo(name = "num_comensales") val numComensales: Int? = null,
+    @ColumnInfo(name = "num_comensales") val numComensales: String? = null,
     @ColumnInfo(name = "fecha_guardado") val fechaGuardado: Long = System.currentTimeMillis()
 )

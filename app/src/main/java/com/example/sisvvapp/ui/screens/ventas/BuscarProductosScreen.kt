@@ -263,7 +263,7 @@ private fun VistaVerdeProductoCard(
                 Spacer(modifier = Modifier.height(12.dp))
                 TextField(
                     value = observaciones,
-                    onValueChange = { observaciones = it },
+                    onValueChange = { observaciones = it.take(250) },
                     placeholder = { Text("Instrucciones...") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.colors(

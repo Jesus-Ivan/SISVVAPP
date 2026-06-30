@@ -14,7 +14,7 @@ data class VentaResponse(
     @SerializedName("clave_punto_venta") val clavePuntoVenta: String? = null,
     val productos: List<ProductoVentaDto>? = null,
     val pagos: List<PagoDto>? = null,
-    @SerializedName("num_comensales") val numComensales: Int? = null
+    @SerializedName("num_comensales") val numComensales: String? = null
 ) {
     fun toVentaDto(): VentaDto {
         val (date, time) = fechaApertura?.split(" ")?.let {

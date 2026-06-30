@@ -9,6 +9,7 @@ import com.example.sisvvapp.data.sync.SyncCoordinator
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -41,7 +42,8 @@ class VentasPendientesViewModel(
     fun reanudarSincronizacion() {
         viewModelScope.launch {
             SyncCoordinator.resumeSync()
-            if (ventasPendientes.value.isNotEmpty()) {
+            val pendientes = ventaRepository.getParaSincronizarFlow().first()
+            if (pendientes.isNotEmpty()) {
                 SyncForegroundService.start(context)
             }
         }

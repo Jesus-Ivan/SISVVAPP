@@ -52,5 +52,5 @@ data class VentaGlobalView(
     val socioId: Int?,
     val fechaFiltro: String,
     val productosJson: String,
-    val numComensales: Int? = null
+    val numComensales: String? = null
 )

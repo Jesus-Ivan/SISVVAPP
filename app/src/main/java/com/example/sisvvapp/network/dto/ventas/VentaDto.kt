@@ -15,7 +15,7 @@ data class VentaDto(
     @SerializedName("clave_punto_venta") val clavePuntoVenta: String = "",
     val productos: List<ProductoVentaDto> = emptyList(),
     val pagos: List<PagoDto> = emptyList(),
-    @SerializedName("num_comensales") val numComensales: Int? = null,
+    @SerializedName("num_comensales") val numComensales: String? = null,
     // Campos para modo offline
     val syncStatus: String = "RECIBIDA",
     val idTemporal: String? = null

@@ -229,7 +229,7 @@ private fun DetalleHeaderCard(venta: VentaDto) {
                 DetalleRow("Tipo", venta.tipoCliente, isTablet)
             }
             DetalleRow("Fecha/Hora", "${venta.fecha ?: ""} · ${venta.hora}", isTablet)
-            DetalleRow("Comensales", venta.numComensales?.toString() ?: "N/A", isTablet)
+            DetalleRow("Comensales", venta.numComensales ?: "N/A", isTablet)
         }
     }
 }
