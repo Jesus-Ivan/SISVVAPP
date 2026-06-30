@@ -65,6 +65,9 @@ class NuevaVentaViewModel(
     private val _numeroComensales = MutableStateFlow("")
     val numeroComensales: StateFlow<String> = _numeroComensales
 
+    private val _paraLlevar = MutableStateFlow(false)
+    val paraLlevar: StateFlow<Boolean> = _paraLlevar
+
     private var searchJob: Job? = null
 
     fun setTipoVenta(tipo: String) {
@@ -156,6 +159,10 @@ class NuevaVentaViewModel(
         }
     }
 
+    fun setParaLlevar(value: Boolean) {
+        _paraLlevar.value = value
+    }
+
     fun clearSocioSelection() {
         searchJob?.cancel()
         Log.d("NuevaVentaVM", "Limpiando selección de socio")
@@ -174,12 +181,15 @@ class NuevaVentaViewModel(
         _nombreCliente.value = ""
         _socioId.value = null
         _numeroComensales.value = ""
+        _paraLlevar.value = false
     }
 
     fun isFormValid(): Boolean {
-        // Validación de comensales: debe ser un número mayor a 0
-        val comensales = _numeroComensales.value.toIntOrNull() ?: 0
-        if (comensales <= 0) return false
+        // Validación de comensales: debe ser un número mayor a 0 si no es para llevar
+        if (!_paraLlevar.value) {
+            val comensales = _numeroComensales.value.toIntOrNull() ?: 0
+            if (comensales <= 0) return false
+        }
 
         val requiereSocio = _tipoVenta.value == "socio" || _tipoVenta.value == "invitado"
         if (requiereSocio) {

@@ -247,6 +247,7 @@ fun MainContainer(
                         val sociosEncontrados by nuevaVentaViewModel.sociosEncontrados.collectAsState()
                         val socioSeleccionado by nuevaVentaViewModel.socioSeleccionado.collectAsState()
                         val numeroComensales by nuevaVentaViewModel.numeroComensales.collectAsState()
+                        val paraLlevar by nuevaVentaViewModel.paraLlevar.collectAsState()
 
                         LaunchedEffect(socioIdArg) {
                             if (socioIdArg != -1) {
@@ -257,11 +258,12 @@ fun MainContainer(
                             }
                         }
 
-                        LaunchedEffect(tipoVenta, nombreCliente, cajaActiva?.corte, numeroComensales) {
+                        LaunchedEffect(tipoVenta, nombreCliente, cajaActiva?.corte, numeroComensales, paraLlevar) {
                             // Si el carrito ya tiene items, no sobreescribimos la config de la venta
                             // a menos que estemos en modo append explícito
                             if (globalCarritoViewModel.items.value.isEmpty() || globalCarritoViewModel.esModoAppend()) {
-                                globalCarritoViewModel.configurarVenta(tipoVenta, socioId, nombreCliente, cajaActiva?.corte ?: 0, cajaActiva?.clavePuntoVenta ?: "", numeroComensales.toIntOrNull())
+                                val comensalesFinal = if (paraLlevar) -1 else numeroComensales.toIntOrNull()
+                                globalCarritoViewModel.configurarVenta(tipoVenta, socioId, nombreCliente, cajaActiva?.corte ?: 0, cajaActiva?.clavePuntoVenta ?: "", comensalesFinal)
                             }
                         }
 
@@ -278,6 +280,8 @@ fun MainContainer(
                             onNombreClienteChange = { nuevaVentaViewModel.setNombreCliente(it) },
                             numeroComensales = numeroComensales,
                             onNumeroComensalesChange = { nuevaVentaViewModel.setNumeroComensales(it) },
+                            paraLlevar = paraLlevar,
+                            onParaLlevarChange = { nuevaVentaViewModel.setParaLlevar(it) },
                             isOnline = isConnected,
                             onMenuClick = { navController.popBackStack() },
                             onContinuarClick = { navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS) },
