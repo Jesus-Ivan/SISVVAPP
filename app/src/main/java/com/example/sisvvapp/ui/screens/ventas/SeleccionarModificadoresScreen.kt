@@ -195,7 +195,7 @@ fun SeleccionarModificadoresScreen(
                                         }
                                     },
                                     notas = modificadorNotas,
-                                    onNotaChange = { id, nota -> modificadorNotas[id] = nota }
+                                    onNotaChange = { id, nota -> modificadorNotas[id] = nota.take(250) }
                                 )
                             }
                         }
@@ -262,7 +262,7 @@ fun SeleccionarModificadoresScreen(
                 
                 VistaVerdeTextField(
                     value = observacionesGeneral,
-                    onValueChange = { observacionesGeneral = it },
+                    onValueChange = { observacionesGeneral = it.take(250) },
                     label = "Observaciones",
                     placeholder = "Ej. Término medio, sin sal...",
                     modifier = Modifier.fillMaxWidth()

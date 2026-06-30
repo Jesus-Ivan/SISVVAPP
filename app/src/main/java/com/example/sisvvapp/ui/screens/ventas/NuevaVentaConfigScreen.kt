@@ -106,7 +106,7 @@ fun NuevaVentaConfigScreen(
                 }
 
                 VistaVerdeTextField(
-                    value = if (paraLlevar) "Para llevar" else numeroComensales,
+                    value = if (paraLlevar) "PARA LLEVAR" else numeroComensales,
                     onValueChange = onNumeroComensalesChange,
                     label = "Número de Comensales",
                     keyboardType = KeyboardType.Number,

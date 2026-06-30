@@ -49,8 +49,8 @@ class CarritoViewModel(
     private val _clavePuntoVenta = MutableStateFlow("")
     val clavePuntoVenta: StateFlow<String> = _clavePuntoVenta
 
-    private val _numComensales = MutableStateFlow<Int?>(null)
-    val numComensales: StateFlow<Int?> = _numComensales
+    private val _numComensales = MutableStateFlow<String?>(null)
+    val numComensales: StateFlow<String?> = _numComensales
 
     private val _items = MutableStateFlow<List<CarritoItem>>(emptyList())
     val items: StateFlow<List<CarritoItem>> = _items
@@ -102,7 +102,7 @@ class CarritoViewModel(
         nombreCliente: String,
         corteCaja: Int,
         clavePuntoVenta: String,
-        numComensales: Int? = null
+        numComensales: String? = null
     ) {
         _tipoVenta.value = tipoVenta
         _socioId.value = socioId

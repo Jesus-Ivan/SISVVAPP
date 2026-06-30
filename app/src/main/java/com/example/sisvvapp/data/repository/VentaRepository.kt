@@ -324,6 +324,7 @@ class VentaRepository(
             idSocio = actual.idSocio,
             nombre = actual.nombreCliente,
             clavePuntoVenta = actual.clavePuntoVenta,
+            numComensales = actual.numComensales,
             productos = productos
         )
 
