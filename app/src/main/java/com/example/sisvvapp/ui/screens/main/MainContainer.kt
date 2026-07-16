@@ -258,13 +258,9 @@ fun MainContainer(
                             }
                         }
 
-                        LaunchedEffect(tipoVenta, nombreCliente, cajaActiva?.corte, numeroComensales, paraLlevar) {
-                            // Si el carrito ya tiene items, no sobreescribimos la config de la venta
-                            // a menos que estemos en modo append explícito
-                            if (globalCarritoViewModel.items.value.isEmpty() || globalCarritoViewModel.esModoAppend()) {
-                                val comensalesFinal = if (paraLlevar) "PARA LLEVAR" else numeroComensales
-                                globalCarritoViewModel.configurarVenta(tipoVenta, socioId, nombreCliente, cajaActiva?.corte ?: 0, cajaActiva?.clavePuntoVenta ?: "", comensalesFinal)
-                            }
+                        LaunchedEffect(tipoVenta, nombreCliente, cajaActiva?.corte, numeroComensales, paraLlevar, socioId) {
+                            val comensalesFinal = if (paraLlevar) "PARA LLEVAR" else numeroComensales
+                            globalCarritoViewModel.configurarVenta(tipoVenta, socioId, nombreCliente, cajaActiva?.corte ?: 0, cajaActiva?.clavePuntoVenta ?: "", comensalesFinal)
                         }
 
                         NuevaVentaConfigScreen(
