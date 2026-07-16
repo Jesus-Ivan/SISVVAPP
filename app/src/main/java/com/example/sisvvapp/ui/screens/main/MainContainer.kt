@@ -78,6 +78,7 @@ fun MainContainer(
     val globalCarritoViewModel: CarritoViewModel = viewModel(factory = factory)
 
     var showCajaCerradaDialog by remember { mutableStateOf(false) }
+    var isFirstCajaLoad by remember { mutableStateOf(true) }
     var motivoCajaCerrada by remember { mutableStateOf("") }
     var hadCajas by remember { mutableStateOf(false) }
     val isSessionExpired = remember { derivedStateOf { !isConnected && !com.example.sisvvapp.data.local.SessionManager.getInstance(context).isLoggedIn() } }
@@ -124,6 +125,19 @@ fun MainContainer(
         if (topCajas.isEmpty() && topCajaId != null && hadCajas && !isLoadingCajas && !showCajaCerradaDialog) {
             motivoCajaCerrada = "cajas_vacias"
             showCajaCerradaDialog = true
+        }
+    }
+
+    // Si cambia la caja, reiniciamos el carrito y volvemos a ventas
+    LaunchedEffect(topCajaId) {
+        if (topCajaId != null) {
+            if (!isFirstCajaLoad) {
+                globalCarritoViewModel.clearState()
+                navController.navigate(ScreenRoutes.VENTAS) {
+                    popUpTo(ScreenRoutes.VENTAS) { inclusive = true }
+                }
+            }
+            isFirstCajaLoad = false
         }
     }
 
@@ -258,13 +272,9 @@ fun MainContainer(
                             }
                         }
 
-                        LaunchedEffect(tipoVenta, nombreCliente, cajaActiva?.corte, numeroComensales, paraLlevar) {
-                            // Si el carrito ya tiene items, no sobreescribimos la config de la venta
-                            // a menos que estemos en modo append explícito
-                            if (globalCarritoViewModel.items.value.isEmpty() || globalCarritoViewModel.esModoAppend()) {
-                                val comensalesFinal = if (paraLlevar) "PARA LLEVAR" else numeroComensales
-                                globalCarritoViewModel.configurarVenta(tipoVenta, socioId, nombreCliente, cajaActiva?.corte ?: 0, cajaActiva?.clavePuntoVenta ?: "", comensalesFinal)
-                            }
+                        LaunchedEffect(tipoVenta, nombreCliente, cajaActiva?.corte, numeroComensales, paraLlevar, socioId) {
+                            val comensalesFinal = if (paraLlevar) "PARA LLEVAR" else numeroComensales
+                            globalCarritoViewModel.configurarVenta(tipoVenta, socioId, nombreCliente, cajaActiva?.corte ?: 0, cajaActiva?.clavePuntoVenta ?: "", comensalesFinal)
                         }
 
                         NuevaVentaConfigScreen(
