@@ -81,6 +81,7 @@ fun MainContainer(
     var isFirstCajaLoad by remember { mutableStateOf(true) }
     var motivoCajaCerrada by remember { mutableStateOf("") }
     var hadCajas by remember { mutableStateOf(false) }
+    var isFirstLoad by remember { mutableStateOf(true) }
     val isSessionExpired = remember { derivedStateOf { !isConnected && !com.example.sisvvapp.data.local.SessionManager.getInstance(context).isLoggedIn() } }
     
     // Conjunto para evitar spam de alertas de la misma caja
@@ -118,11 +119,12 @@ fun MainContainer(
     val topCajas by sharedCajaViewModel.cajas.collectAsState()
     val topCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
     val isLoadingCajas by sharedCajaViewModel.isLoading.collectAsState()
-    LaunchedEffect(topCajas) {
-        if (topCajas.isNotEmpty()) hadCajas = true
-    }
     LaunchedEffect(topCajas, topCajaId, isLoadingCajas) {
-        if (topCajas.isEmpty() && topCajaId != null && hadCajas && !isLoadingCajas && !showCajaCerradaDialog) {
+        if (topCajas.isNotEmpty()) {
+            hadCajas = true
+            isFirstLoad = false
+        }
+        if (!isFirstLoad && topCajas.isEmpty() && topCajaId != null && hadCajas && !isLoadingCajas && !showCajaCerradaDialog) {
             motivoCajaCerrada = "cajas_vacias"
             showCajaCerradaDialog = true
         }

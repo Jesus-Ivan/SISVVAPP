@@ -36,6 +36,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
@@ -104,9 +106,18 @@ fun BuscarProductosScreen(
                 Column(modifier = Modifier.fillMaxSize()) {
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    var searchFieldValue by remember { mutableStateOf(TextFieldValue(searchQuery, TextRange(searchQuery.length))) }
+                    LaunchedEffect(searchQuery) {
+                        if (searchQuery != searchFieldValue.text) {
+                            searchFieldValue = TextFieldValue(searchQuery, TextRange(searchQuery.length))
+                        }
+                    }
                     VistaVerdeSearchBar(
-                        value = searchQuery,
-                        onValueChange = onSearchQueryChange,
+                        value = searchFieldValue,
+                        onValueChange = { newValue ->
+                            searchFieldValue = newValue
+                            onSearchQueryChange(newValue.text)
+                        },
                         placeholder = stringResource(R.string.buscar_productos_placeholder),
                         modifier = Modifier.focusRequester(focusRequester)
                     )

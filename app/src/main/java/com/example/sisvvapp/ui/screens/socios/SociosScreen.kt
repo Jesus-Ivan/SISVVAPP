@@ -11,8 +11,13 @@ import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -85,9 +90,18 @@ fun SociosScreen(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
+                var searchFieldValue by remember { mutableStateOf(TextFieldValue(searchQuery, TextRange(searchQuery.length))) }
+                LaunchedEffect(searchQuery) {
+                    if (searchQuery != searchFieldValue.text) {
+                        searchFieldValue = TextFieldValue(searchQuery, TextRange(searchQuery.length))
+                    }
+                }
                 VistaVerdeSearchBar(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
+                    value = searchFieldValue,
+                    onValueChange = { newValue ->
+                        searchFieldValue = newValue
+                        onSearchQueryChange(newValue.text)
+                    },
                     placeholder = stringResource(R.string.socios_search_placeholder),
                     modifier = Modifier.focusRequester(focusRequester)
                 )
