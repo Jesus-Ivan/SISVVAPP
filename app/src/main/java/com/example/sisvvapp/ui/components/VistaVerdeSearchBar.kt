@@ -22,7 +22,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sisvvapp.ui.theme.SISVVAPPTheme
@@ -31,8 +33,8 @@ import com.example.sisvvapp.ui.utils.LocalDeviceType
 
 @Composable
 fun VistaVerdeSearchBar(
-    value: String,
-    onValueChange: (String) -> Unit,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String = "Buscar..."
 
@@ -74,7 +76,7 @@ fun VistaVerdeSearchBar(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Box(modifier = Modifier.weight(1f)) {
-                    if (value.isEmpty()) {
+                    if (value.text.isEmpty()) {
                         Text(
                             text = placeholder,
                             style = MaterialTheme.typography.bodyLarge,
@@ -93,7 +95,7 @@ fun VistaVerdeSearchBar(
 fun SearchBarPreview() {
     SISVVAPPTheme {
         VistaVerdeSearchBar(
-            value = "g p q y j",
+            value = TextFieldValue("g p q y j"),
             onValueChange = {},
             placeholder = "Buscar socio..."
         )

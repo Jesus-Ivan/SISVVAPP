@@ -66,9 +66,9 @@ class CarritoViewModel(
         _searchQuery
     ) { all, query ->
         if (query.isBlank()) {
-            all.take(15)
+            all.take(25)
         } else {
-            all.filter { it.descripcion.contains(query, ignoreCase = true) }.take(15)
+            all.filter { it.descripcion.contains(query, ignoreCase = true) }.take(25)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

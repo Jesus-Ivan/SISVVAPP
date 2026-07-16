@@ -7,8 +7,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
@@ -155,11 +157,18 @@ fun NuevaVentaConfigScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    var searchFieldValue by remember { mutableStateOf(TextFieldValue(searchQuery, TextRange(searchQuery.length))) }
+                    LaunchedEffect(searchQuery) {
+                        if (searchQuery != searchFieldValue.text) {
+                            searchFieldValue = TextFieldValue(searchQuery, TextRange(searchQuery.length))
+                        }
+                    }
                     VistaVerdeSearchBar(
-                        value = searchQuery,
-                        onValueChange = { nuevaBusqueda ->
-                            onSearchQueryChange(nuevaBusqueda)
-                            if (nuevaBusqueda.isBlank()) {
+                        value = searchFieldValue,
+                        onValueChange = { newValue ->
+                            searchFieldValue = newValue
+                            onSearchQueryChange(newValue.text)
+                            if (newValue.text.isBlank()) {
                                 onSocioSeleccionado(null)
                             }
                         },
