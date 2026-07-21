@@ -369,8 +369,9 @@ class MainActivity : ComponentActivity() {
                                     val caja = cajas.firstOrNull { it.id == id }
                                     val sessionManager = com.example.sisvvapp.data.local.SessionManager.getInstance(this@MainActivity)
                                     sessionManager.saveSelectedCaja(id, caja?.nombre ?: "")
-                                    navController.popBackStack(Screen.CajaInicial.route, inclusive = true)
-                                    navController.navigate(Screen.Main.route)
+                                    navController.navigate(Screen.Main.route) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
                                 }
                             )
                         }

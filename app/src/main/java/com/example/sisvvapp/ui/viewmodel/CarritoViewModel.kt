@@ -104,6 +104,9 @@ class CarritoViewModel(
         clavePuntoVenta: String,
         numComensales: String? = null
     ) {
+        _appendMode.value = false
+        _folioExistente.value = null
+        _idTemporalExistente.value = null
         _tipoVenta.value = tipoVenta
         _socioId.value = socioId
         _nombreCliente.value = nombreCliente

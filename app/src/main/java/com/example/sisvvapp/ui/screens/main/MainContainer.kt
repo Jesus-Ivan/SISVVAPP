@@ -233,11 +233,7 @@ fun MainContainer(
                                 navController.navigate(ScreenRoutes.crearRutaDetalleVenta(id))
                             },
                             onNuevaVentaClick = {
-                                // Solo limpiamos si el carrito está vacío o ya se envió la venta anterior
-                                // Esto permite reanudar si el usuario se salió por error
-                                if (globalCarritoViewModel.items.value.isEmpty() && !globalCarritoViewModel.esModoAppend()) {
-                                    globalCarritoViewModel.clearState()
-                                }
+                                globalCarritoViewModel.clearState()
                                 navController.navigate(ScreenRoutes.NUEVA_VENTA)
                             },
                             onDateSelected = { fechaActiva = it; searchQuery = ""; ventasViewModel.refreshVentas(it, corteCajaActivo) },
@@ -266,6 +262,7 @@ fun MainContainer(
                         val paraLlevar by nuevaVentaViewModel.paraLlevar.collectAsState()
 
                         LaunchedEffect(socioIdArg) {
+                            globalCarritoViewModel.clearState()
                             if (socioIdArg != -1) {
                                 nuevaVentaViewModel.setRestrictedMode(true)
                                 nuevaVentaViewModel.selectSocioById(socioIdArg)
@@ -295,7 +292,10 @@ fun MainContainer(
                             paraLlevar = paraLlevar,
                             onParaLlevarChange = { nuevaVentaViewModel.setParaLlevar(it) },
                             isOnline = isConnected,
-                            onMenuClick = { navController.popBackStack() },
+                            onMenuClick = {
+                                globalCarritoViewModel.clearState()
+                                navController.popBackStack()
+                            },
                             onContinuarClick = { navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS) },
                             cajasDisponibles = cajas.isNotEmpty(),
                             isFormValid = nuevaVentaViewModel.isFormValid()
@@ -361,11 +361,8 @@ fun MainContainer(
                             when (result) {
                                 is SendResult.Success -> {
                                     globalCarritoViewModel.clearState()
-                                    val popped = navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
-                                    if (!popped) {
-                                        navController.navigate(ScreenRoutes.VENTAS) {
-                                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                                        }
+                                    navController.navigate(ScreenRoutes.VENTAS) {
+                                        popUpTo(0) { inclusive = true }
                                     }
                                     scope.launch {
                                         snackbarHostState.showSnackbar(
@@ -376,11 +373,8 @@ fun MainContainer(
                                 }
                                 is SendResult.Offline -> {
                                     globalCarritoViewModel.clearState()
-                                    val popped = navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
-                                    if (!popped) {
-                                        navController.navigate(ScreenRoutes.VENTAS) {
-                                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                                        }
+                                    navController.navigate(ScreenRoutes.VENTAS) {
+                                        popUpTo(0) { inclusive = true }
                                     }
                                     scope.launch {
                                         snackbarHostState.showSnackbar(
@@ -409,11 +403,8 @@ fun MainContainer(
                             onConfirmar = { globalCarritoViewModel.confirmarVenta() },
                             onVolver = {
                                 globalCarritoViewModel.clearState()
-                                val popped = navController.popBackStack(ScreenRoutes.VENTAS, inclusive = false)
-                                if (!popped) {
-                                    navController.navigate(ScreenRoutes.VENTAS) {
-                                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                                    }
+                                navController.navigate(ScreenRoutes.VENTAS) {
+                                    popUpTo(0) { inclusive = true }
                                 }
                             },
                             onBackClick = { navController.popBackStack() },
