@@ -215,12 +215,15 @@ fun MainContainer(
                             onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
                         }
 
+                        val pendientesCount by ventasViewModel.pendientesCount.collectAsState(initial = 0)
+
                         VentasScreen(
                             onMenuClick = { scope.launch { drawerState.open() } },
                             uiState = uiState,
                             isOnline = isConnected,
                             selectedDate = fechaActiva,
                             searchQuery = searchQuery,
+                            pendientesCount = pendientesCount,
                             onSearchQueryChange = { searchQuery = it },
                             onRefresh = { 
                                 // Al refrescar manualmente, forzamos que el repositorio actualice Room
@@ -519,11 +522,12 @@ fun MainContainer(
                         val sociosVM: SociosViewModel = viewModel(viewModelStoreOwner = remember(backStackEntry) { navController.getBackStackEntry(NavGraphs.SOCIOS_GRAPH) }, factory = factory)
                         val socio by sociosVM.selectedSocio.collectAsState()
                         val integrantes by sociosVM.integrantes.collectAsState(initial = emptyList())
+                        val membresias by sociosVM.membresias.collectAsState(initial = emptyList())
 
                         LaunchedEffect(socioId) { sociosVM.getIntegrantesPorSocio(socioId) }
 
                         val s = socio
-                        if (s != null) PerfilSocioScreen(s, integrantes, viewModel?.isOnline ?: true, onNuevaVentaClick = { navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) }) { navController.popBackStack() }
+                        if (s != null) PerfilSocioScreen(s, integrantes, membresias, viewModel?.isOnline ?: true, onNuevaVentaClick = { navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) }) { navController.popBackStack() }
                         else Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator(color = VerdePrincipal) }
                     }
                 }
@@ -533,19 +537,22 @@ fun MainContainer(
                         val cajas by sharedCajaViewModel.cajas.collectAsState()
                         val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
                         val isLoading by sharedCajaViewModel.isLoading.collectAsState()
+                        val ajustesVentasVM: VentasViewModel = viewModel(factory = factory)
+                        val pendientesCount by ajustesVentasVM.pendientesCount.collectAsState(initial = 0)
 
                         LaunchedEffect(currentRoute) { if (currentRoute == ScreenRoutes.AJUSTES) sharedCajaViewModel.refreshCajas() }
                         val sessionManager = SessionManager.getInstance(context)
                         val lastSyncText = if (sessionManager.getLastSyncDate() > 0) java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date(sessionManager.getLastSyncDate())) else "Pendiente"
                         var currentBaseUrl by remember { mutableStateOf(sessionManager.getBaseUrl()) }
-                        AjustesScreen(
-                            cajas = cajas.map { CajaDto(it.id, it.nombre, it.fechaApertura, it.fechaCierre, it.activo, it.meseroId) },
+                            AjustesScreen(
+                            cajas = cajas.map(com.example.sisvvapp.data.repository::toCajaDto),
                             selectedCajaId = selectedCajaId,
                             lastSyncDate = lastSyncText,
                             isLoading = isLoading,
                             isOnline = viewModel?.isOnline ?: true,
                             themeMode = viewModel?.themeMode ?: 0,
                             baseUrl = currentBaseUrl,
+                            pendientesCount = pendientesCount,
                             onThemeModeChange = { viewModel?.updateThemeMode(it) },
                             onBaseUrlChange = { newUrl ->
                                 currentBaseUrl = newUrl

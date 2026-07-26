@@ -44,6 +44,7 @@ fun AjustesScreen(
     isOnline: Boolean = true,
     themeMode: Int = 0,
     baseUrl: String = "",
+    pendientesCount: Int = 0,
     onThemeModeChange: (Int) -> Unit = {},
     onBaseUrlChange: (String) -> Unit = {},
     onCajaClick: (CajaDto) -> Unit,
@@ -54,11 +55,6 @@ fun AjustesScreen(
     onRefresh: () -> Unit = {}
 ) {
     val isTablet = LocalDeviceType.current == DeviceType.TABLET
-
-    // Conteo para la tarjeta de cola
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val db = remember { com.example.sisvvapp.data.local.AppDatabase.getInstance(context) }
-    val pendientesCount by db.ventaColaDao().countAllPendientesFlow().collectAsState(initial = 0)
 
     VistaVerdeScaffold(
         title = stringResource(id = R.string.ajustes_title),

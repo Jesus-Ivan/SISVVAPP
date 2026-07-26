@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.example.sisvvapp.R
 import com.example.sisvvapp.data.local.entity.IntegranteEntity
 import com.example.sisvvapp.data.local.entity.SocioEntity
+import com.example.sisvvapp.network.dto.socios.MembresiaDto
 import com.example.sisvvapp.ui.components.*
 import com.example.sisvvapp.ui.theme.*
 import com.example.sisvvapp.ui.utils.DeviceType
@@ -40,6 +41,7 @@ import dev.chrisbanes.haze.haze
 fun PerfilSocioScreen(
     socio: SocioEntity,
     integrantes: List<IntegranteEntity>,
+    membresias: List<MembresiaDto> = emptyList(),
     isOnline: Boolean = true,
     onNuevaVentaClick: (SocioEntity) -> Unit,
     onBackClick: () -> Unit
@@ -119,16 +121,7 @@ fun PerfilSocioScreen(
 
                                         Spacer(modifier = Modifier.height(16.dp))
 
-                                        // --- NUEVA SECCIÓN DE MEMBRESÍAS (HISTORIAL) ---
-                                        val gson = remember { com.google.gson.Gson() }
-                                        val membresias = remember(socio.membresiasJson) {
-                                            try {
-                                                val type = object : com.google.gson.reflect.TypeToken<List<com.example.sisvvapp.network.dto.socios.MembresiaDto>>() {}.type
-                                                gson.fromJson<List<com.example.sisvvapp.network.dto.socios.MembresiaDto>>(socio.membresiasJson, type) ?: emptyList()
-                                            } catch (e: Exception) {
-                                                emptyList()
-                                            }
-                                        }
+                                        // --- SECCIÓN DE MEMBRESÍAS (HISTORIAL) ---
 
                                         if (membresias.isNotEmpty()) {
                                             @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)

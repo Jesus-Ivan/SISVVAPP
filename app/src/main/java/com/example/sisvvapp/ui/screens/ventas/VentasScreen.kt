@@ -40,6 +40,7 @@ fun VentasScreen(
     isOnline: Boolean = true,
     searchQuery: String = "",
     selectedDate: String = "",
+    pendientesCount: Int = 0,
     onSearchQueryChange: (String) -> Unit = {},
     onRefresh: () -> Unit = {},
     nombreCaja: String,
@@ -51,11 +52,6 @@ fun VentasScreen(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     val isTablet = LocalDeviceType.current == DeviceType.TABLET
-
-    // Conteo de ventas pendientes para el badge
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val db = remember { com.example.sisvvapp.data.local.AppDatabase.getInstance(context) }
-    val pendientesCount by db.ventaColaDao().countAllPendientesFlow().collectAsState(initial = 0)
 
     VistaVerdeScaffold(
         title = stringResource(R.string.ventas_title),
