@@ -352,9 +352,7 @@ class MainActivity : ComponentActivity() {
                             val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
                             val isLoading by cajaViewModel.isLoading.collectAsState()
 
-                            val cajasDto = cajas.map { entity ->
-                                CajaDto(entity.id, entity.nombre, entity.fechaApertura, entity.fechaCierre, entity.activo, entity.meseroId)
-                            }
+                            val cajasDto = cajas.map(com.example.sisvvapp.data.repository::toCajaDto)
 
                             CajaScreen(
                                 cajas = cajasDto,

@@ -94,17 +94,17 @@ class SessionManager private constructor(context: Context) {
         -1
     }
 
+    private val sessionKeys = listOf(KEY_TOKEN, KEY_USER_ID, KEY_SESSION_START, KEY_SELECTED_CAJA_ID, KEY_SELECTED_CAJA_NOMBRE, KEY_LAST_SYNC_DATE)
+
     fun clearSession() {
-        // Al limpiar sesión, mantener preferencias del usuario (tema, URL)
-        val currentTheme = getThemeMode()
-        val savedBaseUrl = getBaseUrl()
         try {
-            prefs.edit().clear().commit()
+            prefs.edit().apply {
+                sessionKeys.forEach { remove(it) }
+                commit()
+            }
         } catch (e: Exception) {
             Log.e("SessionManager", "Error al limpiar sesión", e)
         }
-        saveThemeMode(currentTheme)
-        saveBaseUrl(savedBaseUrl)
     }
 
     fun saveThemeMode(mode: Int) {

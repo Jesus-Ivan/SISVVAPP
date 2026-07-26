@@ -29,11 +29,12 @@ class CajaRepository(
                     }
                 }
                 Log.d("CajaRepo", "Cajas sincronizadas correctamente: ${listaCajas.size}")
+                Result.success(Unit)
             } else {
                 val errorMsg = "Error sync cajas: HTTP ${response.code()} - ${response.message()}"
                 Log.w("CajaRepo", errorMsg)
+                return Result.failure(Exception(errorMsg))
             }
-            Result.success(Unit)
         } catch (e: Exception) {
             Log.e("CajaRepo", "Excepción en sync cajas", e)
             Result.failure(e)

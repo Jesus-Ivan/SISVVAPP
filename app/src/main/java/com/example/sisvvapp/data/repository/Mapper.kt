@@ -106,6 +106,18 @@ fun ProductoDto.toModificadorEntities(): List<ModificadorEntity> = modificadores
     )
 }
 
+fun CajaActivaEntity.toCajaDto() = CajaDto(
+    id = id,
+    nombre = nombre,
+    fechaApertura = fechaApertura,
+    fechaCierre = fechaCierre,
+    activo = activo,
+    meseroId = meseroId,
+    corte = corte,
+    cambioInicial = cambioInicial,
+    clavePuntoVenta = clavePuntoVenta
+)
+
 fun CajaDto.toCajaActivaEntity() = CajaActivaEntity(
     id = id,
     nombre = nombre,

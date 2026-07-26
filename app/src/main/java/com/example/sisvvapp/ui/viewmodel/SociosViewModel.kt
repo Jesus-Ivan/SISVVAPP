@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.sisvvapp.data.local.entity.IntegranteEntity
 import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.data.repository.SocioRepository
+import com.example.sisvvapp.network.dto.socios.MembresiaDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -51,6 +52,9 @@ class SociosViewModel(
     private val _selectedSocio = MutableStateFlow<SocioEntity?>(null)
     val selectedSocio: StateFlow<SocioEntity?> = _selectedSocio.asStateFlow()
 
+    private val _membresias = MutableStateFlow<List<MembresiaDto>>(emptyList())
+    val membresias: StateFlow<List<MembresiaDto>> = _membresias.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
@@ -67,15 +71,22 @@ class SociosViewModel(
         viewModelScope.launch {
             val result = socioRepository.getSocioConIntegrantes(socioId)
             Log.d("SociosVM", "getIntegrantesPorSocio($socioId) → ${result?.integrantes?.size} integrantes, socio=${result?.socio?.nombre}")
-            if (result != null) {
-                _selectedSocio.value = result.socio
-                _integrantes.value = result.integrantes
-            } else {
-                val socio = socioRepository.getSocioById(socioId)
-                if (socio != null) {
-                    _selectedSocio.value = socio
-                }
+            val socio = result?.socio ?: socioRepository.getSocioById(socioId)
+            if (socio != null) {
+                _selectedSocio.value = socio
+                _integrantes.value = result?.integrantes ?: emptyList()
+                _membresias.value = parseMembresias(socio.membresiasJson)
             }
+        }
+    }
+
+    private fun parseMembresias(json: String?): List<MembresiaDto> {
+        if (json.isNullOrBlank()) return emptyList()
+        return try {
+            val type = object : com.google.gson.reflect.TypeToken<List<MembresiaDto>>() {}.type
+            com.google.gson.Gson().fromJson(json, type) ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 
