@@ -33,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.sisvvapp.data.local.SessionManager
+import com.example.sisvvapp.data.repository.toCajaDto
 import com.example.sisvvapp.data.sync.SyncEventBus
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
@@ -545,7 +546,7 @@ fun MainContainer(
                         val lastSyncText = if (sessionManager.getLastSyncDate() > 0) java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date(sessionManager.getLastSyncDate())) else "Pendiente"
                         var currentBaseUrl by remember { mutableStateOf(sessionManager.getBaseUrl()) }
                             AjustesScreen(
-                            cajas = cajas.map(com.example.sisvvapp.data.repository::toCajaDto),
+                            cajas = cajas.map { it.toCajaDto() },
                             selectedCajaId = selectedCajaId,
                             lastSyncDate = lastSyncText,
                             isLoading = isLoading,

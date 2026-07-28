@@ -35,6 +35,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sisvvapp.data.monitor.NetworkMonitor
+import com.example.sisvvapp.data.repository.toCajaDto
 import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.sync.SyncWorker
 import com.example.sisvvapp.network.RetrofitClient
@@ -352,7 +353,7 @@ class MainActivity : ComponentActivity() {
                             val selectedCajaId by cajaViewModel.selectedCajaId.collectAsState()
                             val isLoading by cajaViewModel.isLoading.collectAsState()
 
-                            val cajasDto = cajas.map(com.example.sisvvapp.data.repository::toCajaDto)
+                            val cajasDto = cajas.map { it.toCajaDto() }
 
                             CajaScreen(
                                 cajas = cajasDto,
