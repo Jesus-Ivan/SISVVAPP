@@ -148,10 +148,7 @@ fun MainContainer(
     val currentRoute = navBackStackEntry?.destination?.route ?: ScreenRoutes.VENTAS
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-        ) { paddingValues ->
         ModalNavigationDrawer(
-            modifier = Modifier.padding(paddingValues),
             drawerState = drawerState,
             gesturesEnabled = true,
             drawerContent = {
@@ -159,12 +156,11 @@ fun MainContainer(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
                         navController.navigate(route) {
-                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            popUpTo(0) { inclusive = true }
                             launchSingleTop = true
-                            restoreState = true
                         }
                     },
-                    onCloseDrawer = { scope.launch { drawerState.close() } },
+                    onCloseDrawer = { scope.launch { kotlinx.coroutines.delay(100); drawerState.close() } },
                     viewModel = viewModel
                 )
             }
@@ -713,7 +709,6 @@ fun MainContainer(
                 }
             }
         }
-    }
     }
 }
 
