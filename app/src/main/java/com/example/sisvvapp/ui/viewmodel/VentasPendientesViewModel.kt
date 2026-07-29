@@ -7,6 +7,7 @@ import com.example.sisvvapp.data.local.entity.VentaColaEntity
 import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.data.sync.SyncCoordinator
 import com.example.sisvvapp.data.sync.SyncForegroundService
+import com.example.sisvvapp.data.sync.SyncWorker
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -45,6 +46,7 @@ class VentasPendientesViewModel(
             val pendientes = ventaRepository.getParaSincronizarFlow().first()
             if (pendientes.isNotEmpty()) {
                 SyncForegroundService.start(context)
+                SyncWorker.enqueueOneTime(context)
             }
         }
     }
