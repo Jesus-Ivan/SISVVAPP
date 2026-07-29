@@ -59,7 +59,6 @@ import com.example.sisvvapp.ui.components.VistaVerdeBaseCard
 import com.example.sisvvapp.ui.components.VistaVerdeEmptyState
 import com.example.sisvvapp.ui.components.VistaVerdeScaffold
 import com.example.sisvvapp.ui.components.VistaVerdeSearchBar
-import com.example.sisvvapp.ui.components.VistaVerdeSectionHeader
 import com.example.sisvvapp.ui.theme.Grey950
 import com.example.sisvvapp.ui.theme.OrangeSaaS
 import com.example.sisvvapp.ui.theme.Poppins
@@ -120,12 +119,6 @@ fun BuscarProductosScreen(
                         },
                         placeholder = stringResource(R.string.buscar_productos_placeholder),
                         modifier = Modifier.focusRequester(focusRequester)
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    VistaVerdeSectionHeader(
-                        text = stringResource(R.string.buscar_productos_title)
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
