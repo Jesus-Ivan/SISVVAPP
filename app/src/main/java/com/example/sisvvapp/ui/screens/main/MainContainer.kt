@@ -55,6 +55,19 @@ import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.theme.VerdePrincipal
 import com.example.sisvvapp.ui.utils.LocalIsConnected
 import com.example.sisvvapp.ui.viewmodel.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import com.example.sisvvapp.ui.utils.DeviceType
+import com.example.sisvvapp.ui.utils.LocalDeviceType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -72,7 +85,7 @@ fun MainContainer(
     val isConnected = LocalIsConnected.current
 
     val navController = rememberNavController()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    var drawerOpen by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     // ViewModel persistente para el flujo de ventas
@@ -146,25 +159,34 @@ fun MainContainer(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: ScreenRoutes.VENTAS
+    val isTablet = LocalDeviceType.current == DeviceType.TABLET
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            gesturesEnabled = true,
-            drawerContent = {
-                AppNavigationDrawerContent(
-                    currentRoute = currentRoute,
-                    onNavigate = { route ->
-                        navController.navigate(route) {
-                            popUpTo(0) { inclusive = true }
-                            launchSingleTop = true
-                        }
-                    },
-                    onCloseDrawer = { scope.launch { kotlinx.coroutines.delay(100); drawerState.close() } },
-                    viewModel = viewModel
-                )
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .pointerInput(drawerOpen) {
+            if (drawerOpen) return@pointerInput
+
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false)
+
+                if (down.position.x > 48.dp.toPx()) return@awaitEachGesture
+
+                var totalDrag = 0f
+                var prevX = down.position.x
+                while (true) {
+                    val event = awaitPointerEvent()
+                    val change = event.changes.find { it.id == down.id } ?: break
+                    if (!change.pressed) break
+                    val dx = change.position.x - prevX
+                    prevX = change.position.x
+                    totalDrag += dx
+                    if (dx != 0f) change.consume()
+                }
+
+                if (totalDrag > 100f) drawerOpen = true
             }
-        ) {
+        }
+    ) {
             NavHost(navController = navController, startDestination = NavGraphs.VENTAS_GRAPH) {
                 navigation(startDestination = ScreenRoutes.VENTAS, route = NavGraphs.VENTAS_GRAPH) {
                     composable(ScreenRoutes.VENTAS) { backStackEntry ->
@@ -215,7 +237,7 @@ fun MainContainer(
                         val pendientesCount by ventasViewModel.pendientesCount.collectAsState(initial = 0)
 
                         VentasScreen(
-                            onMenuClick = { scope.launch { drawerState.open() } },
+                            onMenuClick = { drawerOpen = true },
                             uiState = uiState,
                             isOnline = isConnected,
                             selectedDate = fechaActiva,
@@ -508,7 +530,7 @@ fun MainContainer(
                             nombreCaja = cajaActiva?.nombre ?: "Sin Caja",
                             errorMessage = errorMessage,
                             onSearchQueryChange = { sociosVM.search(it) },
-                            onMenuClick = { scope.launch { drawerState.open() } },
+                            onMenuClick = { drawerOpen = true },
                             onSocioClick = { navController.navigate(ScreenRoutes.crearRutaPerfilSocio(it)) },
                             onNuevaVentaClick = { globalCarritoViewModel.clearState(); navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) },
                             onRetry = { sociosVM.sync() },
@@ -561,65 +583,99 @@ fun MainContainer(
                             onVentasPendientesClick = { navController.navigate(ScreenRoutes.VENTAS_PENDIENTES) },
                             onSyncClick = { SyncWorker.enqueueOneTime(context); android.widget.Toast.makeText(context, "Sincronizando...", android.widget.Toast.LENGTH_SHORT).show() },
                             onLogoutClick = { onLogout() },
-                            onMenuClick = { scope.launch { drawerState.open() } },
+                            onMenuClick = { drawerOpen = true },
                             onRefresh = { scope.launch { sharedCajaViewModel.refreshCajas() } }
                         )
                     }
                 }
             }
-        }
 
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 80.dp, start = 24.dp, end = 24.dp)
-        ) { data ->
-            val icon = when {
-                data.visuals.message.contains("éxito") -> Icons.Default.CheckCircle
-                data.visuals.message.contains("sincronizará") -> Icons.Default.CloudQueue
-                else -> Icons.Default.Sync
-            }
-            Card(
-                modifier = Modifier
-                    .padding(horizontal = 24.dp, vertical = 12.dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
-                        shape = CircleShape,
-                        modifier = Modifier.size(36.dp)
+            Box(modifier = Modifier.fillMaxSize()) {
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 80.dp, start = 24.dp, end = 24.dp)
+                ) { data ->
+                    val icon = when {
+                        data.visuals.message.contains("éxito") -> Icons.Default.CheckCircle
+                        data.visuals.message.contains("sincronizará") -> Icons.Default.CloudQueue
+                        else -> Icons.Default.Sync
+                    }
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp, vertical = 12.dp)
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
+                                shape = CircleShape,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = data.visuals.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = data.visuals.message,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
                 }
             }
-        }
+
+            AnimatedVisibility(
+                visible = drawerOpen,
+                enter = fadeIn() + slideInHorizontally { -it },
+                exit = fadeOut() + slideOutHorizontally { -it }
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.32f))
+                            .clickable { drawerOpen = false }
+                    )
+                    ModalDrawerSheet(
+                        modifier = Modifier
+                            .width(if (isTablet) 380.dp else 300.dp)
+                            .fillMaxHeight()
+                    ) {
+                        AppNavigationDrawerContent(
+                            currentRoute = currentRoute,
+                            onNavigate = { route ->
+                                navController.navigate(route) {
+                                    popUpTo(0) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                                drawerOpen = false
+                            },
+                            onCloseDrawer = { drawerOpen = false },
+                            viewModel = viewModel
+                        )
+                    }
+                }
+            }
 
         if (showCajaCerradaDialog) {
             Dialog(onDismissRequest = {}) {
