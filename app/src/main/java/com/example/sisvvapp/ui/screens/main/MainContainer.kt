@@ -262,7 +262,6 @@ fun MainContainer(
                         val paraLlevar by nuevaVentaViewModel.paraLlevar.collectAsState()
 
                         LaunchedEffect(socioIdArg) {
-                            globalCarritoViewModel.clearState()
                             if (socioIdArg != -1) {
                                 nuevaVentaViewModel.setRestrictedMode(true)
                                 nuevaVentaViewModel.selectSocioById(socioIdArg)
@@ -296,7 +295,9 @@ fun MainContainer(
                                 globalCarritoViewModel.clearState()
                                 navController.popBackStack()
                             },
-                            onContinuarClick = { navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS) },
+                            onContinuarClick = {
+                                navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
+                            },
                             cajasDisponibles = cajas.isNotEmpty(),
                             isFormValid = nuevaVentaViewModel.isFormValid()
                         )
@@ -509,7 +510,7 @@ fun MainContainer(
                             onSearchQueryChange = { sociosVM.search(it) },
                             onMenuClick = { scope.launch { drawerState.open() } },
                             onSocioClick = { navController.navigate(ScreenRoutes.crearRutaPerfilSocio(it)) },
-                            onNuevaVentaClick = { navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) },
+                            onNuevaVentaClick = { globalCarritoViewModel.clearState(); navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) },
                             onRetry = { sociosVM.sync() },
                             onRefresh = { sociosVM.search(""); sociosVM.sync() }
                         )
@@ -524,7 +525,7 @@ fun MainContainer(
                         LaunchedEffect(socioId) { sociosVM.getIntegrantesPorSocio(socioId) }
 
                         val s = socio
-                        if (s != null) PerfilSocioScreen(s, integrantes, membresias, viewModel?.isOnline ?: true, onNuevaVentaClick = { navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) }) { navController.popBackStack() }
+                        if (s != null) PerfilSocioScreen(s, integrantes, membresias, viewModel?.isOnline ?: true, onNuevaVentaClick = { globalCarritoViewModel.clearState(); navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) }) { navController.popBackStack() }
                         else Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator(color = VerdePrincipal) }
                     }
                 }

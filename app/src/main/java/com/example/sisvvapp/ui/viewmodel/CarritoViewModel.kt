@@ -104,6 +104,9 @@ class CarritoViewModel(
         clavePuntoVenta: String,
         numComensales: String? = null
     ) {
+        val socioAnterior = _socioId.value
+        val socioCambio = socioAnterior != socioId
+
         _appendMode.value = false
         _folioExistente.value = null
         _idTemporalExistente.value = null
@@ -113,6 +116,11 @@ class CarritoViewModel(
         _corteCaja.value = corteCaja
         _clavePuntoVenta.value = clavePuntoVenta
         _numComensales.value = numComensales
+
+        if (socioCambio) {
+            _items.value = emptyList()
+            _total.value = 0.0
+        }
     }
 
     fun searchProductos(query: String) {
