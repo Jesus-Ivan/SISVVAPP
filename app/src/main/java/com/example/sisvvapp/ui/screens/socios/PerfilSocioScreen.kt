@@ -218,6 +218,7 @@ fun PerfilSocioScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
+                .navigationBarsPadding()
                 .size(if (isTablet) 80.dp else 56.dp),
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
