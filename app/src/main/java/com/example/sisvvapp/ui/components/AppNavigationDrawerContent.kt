@@ -93,7 +93,10 @@ fun AppNavigationDrawerContent(
                             }
                         },
                         selected = currentRoute == item.route,
-                        onClick = { onNavigate(item.route); onCloseDrawer() },
+                        onClick = {
+                            onNavigate(item.route)
+                            onCloseDrawer()
+                        },
                         colors = NavigationDrawerItemDefaults.colors(
                             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
