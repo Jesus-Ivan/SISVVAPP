@@ -8,9 +8,9 @@ import com.example.sisvvapp.data.repository.VentaRepository
 import com.example.sisvvapp.data.sync.SyncCoordinator
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -41,14 +41,11 @@ class VentasPendientesViewModel(
      * Reanuda la sincronización al salir de la pantalla.
      */
     fun reanudarSincronizacion() {
-        viewModelScope.launch {
+        viewModelScope.launch(NonCancellable) {
             SyncCoordinator.resumeSync()
-            val pendientes = ventaRepository.getParaSincronizarFlow().first()
-            if (pendientes.isNotEmpty()) {
-                SyncForegroundService.start(context)
-                SyncWorker.enqueueOneTime(context)
-            }
         }
+        SyncForegroundService.start(context)
+        SyncWorker.enqueueOneTime(context)
     }
 
     fun descartarVenta(idTemporal: String, onResult: (Result<Unit>) -> Unit) {
