@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.work.WorkManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -93,6 +94,11 @@ class MainActivity : ComponentActivity() {
 
             SISVVAPPTheme(darkTheme = isDarkTheme, isTablet = deviceType == DeviceType.TABLET) {
                 val navController = rememberNavController()
+
+                SideEffect {
+                    val controller = WindowCompat.getInsetsController(window, window.decorView)
+                    controller.isAppearanceLightStatusBars = !isDarkTheme
+                }
 
                 // Lógica de Permisos de Notificaciones
                 var showPermissionRationale by remember { mutableStateOf(false) }
