@@ -201,8 +201,8 @@ class NuevaVentaViewModel(
         }
         return when (_tipoVenta.value) {
             "socio" -> _socioId.value != null
-            "invitado" -> _socioId.value != null && _nombreCliente.value.isNotBlank()
-            else -> _nombreCliente.value.isNotBlank()
+            "invitado" -> _socioId.value != null && _nombreCliente.value.trim().length >= 3
+            else -> _nombreCliente.value.trim().length >= 3
         }
     }
 }

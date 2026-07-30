@@ -48,7 +48,9 @@ fun VistaVerdeTextField(
     minLines: Int = 1,
     readOnly: Boolean = false,
     enabled: Boolean = true,
-    bgColor: Color = MaterialTheme.colorScheme.surfaceVariant
+    bgColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    isError: Boolean = false,
+    supportingText: String? = null
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -66,6 +68,8 @@ fun VistaVerdeTextField(
             )
         },
         leadingIcon = leadingIcon,
+        isError = isError,
+        supportingText = supportingText?.let { { Text(text = it, fontFamily = Inter) } },
         shape = RoundedCornerShape(12.dp),
         colors = TextFieldDefaults.colors(
             // Fondos
