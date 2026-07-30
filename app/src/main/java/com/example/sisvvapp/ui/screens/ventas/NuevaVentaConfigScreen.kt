@@ -245,6 +245,7 @@ fun NuevaVentaConfigScreen(
                     else -> "Nombre del Cliente"
                 }
                 val isEditable = tipoSeleccionado != "socio"
+                val nombreError = isEditable && nombreCliente.isNotBlank() && nombreCliente.trim().length < 3
 
                 VistaVerdeTextField(
                     value = nombreCliente,
@@ -252,7 +253,9 @@ fun NuevaVentaConfigScreen(
                     label = labelText,
                     readOnly = !isEditable,
                     enabled = isEditable,
-                    capitalization = KeyboardCapitalization.Characters
+                    capitalization = KeyboardCapitalization.Characters,
+                    isError = nombreError,
+                    supportingText = if (nombreError) "Mínimo 3 caracteres" else null
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
