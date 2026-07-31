@@ -84,6 +84,7 @@
     <string name="error_servidor_caido">No se pudo conectar con el servidor. Intenta de nuevo más tarde.</string>
     <string name="error_inesperado">Ocurrió un error inesperado. Intenta de nuevo.</string>
     <string name="credenciales_incorrectas">Credenciales Incorrectas</string>
+    <string name="error_sin_permisos">Tu usuario no tiene permisos para usar esta aplicación.</string>
 
     <!-- Nueva Venta - Configuración -->
     <string name="nueva_venta_title">Nueva Venta</string>
