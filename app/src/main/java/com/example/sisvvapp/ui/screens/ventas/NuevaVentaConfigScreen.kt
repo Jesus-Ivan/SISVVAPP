@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.Modifier
@@ -158,6 +159,7 @@ fun NuevaVentaConfigScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     var searchFieldValue by remember { mutableStateOf(TextFieldValue(searchQuery, TextRange(searchQuery.length))) }
+                    var searchFocused by remember { mutableStateOf(false) }
                     LaunchedEffect(searchQuery) {
                         if (searchQuery != searchFieldValue.text) {
                             searchFieldValue = TextFieldValue(searchQuery, TextRange(searchQuery.length))
@@ -166,17 +168,20 @@ fun NuevaVentaConfigScreen(
                     VistaVerdeSearchBar(
                         value = searchFieldValue,
                         onValueChange = { newValue ->
-                            searchFieldValue = newValue
-                            onSearchQueryChange(newValue.text)
-                            if (newValue.text.isBlank()) {
-                                onSocioSeleccionado(null)
+                            if (searchFocused) {
+                                searchFieldValue = newValue
+                                onSearchQueryChange(newValue.text)
+                                if (newValue.text.isBlank()) {
+                                    onSocioSeleccionado(null)
+                                }
                             }
                         },
+                        modifier = Modifier.onFocusChanged { searchFocused = it.isFocused },
                         placeholder = "Buscar Socio"
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    if (sociosEncontrados.isNotEmpty()) {
+                    if (sociosEncontrados.isNotEmpty() && socioSeleccionado == null) {
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -191,8 +196,8 @@ fun NuevaVentaConfigScreen(
                                     socio = socio,
                                     isTablet = isTablet,
                                     onClick = {
-                                        onSocioSeleccionado(socio)
                                         focusManager.clearFocus()
+                                        onSocioSeleccionado(socio)
                                     }
                                 )
                             }
