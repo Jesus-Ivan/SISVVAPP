@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -44,13 +45,12 @@ fun AjustesScreen(
     isOnline: Boolean = true,
     themeMode: Int = 0,
     baseUrl: String = "",
-    pendientesCount: Int = 0,
     onThemeModeChange: (Int) -> Unit = {},
     onBaseUrlChange: (String) -> Unit = {},
     onCajaClick: (CajaDto) -> Unit,
     onSyncClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    onVentasPendientesClick: () -> Unit = {},
+    onManualClick: () -> Unit = {},
     onMenuClick: () -> Unit,
     onRefresh: () -> Unit = {}
 ) {
@@ -167,49 +167,49 @@ fun AjustesScreen(
                     }
                 }
 
-                // --- 2.5 SECCIÓN: COLA DE SINCRONIZACIÓN (Nueva) ---
+                // --- 2.5 SECCIÓN: MANUAL DE USUARIO ---
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
-                    VistaVerdeSectionHeader(text = "Operaciones Fuera de Línea")
+                    VistaVerdeSectionHeader(text = "Ayuda")
                 }
 
                 item {
                     VistaVerdeBaseCard(
-                        modifier = Modifier.fillMaxWidth().clickable { onVentasPendientesClick() }
+                        modifier = Modifier.fillMaxWidth().clickable { onManualClick() }
                     ) {
                         Row(
                             modifier = Modifier.padding(if (isTablet) 20.dp else 16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
-                                color = if (pendientesCount > 0) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                color = MaterialTheme.colorScheme.primaryContainer,
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.size(if (isTablet) 56.dp else 48.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        imageVector = Icons.Default.CloudQueue,
+                                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
                                         contentDescription = null,
-                                        tint = if (pendientesCount > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
-                            
+
                             Spacer(modifier = Modifier.width(16.dp))
-                            
+
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Cola de Sincronización",
+                                    text = "Manual de Usuario",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = if (pendientesCount > 0) "$pendientesCount pedidos esperando conexión" else "No hay pedidos pendientes",
+                                    text = "Guía de uso de la aplicación",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            
+
                             Icon(
                                 imageVector = Icons.Default.ChevronRight,
                                 contentDescription = null,

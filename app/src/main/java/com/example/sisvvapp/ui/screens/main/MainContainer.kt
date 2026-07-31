@@ -47,6 +47,7 @@ import com.example.sisvvapp.ui.components.VistaVerdeButton
 import com.example.sisvvapp.ui.navigation.NavGraphs
 import com.example.sisvvapp.ui.navigation.ScreenRoutes
 import com.example.sisvvapp.ui.screens.ajustes.AjustesScreen
+import com.example.sisvvapp.ui.screens.ajustes.ManualUsuarioScreen
 import com.example.sisvvapp.ui.screens.socios.PerfilSocioScreen
 import com.example.sisvvapp.ui.screens.socios.SociosScreen
 import com.example.sisvvapp.ui.screens.ventas.*
@@ -610,8 +611,6 @@ fun MainContainer(
                         val cajas by sharedCajaViewModel.cajas.collectAsState()
                         val selectedCajaId by sharedCajaViewModel.selectedCajaId.collectAsState()
                         val isLoading by sharedCajaViewModel.isLoading.collectAsState()
-                        val ajustesVentasVM: VentasViewModel = viewModel(factory = factory)
-                        val pendientesCount by ajustesVentasVM.pendientesCount.collectAsState(initial = 0)
 
                         LaunchedEffect(currentRoute) { if (currentRoute == ScreenRoutes.AJUSTES) sharedCajaViewModel.refreshCajas() }
                         val sessionManager = SessionManager.getInstance(context)
@@ -625,7 +624,6 @@ fun MainContainer(
                             isOnline = viewModel?.isOnline ?: true,
                             themeMode = viewModel?.themeMode ?: 0,
                             baseUrl = currentBaseUrl,
-                            pendientesCount = pendientesCount,
                             onThemeModeChange = { viewModel?.updateThemeMode(it) },
                             onBaseUrlChange = { newUrl ->
                                 currentBaseUrl = newUrl
@@ -633,11 +631,22 @@ fun MainContainer(
                                 android.widget.Toast.makeText(context, "URL actualizada. La app usará la nueva URL en la próxima conexión.", android.widget.Toast.LENGTH_LONG).show()
                             },
                             onCajaClick = { sharedCajaViewModel.selectCaja(it.id, it.nombre) },
-                            onVentasPendientesClick = { navController.navigate(ScreenRoutes.VENTAS_PENDIENTES) },
+                            onManualClick = { navController.navigate(ScreenRoutes.MANUAL_USUARIO) },
                             onSyncClick = { SyncWorker.enqueueOneTime(context); android.widget.Toast.makeText(context, "Sincronizando...", android.widget.Toast.LENGTH_SHORT).show() },
                             onLogoutClick = { onLogout() },
                             onMenuClick = { drawerOpen = true },
                             onRefresh = { scope.launch { sharedCajaViewModel.refreshCajas() } }
+                        )
+                    }
+
+                    composable(ScreenRoutes.MANUAL_USUARIO) {
+                        ManualUsuarioScreen(
+                            onBackClick = {
+                                if (!isNavigating) {
+                                    isNavigating = true
+                                    navController.popBackStack()
+                                }
+                            }
                         )
                     }
                 }
