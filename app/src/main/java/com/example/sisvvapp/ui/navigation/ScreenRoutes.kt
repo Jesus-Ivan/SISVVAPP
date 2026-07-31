@@ -14,6 +14,7 @@ object ScreenRoutes {
     const val RESUMEN_CARRITO = "resumen_carrito"
     const val DETALLE_VENTA = "detalle_venta/{id}"
     const val VENTAS_PENDIENTES = "ventas_pendientes"
+    const val MANUAL_USUARIO = "manual_usuario"
 
     const val PERFIL_SOCIO = "perfil_socio/{socioId}"
 
