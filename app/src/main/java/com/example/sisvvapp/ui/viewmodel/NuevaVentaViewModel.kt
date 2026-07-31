@@ -5,12 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sisvvapp.data.local.entity.SocioEntity
 import com.example.sisvvapp.data.repository.SocioRepository
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
@@ -50,8 +53,17 @@ class NuevaVentaViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
-    private val _sociosEncontrados = MutableStateFlow<List<SocioEntity>>(emptyList())
-    val sociosEncontrados: StateFlow<List<SocioEntity>> = _sociosEncontrados
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val sociosEncontrados: StateFlow<List<SocioEntity>> = _searchQuery
+        .debounce { if (it.isBlank()) 0L else 300L }
+        .flatMapLatest { query ->
+            if (query.isBlank()) {
+                flowOf(emptyList())
+            } else {
+                socioRepository.searchSocios("%$query%")
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _socioSeleccionado = MutableStateFlow<SocioEntity?>(null)
     val socioSeleccionado: StateFlow<SocioEntity?> = _socioSeleccionado
@@ -67,8 +79,6 @@ class NuevaVentaViewModel(
 
     private val _paraLlevar = MutableStateFlow(false)
     val paraLlevar: StateFlow<Boolean> = _paraLlevar
-
-    private var searchJob: Job? = null
 
     fun setTipoVenta(tipo: String) {
         val previousType = _tipoVenta.value
@@ -110,27 +120,9 @@ class NuevaVentaViewModel(
 
     fun searchSocios(query: String) {
         _searchQuery.value = query
-        searchJob?.cancel()
-
-        if (query.length < 1) {
-            _sociosEncontrados.value = emptyList()
-            return
-        }
-
-        searchJob = viewModelScope.launch {
-            delay(300)
-            Log.d("NuevaVentaVM", "Buscando socios con query: $query")
-
-            socioRepository.searchSocios("%$query%").collect { lista ->
-
-                Log.d("NuevaVentaVM", "Resultados de búsqueda de socios: ${lista.size}")
-                _sociosEncontrados.value = lista
-            }
-        }
     }
 
     fun selectSocio(socio: SocioEntity) {
-        searchJob?.cancel()
         Log.d("NuevaVentaVM", "Socio seleccionado: ID ${socio.id} - ${socio.nombre}")
         _socioSeleccionado.value = socio
         _socioId.value = socio.id
@@ -143,7 +135,6 @@ class NuevaVentaViewModel(
             _nombreCliente.value = ""
         }
 
-        _sociosEncontrados.value = emptyList()
         _searchQuery.value = ""
     }
 
@@ -164,19 +155,15 @@ class NuevaVentaViewModel(
     }
 
     fun clearSocioSelection() {
-        searchJob?.cancel()
         Log.d("NuevaVentaVM", "Limpiando selección de socio")
         _socioSeleccionado.value = null
         _socioId.value = null
         _nombreCliente.value = ""
         _searchQuery.value = ""
-        _sociosEncontrados.value = emptyList()
     }
 
     fun resetFormulario() {
-        searchJob?.cancel()
         _searchQuery.value = ""
-        _sociosEncontrados.value = emptyList()
         _socioSeleccionado.value = null
         _nombreCliente.value = ""
         _socioId.value = null
