@@ -160,6 +160,20 @@ fun MainContainer(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: ScreenRoutes.VENTAS
     val isTablet = LocalDeviceType.current == DeviceType.TABLET
+    var isNavigating by remember { mutableStateOf(false) }
+    val currentEntry = navController.currentBackStackEntry
+
+    DisposableEffect(currentEntry) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isNavigating = false
+            }
+        }
+        currentEntry?.lifecycle?.addObserver(observer)
+        onDispose {
+            currentEntry?.lifecycle?.removeObserver(observer)
+        }
+    }
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -315,7 +329,10 @@ fun MainContainer(
                             isOnline = isConnected,
                             onMenuClick = {
                                 globalCarritoViewModel.clearState()
-                                navController.popBackStack()
+                                if (!isNavigating) {
+                                    isNavigating = true
+                                    navController.popBackStack()
+                                }
                             },
                             onContinuarClick = {
                                 navController.navigate(ScreenRoutes.BUSCAR_PRODUCTOS)
@@ -338,7 +355,12 @@ fun MainContainer(
                             onAddProducto = { p, c, o -> globalCarritoViewModel.addProducto(p, c, o) },
                             onProductoConModificadores = { p, c -> globalCarritoViewModel.seleccionarProducto(p, c); navController.navigate(ScreenRoutes.crearRutaModificadores(p.id)) },
                             onVerCarrito = { navController.navigate(ScreenRoutes.RESUMEN_CARRITO) },
-                            onBackClick = { navController.popBackStack() },
+                            onBackClick = {
+                                if (!isNavigating) {
+                                    isNavigating = true
+                                    navController.popBackStack()
+                                }
+                            },
                             isOnline = isConnected
                         )
                     }
@@ -361,9 +383,17 @@ fun MainContainer(
                                 cantidadProducto = globalCarritoViewModel.cantidadSeleccionada,
                                 onAddToCart = { m, o, mn -> 
                                     globalCarritoViewModel.addProductoConModificadores(producto, m, grupos, globalCarritoViewModel.cantidadSeleccionada, o, mn)
-                                    navController.popBackStack() 
+                                    if (!isNavigating) {
+                                        isNavigating = true
+                                        navController.popBackStack()
+                                    }
                                 },
-                                onBackClick = { navController.popBackStack() },
+                            onBackClick = {
+                                if (!isNavigating) {
+                                    isNavigating = true
+                                    navController.popBackStack()
+                                }
+                            },
                                 isOnline = isConnected
                             )
                         }
@@ -430,7 +460,12 @@ fun MainContainer(
                                     popUpTo(0) { inclusive = true }
                                 }
                             },
-                            onBackClick = { navController.popBackStack() },
+                            onBackClick = {
+                                if (!isNavigating) {
+                                    isNavigating = true
+                                    navController.popBackStack()
+                                }
+                            },
                             isOnline = isConnected
                         )
                     }
@@ -462,7 +497,12 @@ fun MainContainer(
                             venta = ventaDetalle,
                             isLoading = ventaDetalle == null,
                             isOnline = isConnected,
-                            onBackClick = { navController.popBackStack() },
+                            onBackClick = {
+                                if (!isNavigating) {
+                                    isNavigating = true
+                                    navController.popBackStack()
+                                }
+                            },
                             onAgregarProductos = {
                                 val v = ventaDetalle
                                 if (v != null) {
@@ -497,7 +537,12 @@ fun MainContainer(
                         
                         VentasPendientesScreen(
                             ventas = ventas,
-                            onBackClick = { navController.popBackStack() },
+                            onBackClick = {
+                                if (!isNavigating) {
+                                    isNavigating = true
+                                    navController.popBackStack()
+                                }
+                            },
                             onDescartar = { id ->
                                 pendientesVM.descartarVenta(id) { result ->
                                     if (result.isSuccess) {
@@ -547,7 +592,12 @@ fun MainContainer(
                         LaunchedEffect(socioId) { sociosVM.getIntegrantesPorSocio(socioId) }
 
                         val s = socio
-                        if (s != null) PerfilSocioScreen(s, integrantes, membresias, viewModel?.isOnline ?: true, onNuevaVentaClick = { globalCarritoViewModel.clearState(); navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) }) { navController.popBackStack() }
+                        if (s != null) PerfilSocioScreen(s, integrantes, membresias, viewModel?.isOnline ?: true, onNuevaVentaClick = { globalCarritoViewModel.clearState(); navController.navigate(ScreenRoutes.crearRutaNuevaVenta(it.id)) }) {
+                            if (!isNavigating) {
+                                isNavigating = true
+                                navController.popBackStack()
+                            }
+                        }
                         else Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator(color = VerdePrincipal) }
                     }
                 }
@@ -653,7 +703,7 @@ fun MainContainer(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.32f))
+                            .background(Color.Transparent)
                             .clickable { drawerOpen = false }
                     )
                     ModalDrawerSheet(
