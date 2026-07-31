@@ -145,16 +145,33 @@ class SisvvViewModel(
                 if (response.isSuccessful) {
                     val body = response.body()
                     if (body != null) {
-                        sessionManager.saveToken(body.token)
-                        sessionManager.saveUserId(body.user.id)
+                        val rolesPermitidos = setOf("MES", "CAJ")
+                        val tieneAcceso = body.user.permisos.any { it.claveRol in rolesPermitidos }
+                        if (tieneAcceso) {
+                            sessionManager.saveToken(body.token)
+                            sessionManager.saveUserId(body.user.id)
 
-                        Log.d("LOGIN", "Token: ${body.token}")
-                        loginSuccess = true
+                            Log.d("LOGIN", "Token: ${body.token}")
+                            loginSuccess = true
+                        } else {
+                            loginError = context.getString(R.string.error_sin_permisos)
+                        }
                     }
                 } else {
                     when (response.code()) {
                         401, 400 -> {
                             loginError = context.getString(R.string.credenciales_incorrectas)
+                        }
+                        403 -> {
+                            val mensajeServidor = try {
+                                val errorBody = response.errorBody()?.string()
+                                if (errorBody != null) {
+                                    com.google.gson.JsonParser.parseString(errorBody).asJsonObject.get("message")?.asString
+                                } else null
+                            } catch (e: Exception) {
+                                null
+                            }
+                            loginError = mensajeServidor ?: context.getString(R.string.error_sin_permisos)
                         }
                         500, 502, 503, 504 -> {
                             networkError = context.getString(R.string.error_servidor_caido)
