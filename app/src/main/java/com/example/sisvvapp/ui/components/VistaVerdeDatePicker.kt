@@ -26,16 +26,10 @@ fun VistaVerdeDatePicker(
         val datePickerState = rememberDatePickerState(
             selectableDates = object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                    val cal = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-                        set(java.util.Calendar.HOUR_OF_DAY, 0)
-                        set(java.util.Calendar.MINUTE, 0)
-                        set(java.util.Calendar.SECOND, 0)
-                        set(java.util.Calendar.MILLISECOND, 0)
-                    }
-                    val today = cal.timeInMillis
-                    cal.add(java.util.Calendar.DAY_OF_YEAR, -1)
-                    val yesterday = cal.timeInMillis
-                    return utcTimeMillis == today || utcTimeMillis == yesterday
+                    val today = java.time.LocalDate.now()
+                    val todayMillis = today.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
+                    val yesterdayMillis = today.minusDays(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
+                    return utcTimeMillis == todayMillis || utcTimeMillis == yesterdayMillis
                 }
                 override fun isSelectableYear(year: Int) = true
             }

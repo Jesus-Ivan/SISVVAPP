@@ -61,6 +61,9 @@ class CarritoViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
+    private val _productoSeleccionado = MutableStateFlow<ProductoEntity?>(null)
+    val productoSeleccionado: StateFlow<ProductoEntity?> = _productoSeleccionado
+
     val productos: StateFlow<List<ProductoEntity>> = combine(
         productoRepository.getProductos(),
         _searchQuery
@@ -132,6 +135,7 @@ class CarritoViewModel(
 
     fun seleccionarProducto(producto: ProductoEntity, cantidad: Int = 1) {
         cantidadSeleccionada = cantidad
+        _productoSeleccionado.value = producto
     }
 
     fun addProducto(producto: ProductoEntity, cantidad: Int = 1, observaciones: String = "") {
@@ -347,6 +351,7 @@ class CarritoViewModel(
         _total.value = 0.0
         _sendResult.value = null
         _searchQuery.value = ""
+        _productoSeleccionado.value = null
         _isSending.value = false
         _appendMode.value = false
         _folioExistente.value = null
