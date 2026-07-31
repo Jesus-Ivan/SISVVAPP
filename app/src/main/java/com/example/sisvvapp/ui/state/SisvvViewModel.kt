@@ -55,6 +55,9 @@ class SisvvViewModel(
     var logoutSuccess by mutableStateOf(false)
         private set
 
+    var userName by mutableStateOf(sessionManager.getUserName())
+        private set
+
     // ── Theme State ─────────────────────────────────────────────────────────
 
     var themeMode by mutableStateOf(sessionManager.getThemeMode())
@@ -105,6 +108,7 @@ class SisvvViewModel(
             } finally {
                 sessionManager.clearSession()
                 sessionManager.clearSelectedCaja() // Limpiar también la caja al cerrar sesión
+                userName = ""
                 loginSuccess = false
                 loginError = null
                 logoutSuccess = true
@@ -150,6 +154,8 @@ class SisvvViewModel(
                         if (tieneAcceso) {
                             sessionManager.saveToken(body.token)
                             sessionManager.saveUserId(body.user.id)
+                            sessionManager.saveUserName(body.user.name)
+                            userName = body.user.name
 
                             Log.d("LOGIN", "Token: ${body.token}")
                             loginSuccess = true

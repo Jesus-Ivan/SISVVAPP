@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -63,6 +64,19 @@ fun AppNavigationDrawerContent(
                     .fillMaxWidth(0.9f)
                     .padding(bottom = if (isTablet) 12.dp else 8.dp)
             )
+
+            if (viewModel != null && viewModel.userName.isNotBlank()) {
+                Text(
+                    text = "HOLA ${viewModel.userName.uppercase()}",
+                    fontFamily = Inter,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = if (isTablet) 18.sp else 15.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = if (isTablet) 16.dp else 12.dp, bottom = if (isTablet) 20.dp else 16.dp)
+                )
+            }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Spacer(modifier = Modifier.height(if (isTablet) 32.dp else 24.dp))
