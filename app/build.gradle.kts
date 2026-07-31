@@ -10,11 +10,11 @@ ksp {
 
 android {
     namespace = "com.example.sisvvapp"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.sisvvapp"
-        minSdk = 26
+        minSdk = 28
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -60,6 +60,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.compose.material3.window.size)
     implementation(libs.haze)
+
+    // PDF viewer externo (AndroidPdfViewer)
+    implementation(libs.android.pdf.viewer)
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
