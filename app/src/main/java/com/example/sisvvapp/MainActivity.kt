@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
+import android.graphics.drawable.ColorDrawable
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -63,6 +64,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Forzamos vertical antes de cualquier otra cosa
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        // Evita flash blanco durante transiciones de navegación
+        window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.rgb(248, 249, 250)))
 
         // Programar sync periódico
         SyncWorker.enqueuePeriodic(this)
