@@ -20,6 +20,9 @@ class SisvvApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+        if (applicationInfo.processName != packageName) {
+            return
+        }
         // Configurar sincronización periódica en segundo plano
         SyncWorker.enqueuePeriodic(this)
 
