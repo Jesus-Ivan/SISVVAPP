@@ -94,7 +94,22 @@ class SessionManager private constructor(context: Context) {
         -1
     }
 
-    private val sessionKeys = listOf(KEY_TOKEN, KEY_USER_ID, KEY_SESSION_START, KEY_SELECTED_CAJA_ID, KEY_SELECTED_CAJA_NOMBRE, KEY_LAST_SYNC_DATE)
+    fun saveUserName(name: String) {
+        try {
+            prefs.edit().putString(KEY_USER_NAME, name).apply()
+        } catch (e: Exception) {
+            Log.e("SessionManager", "Error al guardar userName", e)
+        }
+    }
+
+    fun getUserName(): String = try {
+        prefs.getString(KEY_USER_NAME, "") ?: ""
+    } catch (e: Exception) {
+        Log.e("SessionManager", "Error al leer userName", e)
+        ""
+    }
+
+    private val sessionKeys = listOf(KEY_TOKEN, KEY_USER_ID, KEY_USER_NAME, KEY_SESSION_START, KEY_SELECTED_CAJA_ID, KEY_SELECTED_CAJA_NOMBRE, KEY_LAST_SYNC_DATE)
 
     fun clearSession() {
         try {
@@ -208,6 +223,7 @@ class SessionManager private constructor(context: Context) {
         private const val PREFS_NAME = "sisvv_prefs"
         private const val KEY_TOKEN = "token"
         private const val KEY_USER_ID = "user_id"
+        private const val KEY_USER_NAME = "user_name"
         private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_SESSION_START = "session_start"
         private const val SESSION_DURATION_MS = 12 * 60 * 60 * 1000L // 12 horas
