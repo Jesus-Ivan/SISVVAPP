@@ -234,7 +234,8 @@ private fun VentasList(
     } else {
         ventas.filter { venta ->
             venta.folio.toString().contains(searchQuery, ignoreCase = true) ||
-                    venta.nombreCliente.contains(searchQuery, ignoreCase = true)
+                    venta.nombreCliente.contains(searchQuery, ignoreCase = true) ||
+                    venta.socioId?.toString()?.contains(searchQuery, ignoreCase = true) == true
         }
     }).sortedByDescending { it.hora }
 
