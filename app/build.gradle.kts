@@ -61,9 +61,8 @@ dependencies {
     implementation(libs.androidx.compose.material3.window.size)
     implementation(libs.haze)
 
-    // PDF viewer oficial de Jetpack
-    implementation(libs.androidx.pdf.compose)
-    implementation(libs.androidx.pdf.document.service)
+    // PDF viewer externo (AndroidPdfViewer)
+    implementation(libs.android.pdf.viewer)
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
