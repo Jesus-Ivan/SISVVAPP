@@ -247,17 +247,19 @@ class CarritoViewModel(
             _sendResult.value = null
 
             val productosRaw = _items.value.map { item ->
-                // Group duplicate modifiers by claveModificador to aggregate quantity and price
-                val modificadores = item.modificadores.groupBy { it.claveModificador }.map { (claveModificador, mods) ->
-                    val totalPrecio = mods.sumOf { if (it.incluido) 0.0 else it.precio }
-                    ModificadorSeleccionadoDto(
-                        claveProducto = claveModificador,
-                        cantidad = mods.size,
-                        precio = totalPrecio / mods.size,
-                        nombre = mods.first().nombre,
-                        observaciones = item.modificadorObservaciones[mods.first().id] ?: ""
-                    )
-                }
+                // Group duplicate modifiers by claveModificador + incluido para separar
+                // los incluidos (precio 0) de los de pago en líneas distintas del ticket
+                val modificadores = item.modificadores
+                    .groupBy { it.claveModificador to it.incluido }
+                    .map { (_, mods) ->
+                        ModificadorSeleccionadoDto(
+                            claveProducto = mods.first().claveModificador,
+                            cantidad = mods.size,
+                            precio = if (mods.first().incluido) 0.0 else mods.first().precio,
+                            nombre = mods.first().nombre,
+                            observaciones = item.modificadorObservaciones[mods.first().id] ?: ""
+                        )
+                    }
                 ItemCarritoDto(
                     claveProducto = item.producto.id,
                     cantidad = item.cantidad,

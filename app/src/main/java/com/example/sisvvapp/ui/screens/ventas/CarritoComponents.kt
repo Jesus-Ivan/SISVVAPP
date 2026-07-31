@@ -195,10 +195,16 @@ fun CarritoItemCard(
                     Spacer(modifier = Modifier.height(4.dp))
                     modificadores.forEach { mod ->
                         Column(modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)) {
+                            val modifierLabel = when {
+                                mod.incluido -> "${mod.cantidad}x ${mod.nombre} (incluido)"
+                                mod.precio > 0 -> "${mod.cantidad}x ${mod.nombre} (+$${String.format(Locale.US, "%.2f", mod.precio * mod.cantidad)})"
+                                else -> "${mod.cantidad}x ${mod.nombre}"
+                            }
                             Text(
-                                text = "• ${mod.cantidad}x ${mod.nombre}",
+                                text = "• $modifierLabel",
                                 style = if (isTablet) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                color = if (mod.incluido) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                                 fontWeight = FontWeight.Bold
                             )
                             if (mod.nota.isNotEmpty()) {
@@ -225,7 +231,9 @@ fun CarritoItemCard(
 data class ModificadorDisplayInfo(
     val nombre: String,
     val cantidad: Int,
-    val nota: String = ""
+    val nota: String = "",
+    val incluido: Boolean = false,
+    val precio: Double = 0.0
 )
 
 @Composable
