@@ -369,12 +369,14 @@ fun MainContainer(
                         val productoId = backStackEntry.arguments?.getInt("productoId") ?: 0
                         val modVM: ModificadoresViewModel = viewModel(factory = factory)
                         val productos by globalCarritoViewModel.productos.collectAsState()
+                        val productoSeleccionado by globalCarritoViewModel.productoSeleccionado.collectAsState()
                         val grupos by modVM.grupos.collectAsState()
                         val modificadores by modVM.modificadores.collectAsState()
 
                         LaunchedEffect(productoId) { modVM.cargarModificadores(productoId) }
 
-                        val producto = productos.find { it.id == productoId }
+                        val producto = productoSeleccionado?.takeIf { it.id == productoId }
+                            ?: productos.find { it.id == productoId }
                         if (producto != null) {
                             SeleccionarModificadoresScreen(
                                 producto = producto,
@@ -383,6 +385,7 @@ fun MainContainer(
                                 cantidadProducto = globalCarritoViewModel.cantidadSeleccionada,
                                 onAddToCart = { m, o, mn -> 
                                     globalCarritoViewModel.addProductoConModificadores(producto, m, grupos, globalCarritoViewModel.cantidadSeleccionada, o, mn)
+                                    globalCarritoViewModel.searchProductos("")
                                     if (!isNavigating) {
                                         isNavigating = true
                                         navController.popBackStack()

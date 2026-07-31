@@ -192,11 +192,6 @@ fun NuevaVentaConfigScreen(
                                     isTablet = isTablet,
                                     onClick = {
                                         onSocioSeleccionado(socio)
-                                        if (socio.estatus == "CAN") {
-                                            onSearchQueryChange("")
-                                        } else {
-                                            onSearchQueryChange("${socio.nombre} ${socio.apellidoP}".trim())
-                                        }
                                         focusManager.clearFocus()
                                     }
                                 )
