@@ -65,6 +65,25 @@ class SyncWorker(
                 Log.w("SyncWorker", "Error descargando fotos (sync parcial)", e)
             }
 
+            // Descargar imágenes de productos de forma limitada
+            try {
+                val productoImgUrls = db.productoDao().getAllProductosImagenes()
+                    .filter { !it.isNullOrBlank() }
+                    .map { it!! }
+                    .distinct()
+
+                val limit = 20
+                val photosDir = java.io.File(applicationContext.filesDir, "photos")
+                val pendingProductos = productoImgUrls.filter { !java.io.File(photosDir, it).exists() }.take(limit)
+
+                if (pendingProductos.isNotEmpty()) {
+                    Log.d("SyncWorker", "Descarga gradual: ${pendingProductos.size} imágenes de productos pendientes")
+                    PhotoDownloader.downloadAll(applicationContext, pendingProductos)
+                }
+            } catch (e: Exception) {
+                Log.w("SyncWorker", "Error descargando imágenes de productos (sync parcial)", e)
+            }
+
             // Enviar ventas offline
             val pendientes = ventaRepo.getParaSincronizar()
             var envioExitoso = true

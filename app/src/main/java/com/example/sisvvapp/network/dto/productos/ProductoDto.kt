@@ -8,6 +8,7 @@ data class ProductoDto(
     @SerializedName("costo_unitario")     val costoUnitario: Double = 0.0,
     @SerializedName("precio")             val precio: Double = 0.0,
     @SerializedName("print_default")      val printDefault: Boolean = false,
+    @SerializedName("img_path")           val imgPath: String? = null,
     @SerializedName("id_grupo")           val idGrupo: Int?,
     val grupo: String?,
     @SerializedName("id_subgrupo")        val idSubgrupo: Int?,
