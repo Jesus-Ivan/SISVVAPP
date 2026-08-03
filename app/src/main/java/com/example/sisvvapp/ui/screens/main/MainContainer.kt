@@ -34,6 +34,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.sisvvapp.data.local.SessionManager
 import com.example.sisvvapp.data.repository.toCajaDto
+import com.example.sisvvapp.data.sync.ManualDownloader
 import com.example.sisvvapp.data.sync.SyncEventBus
 import com.example.sisvvapp.data.sync.SyncForegroundService
 import com.example.sisvvapp.data.sync.SyncWorker
@@ -632,7 +633,7 @@ fun MainContainer(
                             },
                             onCajaClick = { sharedCajaViewModel.selectCaja(it.id, it.nombre) },
                             onManualClick = { navController.navigate(ScreenRoutes.MANUAL_USUARIO) },
-                            onSyncClick = { SyncWorker.enqueueOneTime(context); android.widget.Toast.makeText(context, "Sincronizando...", android.widget.Toast.LENGTH_SHORT).show() },
+                            onSyncClick = { SyncWorker.enqueueOneTime(context); scope.launch { ManualDownloader.download(context) }; android.widget.Toast.makeText(context, "Sincronizando...", android.widget.Toast.LENGTH_SHORT).show() },
                             onLogoutClick = { onLogout() },
                             onMenuClick = { drawerOpen = true },
                             onRefresh = { scope.launch { sharedCajaViewModel.refreshCajas() } }

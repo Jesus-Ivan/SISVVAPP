@@ -71,7 +71,7 @@
     <string name="ajustes_cajas_abiertas">Cajas abiertas</string>
     <string name="ajustes_cajas_empty">No hay cajas abiertas actualmente.</string>
     <string name="ajustes_sincronizar_datos">Sincronizar datos</string>
-    <string name="ajustes_sync_desc">Esta acción sincronizará la información del servidor</string>
+    <string name="ajustes_sync_desc">Esta acción sincronizará la información del servidor, incluyendo el manual de usuario más reciente</string>
     <string name="ajustes_btn_actualizar">Actualizar Datos</string>
     <string name="ajustes_ultima_act">Última actualización:\n%1$s</string>
     <string name="ajustes_btn_cerrar_sesion">Cerrar Sesión</string>
