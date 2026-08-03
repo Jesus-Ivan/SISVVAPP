@@ -30,6 +30,9 @@ interface ProductoDao {
     @Query("SELECT * FROM productos ORDER BY categoria, descripcion")
     fun getAllProductos(): Flow<List<ProductoEntity>>
 
+    @Query("SELECT imagen_url FROM productos")
+    suspend fun getAllProductosImagenes(): List<String?>
+
     @Query("DELETE FROM productos")
     suspend fun deleteAll()
 }
