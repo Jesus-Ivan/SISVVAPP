@@ -29,7 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
@@ -334,14 +334,14 @@ private fun VistaVerdeProductoCard(
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
-                                    imageVector = Icons.Default.PhotoCamera,
+                                    imageVector = Icons.Default.Image,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
                     }
 
                     if (!hasModificadores) {
@@ -476,7 +476,7 @@ private fun ProductoImagenOverlay(
                 text = producto.descripcion.uppercase(),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -485,7 +485,7 @@ private fun ProductoImagenOverlay(
             )
         } else {
             VistaVerdeEmptyState(
-                icon = Icons.Default.PhotoCamera,
+                icon = Icons.Default.Image,
                 message = "Imagen no disponible",
                 modifier = Modifier.fillMaxSize()
             )
