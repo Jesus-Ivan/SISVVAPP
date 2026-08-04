@@ -2,6 +2,7 @@ package com.example.sisvvapp.ui.utils
 
 import android.content.Context
 import android.util.Log
+import com.example.sisvvapp.data.sync.PhotoDownloader
 import com.example.sisvvapp.network.RetrofitClient
 import java.io.File
 
@@ -29,7 +30,7 @@ object ImageUtils {
 
     fun getLocalPhotoFile(context: Context, fotoUrl: String?): File? {
         if (fotoUrl.isNullOrBlank()) return null
-        val file = File(context.filesDir, "photos/$fotoUrl")
+        val file = PhotoDownloader.getLocalFile(context, fotoUrl)
         return if (file.exists()) file else null
     }
 }

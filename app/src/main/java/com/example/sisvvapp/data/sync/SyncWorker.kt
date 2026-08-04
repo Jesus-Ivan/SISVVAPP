@@ -54,8 +54,7 @@ class SyncWorker(
                     .distinct()
                 
                 val limit = 40
-                val photosDir = java.io.File(applicationContext.filesDir, "photos")
-                val pending = fotoUrls.filter { !java.io.File(photosDir, it).exists() }.take(limit)
+                val pending = fotoUrls.filter { !it.isBlank() && !PhotoDownloader.getLocalFile(applicationContext, it).exists() }.take(limit)
                 
                 if (pending.isNotEmpty()) {
                     Log.d("SyncWorker", "Descarga gradual: ${pending.size} fotos pendientes de bajar en este ciclo")
@@ -73,8 +72,7 @@ class SyncWorker(
                     .distinct()
 
                 val limit = 20
-                val photosDir = java.io.File(applicationContext.filesDir, "photos")
-                val pendingProductos = productoImgUrls.filter { !java.io.File(photosDir, it).exists() }.take(limit)
+                val pendingProductos = productoImgUrls.filter { it.isNotBlank() && !PhotoDownloader.getLocalFile(applicationContext, it).exists() }.take(limit)
 
                 if (pendingProductos.isNotEmpty()) {
                     Log.d("SyncWorker", "Descarga gradual: ${pendingProductos.size} imágenes de productos pendientes")

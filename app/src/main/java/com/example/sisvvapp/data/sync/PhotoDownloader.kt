@@ -10,12 +10,32 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.security.MessageDigest
 
 object PhotoDownloader {
 
     private const val TAG = "PhotoDownloader"
     private const val PHOTOS_DIR = "photos"
     private const val MAX_CONCURRENT = 4
+
+    /**
+     * Nombre estable y seguro para el archivo local de una foto.
+     * Deriva de la URL para evitar path traversal y colisiones, y el mismo
+     * valor siempre mapea al mismo archivo (no se re-descarga).
+     */
+    fun nombreArchivo(url: String): String {
+        val cleaned = url.trim()
+        val hash = MessageDigest.getInstance("MD5")
+            .digest(cleaned.toByteArray())
+            .joinToString("") { (it.toInt() and 0xff).toString(16).padStart(2, '0') }
+        return "foto_$hash"
+    }
+
+    /**
+     * Archivo local en el que debe guardarse / buscarse la foto de la URL dada.
+     */
+    fun getLocalFile(context: Context, url: String): File =
+        File(context.filesDir, "$PHOTOS_DIR/${nombreArchivo(url)}")
 
     suspend fun downloadAll(context: Context, fotoUrls: List<String>) = withContext(Dispatchers.IO) {
         val uniqueUrls = fotoUrls.filter { !it.isBlank() }.distinct()
@@ -31,8 +51,7 @@ object PhotoDownloader {
             .build()
 
         val pending = uniqueUrls.filter { url ->
-            val file = File(photosDir, url)
-            !file.exists()
+            !getLocalFile(context, url).exists()
         }
 
         if (pending.isEmpty()) {
@@ -53,7 +72,7 @@ object PhotoDownloader {
 
             val results = chunk.map { url ->
                 async {
-                    downloadOne(client, sessionManager, photosDir, url)
+                    downloadOne(client, sessionManager, context, url)
                 }
             }.awaitAll()
             
@@ -72,7 +91,7 @@ object PhotoDownloader {
         Log.d(TAG, "Descarga de fotos finalizada (con $consecutiveErrors errores detectados)")
     }
 
-    private fun downloadOne(client: OkHttpClient, sessionManager: SessionManager, photosDir: File, url: String): Boolean {
+    private fun downloadOne(client: OkHttpClient, sessionManager: SessionManager, context: Context, url: String): Boolean {
         try {
             val rawBaseUrl = com.example.sisvvapp.network.RetrofitClient.BASE_URL
             val baseUrl = rawBaseUrl
@@ -95,7 +114,7 @@ object PhotoDownloader {
             client.newCall(requestBuilder.build()).execute().use { response ->
                 if (response.isSuccessful) {
                     val body = response.body ?: return false
-                    val file = File(photosDir, url)
+                    val file = getLocalFile(context, url)
                     file.parentFile?.mkdirs()
                     body.byteStream().use { input ->
                         file.outputStream().use { output ->
