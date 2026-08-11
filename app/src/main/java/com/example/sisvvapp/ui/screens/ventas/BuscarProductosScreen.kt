@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -127,7 +128,7 @@ fun BuscarProductosScreen(
                 isOnline = isOnline
             ) {
                 ResponsiveContainer {
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.fillMaxSize().imePadding()) {
                         Column(modifier = Modifier.fillMaxSize()) {
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -252,6 +253,8 @@ private fun VistaVerdeProductoCard(
     var cantidad by remember { mutableStateOf(1) }
     var observaciones by remember { mutableStateOf("") }
     var showObs by remember { mutableStateOf(false) }
+    val obsFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(showObs) { if (showObs) obsFocusRequester.requestFocus() }
     val scope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
     val borderAlpha = remember { Animatable(0f) }
@@ -308,7 +311,9 @@ private fun VistaVerdeProductoCard(
                     value = observaciones,
                     onValueChange = { observaciones = it.take(250) },
                     placeholder = { Text("Instrucciones...") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(obsFocusRequester),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
