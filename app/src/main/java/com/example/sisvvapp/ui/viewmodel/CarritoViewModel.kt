@@ -26,6 +26,7 @@ data class CarritoItem(
     val precioUnitario: Double = producto.precio,
     val subtotal: Double = precioUnitario * cantidad,
     val printDefault: Boolean = producto.printDefault,
+    val tiempo: Int? = null,
     val id: String = java.util.UUID.randomUUID().toString()
 )
 
@@ -234,6 +235,13 @@ class CarritoViewModel(
         calcularTotal()
     }
 
+    fun updateTiempo(index: Int, tiempo: Int?) {
+        if (tiempo != null && tiempo !in 1..4) return
+        val item = _items.value.getOrNull(index) ?: return
+        val updated = item.copy(tiempo = tiempo)
+        _items.value = _items.value.toMutableList().apply { set(index, updated) }
+    }
+
     private fun calcularTotal() {
         _total.value = _items.value.sumOf { it.subtotal }
     }
@@ -267,12 +275,13 @@ class CarritoViewModel(
                     modificadores = modificadores,
                     nombre = item.producto.descripcion,
                     precio = item.producto.precio,
-                    printDefault = item.producto.printDefault
+                    printDefault = item.producto.printDefault,
+                    tiempo = item.tiempo
                 )
             }
 
-            // AGREGAR: Agrupamos productos por claveProducto y observaciones para evitar filas duplicadas
-            val productos = productosRaw.groupBy { it.claveProducto to it.observaciones to it.modificadores }.map { (_, list) ->
+            // AGREGAR: Agrupamos productos por claveProducto, observaciones, modificadores y tiempo para evitar filas duplicadas
+            val productos = productosRaw.groupBy { it.claveProducto to it.observaciones to it.modificadores to it.tiempo }.map { (_, list) ->
                 list.first().copy(
                     cantidad = list.sumOf { it.cantidad }
                 )
@@ -281,6 +290,8 @@ class CarritoViewModel(
             // Generamos o usamos el ID temporal para el request_id
             val idTemporal = _idTemporalExistente.value ?: java.util.UUID.randomUUID().toString()
 
+            // El tiempo se conserva aquí (persistencia local/cola). El dato al API
+            // se omite en VentaRepository (tiempo = null) para no enviarlo al servidor.
             val request = VentaRequest(
                 requestId = idTemporal,
                 corteCaja = _corteCaja.value,

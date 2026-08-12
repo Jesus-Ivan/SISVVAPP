@@ -31,11 +31,15 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sisvvapp.R
+import com.example.sisvvapp.data.local.entity.ModificadorEntity
+import com.example.sisvvapp.data.local.entity.ProductoEntity
 import com.example.sisvvapp.ui.components.*
 import com.example.sisvvapp.ui.theme.Poppins
+import com.example.sisvvapp.ui.theme.SISVVAPPTheme
 import com.example.sisvvapp.ui.viewmodel.CarritoItem
 import com.example.sisvvapp.ui.viewmodel.SendResult
 import kotlinx.coroutines.launch
@@ -54,6 +58,7 @@ fun ResumenCarritoScreen(
     isSending: Boolean,
     sendResult: SendResult?,
     onUpdateCantidad: (Int, Int) -> Unit,
+    onUpdateTiempo: (Int, Int?) -> Unit = { _, _ -> },
     onRemoveItem: (CarritoItem) -> Unit,
     onDeshacer: (CarritoItem, Int) -> Unit,
     onConfirmar: () -> Unit,
@@ -174,6 +179,8 @@ fun ResumenCarritoScreen(
                                                         )
                                                     },
                                                     observacion = item.observaciones,
+                                                    tiempo = item.tiempo,
+                                                    onTiempoChange = { t -> if (!isSending) onUpdateTiempo(index, t) },
                                                     onCantidadChange = { cant -> 
                                                         if (!isSending) onUpdateCantidad(index, cant) 
                                                     }
@@ -336,5 +343,131 @@ private fun OfflineContent(onVolver: () -> Unit) {
         Text("La venta se enviará automáticamente cuando se restaure la conexión.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(32.dp))
         VistaVerdeButton(stringResource(R.string.resumen_volver), onVolver)
+    }
+}
+
+@Preview(showBackground = true, name = "Resumen Carrito - Con Items")
+@Composable
+fun ResumenCarritoScreenPreview() {
+    val sampleProducto = ProductoEntity(
+        id = 1,
+        clave = "P001",
+        descripcion = "Hamburguesa Especial",
+        precio = 150.0,
+        categoria = "Comida",
+        imagenUrl = null,
+        forzarCaptura = false,
+        modifIncluidos = 2,
+        modifMaximos = 5,
+        printDefault = true
+    )
+
+    val sampleModificador = ModificadorEntity(
+        id = 1,
+        productoId = 1,
+        claveModificador = 101,
+        nombre = "Queso Extra",
+        tipo = "Extra",
+        precio = 20.0,
+        grupo = "Lacteos",
+        incluido = false
+    )
+
+    val sampleItems = listOf(
+        CarritoItem(
+            producto = sampleProducto,
+            cantidad = 2,
+            observaciones = "Sin cebolla",
+            modificadores = listOf(sampleModificador)
+        ),
+        CarritoItem(
+            producto = sampleProducto.copy(id = 2, descripcion = "Refresco Grande", precio = 35.0),
+            cantidad = 1
+        )
+    )
+
+    SISVVAPPTheme {
+        ResumenCarritoScreen(
+            items = sampleItems,
+            tipoVenta = "Socio",
+            nombreCliente = "Juan Pérez",
+            corteCaja = 1,
+            clavePuntoVenta = "Caja Principal",
+            total = 355.0,
+            isSending = false,
+            sendResult = null,
+            onUpdateCantidad = { _, _ -> },
+            onRemoveItem = { },
+            onDeshacer = { _, _ -> },
+            onConfirmar = { },
+            onVolver = { },
+            onBackClick = { }
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Resumen Carrito - Vacío")
+@Composable
+fun ResumenCarritoScreenEmptyPreview() {
+    SISVVAPPTheme {
+        ResumenCarritoScreen(
+            items = emptyList(),
+            tipoVenta = "Socio",
+            nombreCliente = "Juan Pérez",
+            corteCaja = 1,
+            clavePuntoVenta = "Caja Principal",
+            total = 0.0,
+            isSending = false,
+            sendResult = null,
+            onUpdateCantidad = { _, _ -> },
+            onRemoveItem = { },
+            onDeshacer = { _, _ -> },
+            onConfirmar = { },
+            onVolver = { },
+            onBackClick = { }
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Resumen Carrito - Enviando")
+@Composable
+fun ResumenCarritoScreenSendingPreview() {
+    val sampleProducto = ProductoEntity(
+        id = 1,
+        clave = "P001",
+        descripcion = "Hamburguesa Especial",
+        precio = 150.0,
+        categoria = "Comida",
+        imagenUrl = null,
+        forzarCaptura = false,
+        modifIncluidos = 2,
+        modifMaximos = 5,
+        printDefault = true
+    )
+
+    val sampleItems = listOf(
+        CarritoItem(
+            producto = sampleProducto,
+            cantidad = 1
+        )
+    )
+
+    SISVVAPPTheme {
+        ResumenCarritoScreen(
+            items = sampleItems,
+            tipoVenta = "Socio",
+            nombreCliente = "Juan Pérez",
+            corteCaja = 1,
+            clavePuntoVenta = "Caja Principal",
+            total = 150.0,
+            isSending = true,
+            sendResult = null,
+            onUpdateCantidad = { _, _ -> },
+            onRemoveItem = { },
+            onDeshacer = { _, _ -> },
+            onConfirmar = { },
+            onVolver = { },
+            onBackClick = { }
+        )
     }
 }

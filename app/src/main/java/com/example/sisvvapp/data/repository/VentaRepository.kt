@@ -166,7 +166,9 @@ class VentaRepository(
     suspend fun crearVenta(request: VentaRequest, idTemporal: String): Result<com.example.sisvvapp.network.dto.ventas.VentaResponse> {
         val requestConId = request.copy(requestId = idTemporal)
         return try {
-            val response = api.crearVenta(requestConId)
+            // No enviamos el tiempo al servidor (solo persistencia local)
+            val requestApi = request.copy(productos = request.productos.map { it.copy(tiempo = null) })
+            val response = api.crearVenta(requestConId.copy(productos = requestApi.productos))
             if (response.isSuccessful) {
                 val body = response.body()!!
                 Log.d("VentaRepo", "Venta creada: folio ${body.folio}")
@@ -205,7 +207,9 @@ class VentaRepository(
     suspend fun appendProductos(folio: Int, request: VentaRequest, idTemporal: String? = null): Result<Unit> {
         val requestConId = if (idTemporal != null) request.copy(requestId = idTemporal) else request
         return try {
-            val response = api.appendProductos(folio, requestConId)
+            // No enviamos el tiempo al servidor (solo persistencia local)
+            val requestApi = requestConId.copy(productos = requestConId.productos.map { it.copy(tiempo = null) })
+            val response = api.appendProductos(folio, requestApi)
             if (response.isSuccessful) {
                 Log.d("VentaRepo", "Productos agregados a venta $folio")
                 Result.success(Unit)
@@ -260,7 +264,7 @@ class VentaRepository(
             
             // Combinar y agrupar para evitar filas separadas del mismo producto
             val listaCombinada = (productosExistentes + nuevosProductos)
-                .groupBy { it.claveProducto to it.observaciones to it.modificadores }
+                .groupBy { it.claveProducto to it.observaciones to it.modificadores to it.tiempo }
                 .map { (_, list) ->
                     list.first().copy(cantidad = list.sumOf { it.cantidad })
                 }
@@ -325,7 +329,8 @@ class VentaRepository(
             nombre = actual.nombreCliente,
             clavePuntoVenta = actual.clavePuntoVenta,
             numComensales = actual.numComensales,
-            productos = productos
+            // El tiempo se omite al enviar al servidor (solo persistencia local)
+            productos = productos.map { it.copy(tiempo = null) }
         )
 
         var lastError: Exception? = null
@@ -513,7 +518,7 @@ class VentaRepository(
             emptyList()
         }
         val merged = (existentes + request.productos)
-            .groupBy { it.claveProducto to it.observaciones to it.modificadores }
+            .groupBy { it.claveProducto to it.observaciones to it.modificadores to it.tiempo }
             .map { (_, list) ->
                 list.first().copy(cantidad = list.sumOf { it.cantidad })
             }
@@ -545,10 +550,11 @@ private fun VentaColaEntity.toVentaDto(): VentaDto {
                 precio = item.precio ?: 0.0,
                 cantidad = item.cantidad,
                 chunk = 0,
-                observaciones = item.observaciones,
-                subtotal = (item.precio ?: 0.0) * item.cantidad,
-                idEstado = if (item.printDefault) "0" else "",
-                modificadores = item.modificadores
+observaciones = item.observaciones,
+                    subtotal = (item.precio ?: 0.0) * item.cantidad,
+                    idEstado = if (item.printDefault) "0" else "",
+                    tiempo = item.tiempo,
+                    modificadores = item.modificadores
             )
         }
     } catch (e: Exception) {

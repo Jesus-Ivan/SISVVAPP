@@ -456,6 +456,7 @@ fun MainContainer(
                             isSending = isSending,
                             sendResult = sendResult,
                             onUpdateCantidad = { i, c -> globalCarritoViewModel.updateCantidad(i, c) },
+                            onUpdateTiempo = { i, t -> globalCarritoViewModel.updateTiempo(i, t) },
                             onRemoveItem = { globalCarritoViewModel.removeProducto(it) },
                             onDeshacer = { i, idx -> globalCarritoViewModel.insertarProducto(idx, i) },
                             onConfirmar = { globalCarritoViewModel.confirmarVenta() },
