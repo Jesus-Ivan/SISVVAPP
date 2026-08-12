@@ -270,6 +270,8 @@ private fun VistaVerdeProductoCard(
     var cantidad by remember { mutableStateOf(1) }
     var observaciones by remember { mutableStateOf("") }
     var showObs by remember { mutableStateOf(false) }
+    val obsFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(showObs) { if (showObs) obsFocusRequester.requestFocus() }
     val scope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
     val borderAlpha = remember { Animatable(0f) }
@@ -328,6 +330,7 @@ private fun VistaVerdeProductoCard(
                     placeholder = { Text("Instrucciones...") },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .focusRequester(obsFocusRequester)
                         .onFocusChanged { if (it.isFocused) onNoteFocus() },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
