@@ -5,6 +5,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -42,7 +44,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -55,6 +56,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -109,14 +112,9 @@ fun BuscarProductosScreen(
     val listState = rememberLazyListState()
     val hazeState = remember { HazeState() }
     var productoImg by remember { mutableStateOf<ProductoEntity?>(null) }
+    val scrollScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
-    }
-    LaunchedEffect(Unit) {
-        snapshotFlow { listState.isScrollInProgress }
-            .collect { scrolling ->
-                if (scrolling) keyboardController?.hide()
-            }
     }
     Box(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize().haze(hazeState)) {
@@ -158,19 +156,37 @@ fun BuscarProductosScreen(
                         )
                     } else {
                         LazyColumn(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .pointerInput(Unit) {
+                                    awaitEachGesture {
+                                        val down = awaitFirstDown(requireUnconsumed = false)
+                                        var dragged = false
+                                        do {
+                                            val event = awaitPointerEvent()
+                                            val dragging = event.changes.firstOrNull { it.id == down.id && it.pressed }
+                                            if (dragging != null && dragging.positionChange().y != 0f) {
+                                                dragged = true
+                                            }
+                                        } while (event.changes.any { it.pressed })
+                                        if (dragged) keyboardController?.hide()
+                                    }
+                                },
                             state = listState,
                             contentPadding = PaddingValues(bottom = 80.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(
+                            itemsIndexed(
                                 items = productos,
-                                key = { it.id }
-                            ) { producto ->
+                                key = { _, it -> it.id }
+                            ) { index, producto ->
                                 VistaVerdeProductoCard(
                                     producto = producto,
                                     hasModificadores = producto.modifMaximos > 0,
                                     onImageClick = { productoImg = it },
+                                    onNoteFocus = {
+                                        scrollScope.launch { listState.animateScrollToItem(index) }
+                                    },
                                     onAdd = { cantidad, obs ->
                                         onSearchQueryChange("")
                                         keyboardController?.hide()
@@ -243,6 +259,7 @@ private fun VistaVerdeProductoCard(
     producto: ProductoEntity,
     hasModificadores: Boolean,
     onImageClick: (ProductoEntity) -> Unit,
+    onNoteFocus: () -> Unit,
     onAdd: (Int, String) -> Unit,
     onAddConModif: (Int) -> Unit
 ) {
@@ -253,8 +270,6 @@ private fun VistaVerdeProductoCard(
     var cantidad by remember { mutableStateOf(1) }
     var observaciones by remember { mutableStateOf("") }
     var showObs by remember { mutableStateOf(false) }
-    val obsFocusRequester = remember { FocusRequester() }
-    LaunchedEffect(showObs) { if (showObs) obsFocusRequester.requestFocus() }
     val scope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
     val borderAlpha = remember { Animatable(0f) }
@@ -313,7 +328,7 @@ private fun VistaVerdeProductoCard(
                     placeholder = { Text("Instrucciones...") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .focusRequester(obsFocusRequester),
+                        .onFocusChanged { if (it.isFocused) onNoteFocus() },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
