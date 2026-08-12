@@ -19,5 +19,6 @@ data class ItemCarritoDto(
     val modificadores: List<ModificadorSeleccionadoDto> = emptyList(),
     val nombre: String? = null, // Usado para visualización offline
     val precio: Double? = null, // Usado para visualización offline
-    @SerializedName("print_default") val printDefault: Boolean = true
+    @SerializedName("print_default") val printDefault: Boolean = true,
+    val tiempo: Int? = null // Tiempo de presentación (1-4), solo persistencia local
 )

@@ -6,6 +6,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EditNote
@@ -43,6 +44,8 @@ fun CarritoItemCard(
     modificadores: List<ModificadorDisplayInfo> = emptyList(),
     observacion: String = "",
     printDefault: Boolean = true,
+    tiempo: Int? = null,
+    onTiempoChange: (Int?) -> Unit = {},
     onCantidadChange: (Int) -> Unit,
 ) {
     val deviceType = LocalDeviceType.current
@@ -171,6 +174,13 @@ fun CarritoItemCard(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
+
+                Spacer(modifier = Modifier.height(if (isTablet) 12.dp else 10.dp))
+                TiempoSelectorRow(
+                    tiempo = tiempo,
+                    onTiempoChange = onTiempoChange,
+                    isTablet = isTablet
+                )
             }
 
             // Desglose de Modificadores (Expandible)
@@ -224,7 +234,52 @@ fun CarritoItemCard(
                 }
             }
         }
+}
+}
 
+@Composable
+fun TiempoSelectorRow(
+    tiempo: Int?,
+    onTiempoChange: (Int?) -> Unit,
+    isTablet: Boolean = false
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(if (isTablet) 8.dp else 6.dp)
+    ) {
+        Text(
+            text = "TIEMPO",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            letterSpacing = 0.5.sp,
+            modifier = Modifier.padding(end = if (isTablet) 12.dp else 8.dp)
+        )
+        (1..4).forEach { n ->
+            val selected = tiempo == n
+            Surface(
+                shape = RoundedCornerShape(if (isTablet) 12.dp else 10.dp),
+                color = if (selected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(if (isTablet) 44.dp else 34.dp)
+                    .clickable {
+                        onTiempoChange(if (selected) null else n)
+                    }
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "$n",
+                        fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium,
+                        fontSize = if (isTablet) 16.sp else 13.sp
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -277,6 +332,7 @@ fun CarritoItemCardPreview() {
                 cantidad = 2,
                 subtotal = 370.0,
                 printDefault = false,
+                tiempo = 2,
                 modificadores = listOf(
                     ModificadorDisplayInfo("Sin cebolla", 1),
                     ModificadorDisplayInfo("Extra queso", 1, "Muy fundido")
