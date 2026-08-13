@@ -316,6 +316,9 @@ class CarritoViewModel(
                     onFailure = { e ->
                         if (e.message?.contains("offline") == true) {
                             _sendResult.value = SendResult.Offline
+                        } else if (e.message?.contains("caja_cerrada") == true) {
+                            Log.w("CarritoVM", "Caja cerrada al agregar productos, se muestra diálogo de caja cerrada")
+                            _sendResult.value = null
                         } else {
                             Log.e("CarritoVM", "Error al agregar productos", e)
                             _sendResult.value = SendResult.Error(e.message ?: "Error desconocido")
@@ -342,6 +345,9 @@ class CarritoViewModel(
                     onFailure = { e ->
                         if (e.message?.contains("offline") == true) {
                             _sendResult.value = SendResult.Offline
+                        } else if (e.message?.contains("caja_cerrada") == true) {
+                            Log.w("CarritoVM", "Caja cerrada al crear venta, se muestra diálogo de caja cerrada")
+                            _sendResult.value = null
                         } else {
                             Log.e("CarritoVM", "Error al crear venta", e)
                             _sendResult.value = SendResult.Error(e.message ?: "Error desconocido")

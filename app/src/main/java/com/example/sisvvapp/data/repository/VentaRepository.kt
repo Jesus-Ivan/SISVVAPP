@@ -34,6 +34,37 @@ class VentaRepository(
     private val ventaGlobalDao = db.ventaGlobalDao()
 
     private val gson = Gson()
+
+    private fun leerErrorBody(response: retrofit2.Response<*>): String {
+        return try {
+            response.errorBody()?.byteStream()?.reader(Charsets.UTF_8)?.use { it.readText() } ?: "Error desconocido"
+        } catch (e: Exception) {
+            "Error desconocido"
+        }
+    }
+
+    private fun esCajaCerrada(code: Int, errorBody: String): Boolean {
+        if (code == 401) return true
+        return code == 422 && (
+            errorBody.contains("caja", ignoreCase = true) ||
+            errorBody.contains("punto de venta", ignoreCase = true) ||
+            errorBody.contains("puntoventa", ignoreCase = true) ||
+            errorBody.contains("point of sale", ignoreCase = true) ||
+            errorBody.contains("clave del punto", ignoreCase = true)
+        )
+    }
+
+    private fun esSesionExpirada(msg: String): Boolean =
+        msg.contains("expirada") || msg.contains("sesion") || msg.contains("401")
+
+    private fun extraerMensaje(errorBody: String): String {
+        return try {
+            com.google.gson.JsonParser.parseString(errorBody).asJsonObject.get("message")?.asString ?: errorBody
+        } catch (e: Exception) {
+            errorBody
+        }
+    }
+
     fun getPendientesCountFlow(): Flow<Int> = ventaColaDao.countPendientesFlow()
     fun getParaSincronizarFlow(): Flow<List<VentaColaEntity>> = ventaColaDao.getParaSincronizarFlow()
     suspend fun getPendientes(): List<VentaColaEntity> = ventaColaDao.getPendientes()
@@ -172,13 +203,17 @@ class VentaRepository(
                 Log.d("VentaRepo", "Venta creada: folio ${body.folio}")
                 Result.success(body)
             } else {
-                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                val errorBody = leerErrorBody(response)
                 Log.w("VentaRepo", "Error al crear venta: ${response.code()} - $errorBody")
-                if (response.code() >= 500 || response.code() == 429) {
+                if (esCajaCerrada(response.code(), errorBody)) {
+                    Log.w("VentaRepo", "Caja cerrada detectada al crear venta, notificando")
+                    SyncEventBus.cajaCerrada(idTemporal)
+                    Result.failure(Exception("caja_cerrada"))
+                } else if (response.code() >= 500 || response.code() == 429) {
                     encolarVentaOffline(request, null, idTemporal)
                     Result.failure(Exception("offline"))
                 } else {
-                    Result.failure(Exception("Error ${response.code()}: $errorBody"))
+                    Result.failure(Exception("Error ${response.code()}: ${extraerMensaje(errorBody)}"))
                 }
             }
         } catch (e: Exception) {
@@ -190,11 +225,15 @@ class VentaRepository(
                     msg.contains("network is unreachable") ||
                     msg.contains("route to host") ||
                     msg.contains("connection refused")
-            
+
             if (isNetworkError) {
                 Log.w("VentaRepo", "Sin conexión o servidor inalcanzable, encolando venta offline", e)
                 encolarVentaOffline(request, null, idTemporal)
                 Result.failure(Exception("offline"))
+            } else if (esSesionExpirada(msg)) {
+                Log.w("VentaRepo", "Sesión expirada al crear venta, notificando")
+                SyncEventBus.cajaCerrada(idTemporal)
+                Result.failure(Exception("caja_cerrada"))
             } else {
                 Log.e("VentaRepo", "Error no recuperable al crear venta, no se encola", e)
                 Result.failure(Exception("Error de comunicación: ${e.message}"))
@@ -210,13 +249,17 @@ class VentaRepository(
                 Log.d("VentaRepo", "Productos agregados a venta $folio")
                 Result.success(Unit)
             } else {
-                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                val errorBody = leerErrorBody(response)
                 Log.w("VentaRepo", "Error al agregar productos: ${response.code()} - $errorBody")
-                if (response.code() >= 500 || response.code() == 429) {
+                if (esCajaCerrada(response.code(), errorBody)) {
+                    Log.w("VentaRepo", "Caja cerrada detectada al agregar productos, notificando")
+                    SyncEventBus.cajaCerrada(idTemporal ?: "")
+                    Result.failure(Exception("caja_cerrada"))
+                } else if (response.code() >= 500 || response.code() == 429) {
                     encolarVentaOffline(request, if (folio > 0) folio else null, idTemporal)
                     Result.failure(Exception("offline"))
                 } else {
-                    Result.failure(Exception("Error ${response.code()}: $errorBody"))
+                    Result.failure(Exception("Error ${response.code()}: ${extraerMensaje(errorBody)}"))
                 }
             }
         } catch (e: Exception) {
@@ -233,6 +276,10 @@ class VentaRepository(
                 Log.w("VentaRepo", "Sin conexión o servidor inalcanzable, encolando append offline")
                 encolarVentaOffline(request, if (folio > 0) folio else null, idTemporal)
                 Result.failure(Exception("offline"))
+            } else if (esSesionExpirada(msg)) {
+                Log.w("VentaRepo", "Sesión expirada al agregar productos, notificando")
+                SyncEventBus.cajaCerrada(idTemporal ?: "")
+                Result.failure(Exception("caja_cerrada"))
             } else {
                 Log.e("VentaRepo", "Error no recuperable al agregar productos, no se encola", e)
                 Result.failure(Exception("Error de comunicación: ${e.message}"))
