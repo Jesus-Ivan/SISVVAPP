@@ -166,9 +166,7 @@ class VentaRepository(
     suspend fun crearVenta(request: VentaRequest, idTemporal: String): Result<com.example.sisvvapp.network.dto.ventas.VentaResponse> {
         val requestConId = request.copy(requestId = idTemporal)
         return try {
-            // No enviamos el tiempo al servidor (solo persistencia local)
-            val requestApi = request.copy(productos = request.productos.map { it.copy(tiempo = null) })
-            val response = api.crearVenta(requestConId.copy(productos = requestApi.productos))
+            val response = api.crearVenta(requestConId)
             if (response.isSuccessful) {
                 val body = response.body()!!
                 Log.d("VentaRepo", "Venta creada: folio ${body.folio}")
@@ -207,9 +205,7 @@ class VentaRepository(
     suspend fun appendProductos(folio: Int, request: VentaRequest, idTemporal: String? = null): Result<Unit> {
         val requestConId = if (idTemporal != null) request.copy(requestId = idTemporal) else request
         return try {
-            // No enviamos el tiempo al servidor (solo persistencia local)
-            val requestApi = requestConId.copy(productos = requestConId.productos.map { it.copy(tiempo = null) })
-            val response = api.appendProductos(folio, requestApi)
+            val response = api.appendProductos(folio, requestConId)
             if (response.isSuccessful) {
                 Log.d("VentaRepo", "Productos agregados a venta $folio")
                 Result.success(Unit)
@@ -329,8 +325,7 @@ class VentaRepository(
             nombre = actual.nombreCliente,
             clavePuntoVenta = actual.clavePuntoVenta,
             numComensales = actual.numComensales,
-            // El tiempo se omite al enviar al servidor (solo persistencia local)
-            productos = productos.map { it.copy(tiempo = null) }
+            productos = productos
         )
 
         var lastError: Exception? = null
@@ -614,6 +609,7 @@ private fun VentaGlobalView.toVentaDto(): VentaDto {
                     observaciones = item.observaciones,
                     subtotal = (item.precio ?: 0.0) * item.cantidad,
                     idEstado = if (item.printDefault) "0" else "", // Forzamos estado 0 solo si imprime comanda
+                    tiempo = item.tiempo,
                     modificadores = item.modificadores
                 )
             }

@@ -150,14 +150,13 @@ fun ProductoDetalleCard(
                         }
 
                         // Leyenda del tiempo de presentación seleccionado
-                        if (producto.tiempo != null) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Surface(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = MaterialTheme.shapes.extraSmall
-                            ) {
-                                Text(
-                                    text = "TIEMPO ${producto.tiempo}",
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = MaterialTheme.shapes.extraSmall
+                        ) {
+                            Text(
+                                text = "TIEMPO ${producto.tiempo ?: 1}",
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                                     fontSize = if (isTablet) 10.sp else 9.sp,
                                     fontWeight = FontWeight.Bold,
@@ -166,7 +165,6 @@ fun ProductoDetalleCard(
                                 )
                             }
                         }
-                    }
 
                     // 3. Botón de transferencia (Tal como estaba)
                     if (onTransferClick != null) {

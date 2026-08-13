@@ -26,7 +26,7 @@ data class CarritoItem(
     val precioUnitario: Double = producto.precio,
     val subtotal: Double = precioUnitario * cantidad,
     val printDefault: Boolean = producto.printDefault,
-    val tiempo: Int? = null,
+    val tiempo: Int = 1,
     val id: String = java.util.UUID.randomUUID().toString()
 )
 
@@ -236,9 +236,10 @@ class CarritoViewModel(
     }
 
     fun updateTiempo(index: Int, tiempo: Int?) {
-        if (tiempo != null && tiempo !in 1..4) return
+        val tiempoNormalizado = tiempo ?: 1
+        if (tiempoNormalizado !in 1..4) return
         val item = _items.value.getOrNull(index) ?: return
-        val updated = item.copy(tiempo = tiempo)
+        val updated = item.copy(tiempo = tiempoNormalizado)
         _items.value = _items.value.toMutableList().apply { set(index, updated) }
     }
 
