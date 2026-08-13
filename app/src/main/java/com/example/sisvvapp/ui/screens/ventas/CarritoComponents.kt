@@ -268,7 +268,7 @@ fun TiempoSelectorRow(
                     .weight(1f)
                     .height(if (isTablet) 44.dp else 34.dp)
                     .clickable {
-                        onTiempoChange(if (selected) null else n)
+                        onTiempoChange(n)
                     }
             ) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
