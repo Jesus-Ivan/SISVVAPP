@@ -781,9 +781,9 @@ fun MainContainer(
                             )
                         } else {
                             Text(
-                                text = "La caja seleccionada fue cerrada en otro dispositivo.\n\n" +
-                                        "Las ventas offline pendientes se descartaron porque ya no pueden sincronizarse.\n\n" +
-                                        "Selecciona una caja activa para continuar.",
+                                text = "La caja seleccionada fue cerrada.\n\n" +
+                                        "Las ventas pendientes fueron descartadas porque ya no pueden sincronizarse.\n\n" +
+                                        "Serás regresado al inicio de sesión para continuar.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -817,11 +817,10 @@ fun MainContainer(
                             }
                         } else {
                             VistaVerdeButton(
-                                text = "Seleccionar otra caja",
+                                text = "Ir al Login",
                                 onClick = {
                                     showCajaCerradaDialog = false
-                                    sharedCajaViewModel.clearSelectedCaja()
-                                    onCajaClosed()
+                                    onLogout()
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             )
