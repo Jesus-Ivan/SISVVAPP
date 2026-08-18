@@ -162,8 +162,20 @@ class VentaRepository(
                         remoteEntity
                     }
                 }
-                
-                ventaRecibidaDao.insertAll(updatedEntities)
+
+                db.withTransaction {
+                    // Reconciliación: eliminar ventas locales que el servidor ya no devuelve
+                    // para este ámbito (corte+fecha o fecha completa). El servidor es la fuente
+                    // de verdad: si una venta se transfirió/fusionó en la web, su corte_caja
+                    // cambió o desapareció, y aquí debe salir de la vista del punto origen.
+                    val serverFolios = body.map { it.folio }.toSet() + -1
+                    if (corteCaja != null) {
+                        ventaRecibidaDao.deleteByCorteExcludingFolios(corteCaja, fecha, serverFolios.toList())
+                    } else {
+                        ventaRecibidaDao.deleteByFechaExcludingFolios(fecha, serverFolios.toList())
+                    }
+                    ventaRecibidaDao.insertAll(updatedEntities)
+                }
                 Log.d("VentaRepo", "Ventas sincronizadas para $fecha: ${updatedEntities.size}")
 
                 // 2. PREFETCH: Descargar detalles de ventas ABIERTAS que no tengan productos
