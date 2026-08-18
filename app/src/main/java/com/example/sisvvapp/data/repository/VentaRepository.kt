@@ -456,6 +456,17 @@ class VentaRepository(
                         return Result.success(Unit)
                     }
 
+                    // La venta base fue fusionada/eliminada/cerrada en el servidor:
+                    // eliminar la fila local obsoleta para que no reaparezca la venta original
+                    if (actual.folioExistente != null && actual.folioExistente > 0 &&
+                        response.code() == 422) {
+                        val msg = extraerMensaje(errorBody)
+                        if (msg.contains("no existe", ignoreCase = true)) {
+                            Log.w("VentaRepo", "Venta base ${actual.folioExistente} ya no existe en servidor, eliminando fila obsoleta")
+                            ventaRecibidaDao.deleteByFolio(actual.folioExistente)
+                        }
+                    }
+
                     if (response.code() in 400..499 && response.code() != 429) {
                         Log.w("VentaRepo", "Error de cliente ${response.code()}, marcando como ERROR_FATAL")
                         ventaColaDao.updateEstado(venta.idTemporal, "ERROR_FATAL")
