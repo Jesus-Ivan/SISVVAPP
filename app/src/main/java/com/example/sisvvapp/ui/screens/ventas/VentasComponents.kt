@@ -149,20 +149,22 @@ fun ProductoDetalleCard(
                             }
                         }
 
-                        // Leyenda del tiempo de presentación seleccionado
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = MaterialTheme.shapes.extraSmall
-                        ) {
-                            Text(
-                                text = "TIEMPO ${producto.tiempo ?: 1}",
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-                                    fontSize = if (isTablet) 10.sp else 9.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    letterSpacing = 0.5.sp
-                                )
+                        // Leyenda del tiempo de presentación seleccionado (solo si el producto genera comanda)
+                        if (!producto.idEstado.isNullOrEmpty()) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Surface(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = MaterialTheme.shapes.extraSmall
+                            ) {
+                                Text(
+                                    text = "TIEMPO ${producto.tiempo ?: 1}",
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                                        fontSize = if (isTablet) 10.sp else 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        letterSpacing = 0.5.sp
+                                    )
+                                }
                             }
                         }
 

@@ -41,6 +41,15 @@ interface VentaRecibidaDao {
     @Query("DELETE FROM ventas_recibidas WHERE fecha LIKE :fechaPrefix || '%'")
     suspend fun deleteByFecha(fechaPrefix: String)
 
+    // Reconciliación: borra ventas de un corte+fecha que el servidor ya no devuelve,
+    // excluyendo folios con append offline pendiente en la cola.
+    @Query("DELETE FROM ventas_recibidas WHERE fecha LIKE :fechaPrefix || '%' AND corte_caja = :corteCaja AND folio NOT IN (:folios) AND folio NOT IN (SELECT folioExistente FROM ventas_cola WHERE folioExistente > 0 AND (estado = 'PENDIENTE' OR estado = 'SYNCING'))")
+    suspend fun deleteByCorteExcludingFolios(corteCaja: Int, fechaPrefix: String, folios: List<Int>)
+
+    // Reconciliación sin corte: borra ventas de la fecha que el servidor ya no devuelve.
+    @Query("DELETE FROM ventas_recibidas WHERE fecha LIKE :fechaPrefix || '%' AND folio NOT IN (:folios) AND folio NOT IN (SELECT folioExistente FROM ventas_cola WHERE folioExistente > 0 AND (estado = 'PENDIENTE' OR estado = 'SYNCING'))")
+    suspend fun deleteByFechaExcludingFolios(fechaPrefix: String, folios: List<Int>)
+
     @Query("DELETE FROM ventas_recibidas")
     suspend fun deleteAll()
 }

@@ -176,11 +176,13 @@ fun CarritoItemCard(
                 }
 
                 Spacer(modifier = Modifier.height(if (isTablet) 12.dp else 10.dp))
-                TiempoSelectorRow(
-                    tiempo = tiempo,
-                    onTiempoChange = onTiempoChange,
-                    isTablet = isTablet
-                )
+                if (printDefault) {
+                    TiempoSelectorRow(
+                        tiempo = tiempo,
+                        onTiempoChange = onTiempoChange,
+                        isTablet = isTablet
+                    )
+                }
             }
 
             // Desglose de Modificadores (Expandible)
